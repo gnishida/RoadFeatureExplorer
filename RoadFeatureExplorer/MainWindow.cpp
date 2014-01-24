@@ -17,10 +17,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	glWidget = new GLWidget(this);
 	setCentralWidget(glWidget);
 
-	// setup the event filter
-	//glWidget->installEventFilter(this);
-	//controlWidget->installEventFilter(this);
-
 	controlWidget->show();
 	addDockWidget(Qt::LeftDockWidgetArea, controlWidget);
 }

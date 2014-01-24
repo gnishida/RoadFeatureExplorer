@@ -22,9 +22,7 @@ public:
 	void setRoadEdge(RoadEdgePtr selectedEdge);
 
 public slots:
-	void clean();
-	void simplify();
-	void reduce();
-	void removeShortDeadend();
+	void detectGrid();
+	void detectPlaza();
 };
 

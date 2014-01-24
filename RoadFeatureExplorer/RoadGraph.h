@@ -47,30 +47,6 @@ public:
 	void setModified();
 	void clear();
 	void setZ(float z);
-
-	QList<RoadEdgeDesc> getOrderedEdgesByImportance();
-
-	//void load(FILE* fp, int roadType);
-};
-
-class LessWeight {
-private:
-	RoadGraph* roads;
-
-public:
-	LessWeight(RoadGraph* roads);
-
-	bool operator()(const RoadEdgeDesc& left, const RoadEdgeDesc& right) const;
-};
-
-class MoreImportantEdge {
-private:
-	RoadGraph* roads;
-
-public:
-	MoreImportantEdge(RoadGraph* roads);
-
-	bool operator()(const RoadEdgeDesc& left, const RoadEdgeDesc& right) const;
 };
 
 typedef boost::shared_ptr<RoadGraph> RoadGraphPtr;

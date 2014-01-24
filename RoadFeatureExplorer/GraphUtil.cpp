@@ -8,9 +8,46 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/linestring.hpp>
 
+#ifndef Q_MOC_RUN
+#include <boost/graph/planar_face_traversal.hpp>
+#include <boost/graph/boyer_myrvold_planar_test.hpp>
+#endif
+
 #ifndef M_PI
 #define M_PI	3.141592653
 #endif
+
+RoadGraph* roadGraphPtr;
+std::vector<RoadEdgeDesc> plaza;
+bool isFirstVertexVisited;
+int numOutingEdges;
+std::vector<std::vector<RoadEdgeDesc> > plaza_list;
+
+//Vertex visitor
+struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visitor {
+	void begin_face() {
+		plaza.clear();
+		isFirstVertexVisited = true;
+		numOutingEdges = 0;
+	}
+
+	void end_face() {
+		if (plaza.size() >= 4 && numOutingEdges > 4) {
+			plaza_list.push_back(plaza);
+		}
+	}
+
+	template <typename Vertex> 
+	void next_vertex(Vertex v) {
+		//plaza.push_back(v);
+		numOutingEdges += GraphUtil::getNumEdges(*roadGraphPtr, v) - 2;
+	}
+
+	template <typename Edge> 
+	void next_edge(Edge e) {
+		plaza.push_back(e);
+	}
+};
 
 EdgePair::EdgePair(RoadEdgeDesc edge1, RoadEdgeDesc edge2) {
 	this->edge1 = edge1;
@@ -429,6 +466,18 @@ int GraphUtil::getNumEdges(RoadGraph& roads, bool onlyValidEdge) {
 	return count;
 }
 
+int GraphUtil::getNumEdges(RoadGraph& roads, RoadVertexDesc v, bool onlyValidEdge) {
+	int count = 0;
+	RoadOutEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = out_edges(v, roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		count++;
+	}
+
+	return count;
+}
+
 /**
  * Add an edge.
  * This function creates a straight line of edge.
@@ -676,34 +725,6 @@ std::vector<QVector2D> GraphUtil::interpolateEdges(RoadGraph* roads1, RoadEdgeDe
 	}
 
 	return ret;
-}
-
-/**
- * Compute the importance of the edges.
- * importance = MAX( (w_length * length + w_valence * (valence1 + valence2) + w_lanes * lanes) / K, K / initial distance)
- */
-void GraphUtil::computeImportanceOfEdges(RoadGraph* roads, float w_length, float w_valence, float w_lanes) {
-	// compute the maximum length of the edges.
-	float max_length = 0.0f;
-	RoadEdgeIter ei, eend;
-	for (boost::tie(ei, eend) = boost::edges(roads->graph); ei != eend; ++ei) {
-		if (!roads->graph[*ei]->valid) continue;
-
-		float length = roads->graph[*ei]->getLength();
-		if (length > max_length) max_length = length;
-	}
-	
-	float max_importance = 0.0f;
-	int count = 0;
-
-	for (boost::tie(ei, eend) = boost::edges(roads->graph); ei != eend; ++ei) {
-		if (!roads->graph[*ei]->valid) continue;
-
-		RoadVertexDesc src = boost::source(*ei, roads->graph);
-		RoadVertexDesc tgt = boost::target(*ei, roads->graph);
-
-		roads->graph[*ei]->importance = roads->graph[*ei]->getLength() / max_length * w_length + (getDegree(*roads, src) + getDegree(*roads, tgt)) * w_valence + roads->graph[*ei]->lanes * w_lanes;
-	}
 }
 
 /**
@@ -3098,7 +3119,7 @@ float GraphUtil::computeDissimilarity2(RoadGraph* roads1, QMap<RoadVertexDesc, R
 		
 		if (!map1.contains(src) || !map1.contains(tgt)) {
 			// 対応エッジがないので、当該エッジのImportanceに基づいて、ペナルティを追加
-			penalty += roads1->graph[*ei]->importance * w_matching;
+			penalty += w_matching;
 		}
 	}
 
@@ -3112,7 +3133,7 @@ float GraphUtil::computeDissimilarity2(RoadGraph* roads1, QMap<RoadVertexDesc, R
 		
 		if (!map2.contains(src) || !map2.contains(tgt)) {
 			// 対応エッジがないので、当該エッジのImportanceに基づいて、ペナルティを追加
-			penalty += roads2->graph[*ei]->importance * w_matching;
+			penalty += w_matching;
 		}
 	}
 
@@ -3855,74 +3876,6 @@ void GraphUtil::computeHistogram(RoadGraph& roads, cv::Mat& hist) {
 }
 
 /**
- * ２つの道路網について、似ているエッジペアを類似度でソートして、トップNを返却する。
- */
-QList<EdgePair> GraphUtil::getClosestEdgePairs(RoadGraph* roads1, RoadGraph* roads2, int num) {
-	QList<EdgePair> pairs;
-
-	// Importance順に並べたエッジリストを取得
-	QList<RoadEdgeDesc> edges1 = roads1->getOrderedEdgesByImportance();
-	QList<RoadEdgeDesc> edges2 = roads2->getOrderedEdgesByImportance();
-
-	while (pairs.size() < num && !edges1.empty() && !edges2.empty()) {
-		float min_diff = std::numeric_limits<float>::max();
-		RoadEdgeDesc e1;
-		RoadEdgeDesc e2;
-
-		// 道路網１のTop10 Importantエッジに対して
-		int topN = std::min(10, edges1.size());
-		for (int i = 0; i < topN; i++) {
-			// 似ている対応エッジを道路網２から探す
-			for (int j = 0; j < edges2.size(); j++) {
-				float diff = GraphUtil::computeDissimilarityOfEdges(roads1, edges1[i], roads2, edges2[j]);
-				if (diff < min_diff) {
-					min_diff = diff;
-					e1 = edges1[i];
-					e2 = edges2[j];
-				}
-			}
-		}
-
-		// 道路網２のTop10 Importantエッジに対して
-		topN = std::min(10, edges2.size());
-		for (int i = 0; i < topN; i++) {
-			// 似ている対応エッジを道路網１ら探す
-			for (int j = 0; j < edges1.size(); j++) {
-				float diff = GraphUtil::computeDissimilarityOfEdges(roads1, edges1[j], roads2, edges2[i]);
-				if (diff < min_diff) {
-					min_diff = diff;
-					e1 = edges1[j];
-					e2 = edges2[i];
-				}
-			}
-		}
-
-		// 抽出された最も似ているエッジペアを、リストに登録する
-		pairs.push_back(EdgePair(e1, e2));
-
-		// 選択されたペアから、両端のノードを取得
-		RoadVertexDesc src1 = boost::source(e1, roads1->graph);
-		RoadVertexDesc tgt1 = boost::target(e1, roads1->graph);
-		RoadVertexDesc src2 = boost::source(e2, roads2->graph);
-		RoadVertexDesc tgt2 = boost::target(e2, roads2->graph);
-
-		//エッジリストから、使用したエッジに含まれる頂点を含むエッジを削除
-		for (int j = edges1.size() - 1; j >= 0; j--) {
-			if (boost::source(edges1[j], roads1->graph) == src1 || boost::source(edges1[j], roads1->graph) == tgt1 || boost::target(edges1[j], roads1->graph) == src1 || boost::target(edges1[j], roads1->graph) == tgt1) {
-				edges1.removeAt(j);
-			}
-		}
-		for (int j = edges2.size() - 1; j >= 0; j--) {
-			if (boost::source(edges2[j], roads2->graph) == src2 || boost::source(edges2[j], roads2->graph) == tgt2 || boost::target(edges2[j], roads2->graph) == src2 || boost::target(edges2[j], roads2->graph) == tgt2) {
-				edges2.removeAt(j);
-			}
-		}
-	}
-
-	return pairs;
-}
-
-/**
  * Apply the global rigid ICP in order to fit the 1st road graph to the 2nd road graph in the least square manner.
  * As a result, roads1 will be updated to best fit roads2.
  */
@@ -4453,5 +4406,46 @@ void GraphUtil::drawRoadSegmentOnMat(RoadGraph& roads, RoadEdgeDesc e, cv::Mat& 
 		QVector2D p0 = roads.graph[e]->polyLine[i];
 		QVector2D p1 = roads.graph[e]->polyLine[i + 1];
 		cv::line(mat, cv::Point(p0.x(), p0.y()), cv::Point(p1.x(), p1.y()), cv::Scalar(brightness), width, CV_AA);
+	}
+}
+
+/**
+ * グリッドを検知する
+ */
+void GraphUtil::detectGrid(RoadGraph& roads) {
+
+}
+
+/**
+ * Plazaを検知する
+ */
+void GraphUtil::detectPlaza(RoadGraph& roads) {
+	plaza_list.clear();
+	roadGraphPtr = &roads;
+
+	//Make sure graph is planar
+	typedef std::vector<RoadEdgeDesc > tEdgeDescriptorVector;
+	std::vector<tEdgeDescriptorVector> embedding(boost::num_vertices(roads.graph));
+
+	//Create edge index property map
+	typedef std::map<RoadEdgeDesc, size_t> EdgeIndexMap;
+	EdgeIndexMap mapEdgeIdx;
+	boost::associative_property_map<EdgeIndexMap> pmEdgeIndex(mapEdgeIdx);		
+	RoadEdgeIter ei, eend;	
+	int edge_count = 0;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		mapEdgeIdx.insert(std::make_pair(*ei, edge_count++));
+	}
+
+	//Extract blocks from road graph using boost graph planar_face_traversal
+	faceVisitorForPlazaDetection vis;	
+	boost::planar_face_traversal(roads.graph, &embedding[0], vis, pmEdgeIndex);
+
+	for (int i = 0; i < plaza_list.size(); i++) {
+		for (int j = 0; j < plaza_list[i].size(); j++) {
+			RoadEdgeDesc e = plaza_list[i][j];
+
+			roads.graph[e]->color = QColor(0, 255, 0);
+		}
 	}
 }

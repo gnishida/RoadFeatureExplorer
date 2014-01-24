@@ -1,6 +1,7 @@
 #pragma once
 
-#include <qvector3d.h>
+#include <Qvector2D>
+#include <QColor>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
@@ -10,7 +11,7 @@ public:
 	int lanes;
 	bool oneWay;
 	std::vector<QVector2D> polyLine;
-	float importance;
+	QColor color;
 
 	bool valid;			// if this edge is valid
 	bool seed;			// if this edge is used as a seed of a forest

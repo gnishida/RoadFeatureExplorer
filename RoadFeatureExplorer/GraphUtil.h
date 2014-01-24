@@ -55,6 +55,7 @@ public:
 	static RoadEdgeDesc getEdge(RoadGraph& roads, int index, bool onlyValidEdge = true);
 	static float getTotalEdgeLength(RoadGraph& roads, RoadVertexDesc v);
 	static int getNumEdges(RoadGraph& roads, bool onlyValidEdge = true);
+	static int getNumEdges(RoadGraph& roads, RoadVertexDesc v, bool onlyValidEdge = true);
 	static RoadEdgeDesc addEdge(RoadGraph& roads, RoadVertexDesc src, RoadVertexDesc tgt, unsigned int type, unsigned int lanes, bool oneWay = false);
 	static RoadEdgeDesc addEdge(RoadGraph& roads, RoadVertexDesc src, RoadVertexDesc tgt, RoadEdgePtr ref_edge);
 	static bool hasEdge(RoadGraph& roads, RoadVertexDesc desc1, RoadVertexDesc desc2, bool onlyValidEdge = true);
@@ -65,7 +66,6 @@ public:
 	static void moveEdge(RoadGraph& roads, RoadEdgeDesc e, QVector2D& src_pos, QVector2D& tgt_pos);
 	static bool removeDeadEnd(RoadGraph& roads);
 	static std::vector<QVector2D> interpolateEdges(RoadGraph* roads1, RoadEdgeDesc e1, RoadVertexDesc src1, RoadGraph* roads2, RoadEdgeDesc e2, RoadVertexDesc src2, float t);
-	static void computeImportanceOfEdges(RoadGraph* roads, float w_length, float w_valence, float w_lanes);
 	static float computeDissimilarityOfEdges(RoadGraph* roads1, RoadEdgeDesc e1, RoadGraph* roads2, RoadEdgeDesc e2);
 	static void removeIsolatedEdges(RoadGraph& roads, bool onlyValidEdge = true);
 	static RoadVertexDesc splitEdge(RoadGraph* roads, RoadEdgeDesc edge_desc, const QVector2D& pt);
@@ -174,5 +174,9 @@ public:
 	// OpenCV
 	static void convertToMat(RoadGraph& roads, cv::Mat_<uchar>& mat, const cv::Size& size, int width = 3, bool flip = true);
 	static void drawRoadSegmentOnMat(RoadGraph& roads, RoadEdgeDesc e, cv::Mat& mat, int width = 3, int brightness = 255);
+
+	// Particular detection
+	static void detectGrid(RoadGraph& roads);
+	static void detectPlaza(RoadGraph& roads);
 };
 

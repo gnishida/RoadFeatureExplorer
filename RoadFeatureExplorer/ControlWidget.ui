@@ -102,117 +102,19 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>320</y>
-      <width>171</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Simplify</string>
-    </property>
-    <widget class="QLabel" name="label_4">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>46</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Threshold</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEditSimplifyThreshold">
-     <property name="geometry">
-      <rect>
-       <x>80</x>
-       <y>20</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonSimplify">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>151</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Simplify</string>
-     </property>
-    </widget>
-   </widget>
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>490</y>
-      <width>171</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Remove Short Dead-End</string>
-    </property>
-    <widget class="QPushButton" name="pushButtonRemoveShortDeadend">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>151</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Remove Short Dead-End</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>46</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Threshold</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEditRemoveShortDeadendThreshold">
-     <property name="geometry">
-      <rect>
-       <x>80</x>
-       <y>20</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_4">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>250</y>
+      <y>360</y>
       <width>171</width>
       <height>61</height>
      </rect>
     </property>
     <property name="title">
-     <string>Clean</string>
+     <string>Grid Detection</string>
     </property>
-    <widget class="QPushButton" name="pushButtonClean">
+    <widget class="QPushButton" name="pushButtonDetectGrid">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -222,7 +124,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Clean</string>
+      <string>Detect Grid</string>
      </property>
     </widget>
    </widget>
@@ -308,19 +210,19 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_6">
+   <widget class="QGroupBox" name="groupBox_4">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>420</y>
+      <y>440</y>
       <width>171</width>
       <height>61</height>
      </rect>
     </property>
     <property name="title">
-     <string>Reduce</string>
+     <string>Plaza Detection</string>
     </property>
-    <widget class="QPushButton" name="pushButtonReduce">
+    <widget class="QPushButton" name="pushButtonDetectPlaza">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -330,7 +232,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Reduce</string>
+      <string>Detect Plaza</string>
      </property>
     </widget>
    </widget>

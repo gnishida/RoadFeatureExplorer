@@ -6,9 +6,10 @@ RoadEdge::RoadEdge(unsigned int type, unsigned int lanes, bool oneWay) {
 	this->lanes = lanes;
 	this->oneWay = oneWay;
 
+	this->color = QColor(255, 255, 255);
+
 	// initialize other members
 	this->valid = true;
-	this->importance = 0.0f;
 	this->group = 0;
 	this->seed = false;
 	this->fullyPaired = false;

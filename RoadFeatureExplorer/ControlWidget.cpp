@@ -8,14 +8,10 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 	// set up the UI
 	ui.setupUi(this);
-	ui.lineEditSimplifyThreshold->setText("10");
-	ui.lineEditRemoveShortDeadendThreshold->setText("10");
 
 	// register the event handlers
-	connect(ui.pushButtonClean, SIGNAL(clicked()), this, SLOT(clean()));
-	connect(ui.pushButtonSimplify, SIGNAL(clicked()), this, SLOT(simplify()));
-	connect(ui.pushButtonReduce, SIGNAL(clicked()), this, SLOT(reduce()));
-	connect(ui.pushButtonRemoveShortDeadend, SIGNAL(clicked()), this, SLOT(removeShortDeadend()));
+	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
+	connect(ui.pushButtonDetectPlaza, SIGNAL(clicked()), this, SLOT(detectPlaza()));
 
 	hide();
 }
@@ -84,39 +80,21 @@ void ControlWidget::setRoadEdge(RoadEdgePtr selectedEdge) {
 // Event handlers
 
 /**
- * Event handler for button [Clean]
+ * Event handler for button [Detect Grid]
  */
-void ControlWidget::clean() {
+void ControlWidget::detectGrid() {
 	GraphUtil::clean(mainWin->glWidget->roads);
 
 	mainWin->glWidget->updateGL();
 }
 
 /**
- * Event handler for button [Simplify]
+ * Event handler for button [Detect Plaza]
  */
-void ControlWidget::simplify() {
-	float threshold = ui.lineEditSimplifyThreshold->text().toFloat();
-	GraphUtil::simplify(mainWin->glWidget->roads, threshold);
+void ControlWidget::detectPlaza() {
+	// 
+	GraphUtil::detectPlaza(mainWin->glWidget->roads);
 
 	mainWin->glWidget->updateGL();
 }
 
-/**
- * Event handler for button [Reduce]
- */
-void ControlWidget::reduce() {
-	GraphUtil::realize(mainWin->glWidget->roads);
-
-	mainWin->glWidget->updateGL();
-}
-
-/**
- * Event handler for button [Remove Short Dead-End]
- */
-void ControlWidget::removeShortDeadend() {
-	float threshold = ui.lineEditRemoveShortDeadendThreshold->text().toFloat();
-	GraphUtil::removeShortDeadend(mainWin->glWidget->roads, threshold);
-
-	mainWin->glWidget->updateGL();
-}
