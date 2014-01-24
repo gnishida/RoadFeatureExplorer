@@ -21,6 +21,8 @@ GLWidget::GLWidget(MainWindow* mainWin) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	// initialize the width and others
 	roads.setZ(MIN_Z);
 
+	selected = false;
+
 	// initialize the key status
 	shiftPressed = false;
 	controlPressed = false;
@@ -40,11 +42,9 @@ void GLWidget::drawScene() {
 	float height = (float)((int)(camera->dz * 0.012f)) * 0.1f * 1.5f;
 
 	// draw the selected area
-	/*
-	if (editor->selectedArea != NULL) {
-		renderer->renderArea(*editor->selectedArea, height);
+	if (selected) {
+		renderer->renderArea(selectedArea, height);
 	}
-	*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,8 @@ void GLWidget::mousePressEvent(QMouseEvent *e) {
 	mouseTo2D(e->x(), e->y(), &last2DPos);
 
 	if (e->buttons() & Qt::LeftButton) {
-
+		selectedArea = BBox(last2DPos);
+		selected = true;
 	}
 
 	updateGL();
@@ -113,6 +114,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e) {
 	lastPos = e->pos();
 
 	//stopDefiningArea();
+	if (selectedArea.dx() < 0.1f && selectedArea.dy() < 0.1f) selected = false;
 
 	e->ignore();
 
@@ -133,7 +135,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e) {
 	last2DPos = pos;
 
 	if (e->buttons() & Qt::LeftButton) {
-		//editor->defineArea(last2DPos);
+		selectedArea.addPoint(last2DPos);
 	} else if (e->buttons() & Qt::MidButton) {   // Shift the camera
 		camera->changeXYZTranslation(-dx * camera->dz * 0.001f, dy * camera->dz * 0.001f, 0);
 	} else if (e->buttons() & Qt::RightButton) { // Zoom the camera

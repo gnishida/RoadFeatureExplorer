@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include "RoadGraph.h"
 #include "RoadGraphRenderer.h"
-//#include "AbstractArea.h"
+#include "BBox.h"
 #include <QGLWidget>
 #include <QString>
 
@@ -21,7 +21,8 @@ public:
 	RoadGraphRenderer* renderer;
 	QPoint lastPos;
 	QVector2D last2DPos;
-	//AbstractArea selectedArea;
+	BBox selectedArea;
+	bool selected;
 
 	// key status
 	bool shiftPressed;

@@ -25,6 +25,7 @@ protected:
 public slots:
 	void onNew();
 	void onOpen();
+	void onShowControlWidget();
 };
 
 #endif // MAINWINDOW_H

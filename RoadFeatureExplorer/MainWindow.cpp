@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	connect(ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
 	connect(ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
+	connect(ui.actionControlWidget, SIGNAL(triggered()), this, SLOT(onShowControlWidget()));
 
 	// setup the GL widget
 	glWidget = new GLWidget(this);
@@ -19,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 	// setup the event filter
 	//glWidget->installEventFilter(this);
 	//controlWidget->installEventFilter(this);
+
+	controlWidget->show();
+	addDockWidget(Qt::LeftDockWidgetArea, controlWidget);
 }
 
 MainWindow::~MainWindow() {
@@ -52,4 +56,9 @@ void MainWindow::onOpen() {
 	GraphUtil::loadRoads(glWidget->roads, filename);
 	glWidget->updateGL();
 	QApplication::restoreOverrideCursor();
+}
+
+void MainWindow::onShowControlWidget() {
+	controlWidget->show();
+	addDockWidget(Qt::LeftDockWidgetArea, controlWidget);
 }
