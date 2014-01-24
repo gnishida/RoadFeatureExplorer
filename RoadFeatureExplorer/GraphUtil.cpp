@@ -19,20 +19,20 @@
 
 RoadGraph* roadGraphPtr;
 std::vector<RoadEdgeDesc> plaza;
-bool isFirstVertexVisited;
 int numOutingEdges;
+float plazaLength;
 std::vector<std::vector<RoadEdgeDesc> > plaza_list;
 
 //Vertex visitor
 struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visitor {
 	void begin_face() {
 		plaza.clear();
-		isFirstVertexVisited = true;
 		numOutingEdges = 0;
+		plazaLength = 0.0f;
 	}
 
 	void end_face() {
-		if (plaza.size() >= 4 && numOutingEdges > 4) {
+		if (plaza.size() >= 3 && numOutingEdges >= 3 && plazaLength < 300.0f) {
 			plaza_list.push_back(plaza);
 		}
 	}
@@ -46,6 +46,7 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
 	template <typename Edge> 
 	void next_edge(Edge e) {
 		plaza.push_back(e);
+		plazaLength += roadGraphPtr->graph[e]->getLength();
 	}
 };
 
