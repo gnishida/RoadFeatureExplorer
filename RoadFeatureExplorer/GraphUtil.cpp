@@ -4426,6 +4426,7 @@ void GraphUtil::detectPlaza(RoadGraph& roads) {
 	//Make sure graph is planar
 	typedef std::vector<RoadEdgeDesc > tEdgeDescriptorVector;
 	std::vector<tEdgeDescriptorVector> embedding(boost::num_vertices(roads.graph));
+	boost::boyer_myrvold_planarity_test(boost::boyer_myrvold_params::graph = roads.graph, boost::boyer_myrvold_params::embedding = &embedding[0]);
 
 	//Create edge index property map
 	typedef std::map<RoadEdgeDesc, size_t> EdgeIndexMap;

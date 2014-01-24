@@ -25,7 +25,7 @@ void RoadGraph::generateMesh() {
 	// road edge
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(graph); ei != eend; ++ei) {
-		//if (!graph[*ei]->valid) continue;
+		if (!graph[*ei]->valid) continue;
 
 		RoadEdgePtr edge = graph[*ei];
 
@@ -45,7 +45,7 @@ void RoadGraph::generateMesh() {
 			break;
 		}
 
-		if (!graph[*ei]->valid) color = bColor;
+		color = graph[*ei]->color;
 
 		// draw the border of the road segment
 		if (!showLocalStreets && edge->type == 1) {
