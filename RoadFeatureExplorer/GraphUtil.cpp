@@ -4421,6 +4421,8 @@ void GraphUtil::detectGrid(RoadGraph& roads) {
  * Plazaを検知する
  */
 void GraphUtil::detectPlaza(RoadGraph& roads) {
+	planarify(roads);
+
 	plaza_list.clear();
 	roadGraphPtr = &roads;
 
