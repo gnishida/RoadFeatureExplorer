@@ -1,6 +1,7 @@
 ﻿#include "GraphUtil.h"
 #include "Util.h"
 #include "BFSForest.h"
+#include <time.h>
 #include <QList>
 #include <QSet>
 #include <QDebug>
@@ -968,6 +969,8 @@ std::vector<QVector2D> GraphUtil::finerEdge(RoadGraph& roads, RoadEdgeDesc e, fl
  * Load the road from a file.
  */
 void GraphUtil::loadRoads(RoadGraph& roads, const QString& filename, int roadType) {
+	clock_t start, end;
+
 	roads.clear();
 
 	FILE* fp = fopen(filename.toUtf8().data(), "rb");
@@ -979,6 +982,7 @@ void GraphUtil::loadRoads(RoadGraph& roads, const QString& filename, int roadTyp
 	fread(&nVertices, sizeof(unsigned int), 1, fp);
 
 	// Read each vertex's information: desc, x, and y.
+	start = clock();
 	for (int i = 0; i < nVertices; i++) {
 		RoadVertexDesc id;
 		float x, y;
@@ -993,12 +997,15 @@ void GraphUtil::loadRoads(RoadGraph& roads, const QString& filename, int roadTyp
 
 		idToDesc[id] = desc;
 	}
+	end = clock();
+	std::cout << "load vertices: " << (double)(end-start)/CLOCKS_PER_SEC << std::endl;
 
 	// Read the number of edges
 	unsigned int nEdges;
 	fread(&nEdges, sizeof(unsigned int), 1, fp);
 
 	// Read each edge's information: the descs of two vertices, road type, the number of lanes, the number of points along the polyline, and the coordinate of each point along the polyline.
+	start = clock();
 	for (int i = 0; i < nEdges; i++) {
 		RoadEdgePtr edge = RoadEdgePtr(new RoadEdge(1, 1, false));
 
@@ -1030,6 +1037,8 @@ void GraphUtil::loadRoads(RoadGraph& roads, const QString& filename, int roadTyp
 			roads.graph[edge_pair.first] = edge;
 		}
 	}
+	end = clock();
+	std::cout << "load edges: " << (double)(end-start)/CLOCKS_PER_SEC << std::endl;
 
 	fclose(fp);
 
