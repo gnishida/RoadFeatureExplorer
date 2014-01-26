@@ -83,7 +83,7 @@ void ControlWidget::setRoadEdge(RoadEdgePtr selectedEdge) {
  * Event handler for button [Detect Grid]
  */
 void ControlWidget::detectGrid() {
-	GraphUtil::clean(mainWin->glWidget->roads);
+	GraphUtil::detectGrid(mainWin->glWidget->roads);
 
 	mainWin->glWidget->updateGL();
 }
@@ -92,7 +92,6 @@ void ControlWidget::detectGrid() {
  * Event handler for button [Detect Plaza]
  */
 void ControlWidget::detectPlaza() {
-	// 
 	GraphUtil::detectPlaza(mainWin->glWidget->roads);
 
 	mainWin->glWidget->updateGL();

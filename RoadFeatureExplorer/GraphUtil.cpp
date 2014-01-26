@@ -33,7 +33,7 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
 	}
 
 	void end_face() {
-		if (plaza.size() >= 3 && numOutingEdges >= 3 && plazaLength < 300.0f) {
+		if (plaza.size() > 4 && numOutingEdges >= 4 && plazaLength < 1000.0f && plazaLength > 200.0f) {
 			plaza_list.push_back(plaza);
 		}
 	}
@@ -2249,11 +2249,17 @@ void GraphUtil::singlify(RoadGraph& roads) {
  * Convert the road graph to a planar graph.
  */
 void GraphUtil::planarify(RoadGraph& roads) {
+	clock_t start, end;
+	start = clock();
+
 	bool split = true;
 
 	while (split) {
 		split = planarifyOne(roads);
 	}
+
+	end = clock();
+	std::cout << "planarify: " << (double)(end-start)/CLOCKS_PER_SEC << std::endl;
 }
 
 /**
@@ -4423,22 +4429,81 @@ void GraphUtil::drawRoadSegmentOnMat(RoadGraph& roads, RoadEdgeDesc e, cv::Mat& 
  * グリッドを検知する
  */
 void GraphUtil::detectGrid(RoadGraph& roads) {
+	// ヒストグラムの初期化
+	int numBins = 9;
+	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+			float theta = atan2f(dir.y(), dir.x());
+			if (theta < 0) theta += M_PI;
+			if (theta > M_PI * 0.5f) theta -= M_PI * 0.5f;
+
+			// どのビンか決定
+			int bin_id = theta * (float)numBins / M_PI * 2.0f;
+			if (bin_id >= numBins) bin_id = numBins - 1;
+
+			// 投票する
+			dirMat.at<float>(bin_id, 0) += dir.length();
+		}
+	}
+
+	// ビンの中で、最大値を探す
+	float max_hist_value = 0.0f;
+	int max_bin_id;
+	for (int i = 0; i < dirMat.rows; i++) {
+		if (dirMat.at<float>(i, 0) > max_hist_value) {
+			max_hist_value = dirMat.at<float>(i, 0);
+			max_bin_id = i;
+		}
+	}
+
+	// 最大値となるビンと同じビンに入るエッジについて、青色にする
+	QVector2D dir1, dir2;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		float length = 0.0f;
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+			float theta = atan2f(dir.y(), dir.x());
+			if (theta < 0) theta += M_PI;
+			if (theta > M_PI * 0.5f) theta -= M_PI * 0.5f;
+
+			// どのビンか決定
+			int bin_id = theta * (float)numBins / M_PI * 2.0f;
+			if (bin_id >= numBins) bin_id = numBins - 1;
+
+			// 同じビンに入るなら、カウントをインクリメント
+			if (bin_id == max_bin_id) length += dir.length();
+		}
+
+		// 80%以上、グリッドの方向と同じエッジなら、そのエッジを青色にする
+		if (length >= roads.graph[*ei]->getLength() * 0.8f) {
+			roads.graph[*ei]->color = QColor(0, 0, 255);
+		}
+	}
+
+	roads.setModified();
 }
 
 /**
  * Plazaを検知する
  */
 void GraphUtil::detectPlaza(RoadGraph& roads) {
-	planarify(roads);
-
 	plaza_list.clear();
 	roadGraphPtr = &roads;
 
 	//Make sure graph is planar
 	typedef std::vector<RoadEdgeDesc > tEdgeDescriptorVector;
 	std::vector<tEdgeDescriptorVector> embedding(boost::num_vertices(roads.graph));
-	boost::boyer_myrvold_planarity_test(boost::boyer_myrvold_params::graph = roads.graph, boost::boyer_myrvold_params::embedding = &embedding[0]);
+	if (!boost::boyer_myrvold_planarity_test(boost::boyer_myrvold_params::graph = roads.graph, boost::boyer_myrvold_params::embedding = &embedding[0])) {
+		std::cout << "The road graph is not a planar graph." << std::endl;
+	}
 
 	//Create edge index property map
 	typedef std::map<RoadEdgeDesc, size_t> EdgeIndexMap;
@@ -4461,4 +4526,6 @@ void GraphUtil::detectPlaza(RoadGraph& roads) {
 			roads.graph[e]->color = QColor(0, 255, 0);
 		}
 	}
+
+	roads.setModified();
 }
