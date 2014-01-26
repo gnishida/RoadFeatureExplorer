@@ -10,7 +10,7 @@ RoadEdge::RoadEdge(unsigned int type, unsigned int lanes, bool oneWay) {
 
 	// initialize other members
 	this->valid = true;
-	this->group = 0;
+	this->group = -1;
 	this->seed = false;
 	this->fullyPaired = false;
 }

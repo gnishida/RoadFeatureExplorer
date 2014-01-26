@@ -174,9 +174,5 @@ public:
 	// OpenCV
 	static void convertToMat(RoadGraph& roads, cv::Mat_<uchar>& mat, const cv::Size& size, int width = 3, bool flip = true);
 	static void drawRoadSegmentOnMat(RoadGraph& roads, RoadEdgeDesc e, cv::Mat& mat, int width = 3, int brightness = 255);
-
-	// Particular detection
-	static void detectGrid(RoadGraph& roads);
-	static void detectPlaza(RoadGraph& roads);
 };
 

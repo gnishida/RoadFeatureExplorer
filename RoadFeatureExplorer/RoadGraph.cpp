@@ -33,10 +33,6 @@ void RoadGraph::generateMesh() {
 		float height;
 		switch (edge->type) {
 		case 3:	// high way
-			color = QColor(255, 225, 104);
-			bColor = QColor(229, 153, 21);
-			height = highwayHeight;
-			break;
 		case 2: // avenue
 		case 1: // street
 			color = QColor(255, 255, 255);
@@ -46,6 +42,43 @@ void RoadGraph::generateMesh() {
 		}
 
 		color = graph[*ei]->color;
+
+		// グループに基づいて色を決定
+		switch (graph[*ei]->group) {
+		case 0:
+			color = QColor(0, 255, 0);
+			break;
+		case 1:
+			color = QColor(0, 128, 0);
+			break;
+		case 2:
+			color = QColor(255, 0, 0);
+			break;
+		case 3:
+			color = QColor(128, 0, 0);
+			break;
+		case 4:
+			color = QColor(128, 128, 0);
+			break;
+		case 5:
+			color = QColor(0, 0, 255);
+			break;
+		case 6:
+			color = QColor(0, 0, 128);
+			break;
+		case 7:
+			color = QColor(0, 128, 128);
+			break;
+		case 8:
+			color = QColor(128, 0, 128);
+			break;
+		case 9:
+			color = QColor(0, 0, 64);
+			break;
+		default:
+			color = QColor(255, 255, 255);
+			break;
+		}
 
 		// draw the border of the road segment
 		if (!showLocalStreets && edge->type == 1) {

@@ -10,16 +10,14 @@ const float Util::MTC_FLOAT_TOL = 1e-6f;
  * Return the sistance from segment ab to point c.
  * If the 
  */
-float Util::pointSegmentDistanceXY(const QVector3D &a, const QVector3D &b, const QVector3D &c) {
+float Util::pointSegmentDistanceXY(const QVector3D &a, const QVector3D &b, const QVector3D &c, bool segmentOnly) {
 	float dist;		
 
 	float r_numerator = (c.x()-a.x())*(b.x()-a.x()) + (c.y()-a.y())*(b.y()-a.y());
 	float r_denomenator = (b.x()-a.x())*(b.x()-a.x()) + (b.y()-a.y())*(b.y()-a.y());
 	float r = r_numerator / r_denomenator;
 
-	if (r >= 0 && r <= 1) {
-		return abs((a.y()-c.y())*(b.x()-a.x())-(a.x()-c.x())*(b.y()-a.y())) / sqrt(r_denomenator);
-	} else {
+	if (segmentOnly && (r < 0 || r > 1)) {
 		float dist1 = SQR(c.x() - a.x()) + SQR(c.y() - a.y());
 		float dist2 = SQR(c.x() - b.x()) + SQR(c.y() - b.y());
 		if (dist1 < dist2) {	
@@ -27,6 +25,8 @@ float Util::pointSegmentDistanceXY(const QVector3D &a, const QVector3D &b, const
 		} else {
 			return sqrt(dist2);
 		}
+	} else {
+		return abs((a.y()-c.y())*(b.x()-a.x())-(a.x()-c.x())*(b.y()-a.y())) / sqrt(r_denomenator);
 	}
 }
 

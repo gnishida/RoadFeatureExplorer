@@ -169,6 +169,7 @@
     <ClCompile Include="RoadEdge.cpp" />
     <ClCompile Include="RoadGraph.cpp" />
     <ClCompile Include="RoadGraphRenderer.cpp" />
+    <ClCompile Include="RoadSegmentationUtil.cpp" />
     <ClCompile Include="RoadVertex.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
@@ -228,6 +229,7 @@
     <ClInclude Include="RoadEdge.h" />
     <ClInclude Include="RoadGraph.h" />
     <ClInclude Include="RoadGraphRenderer.h" />
+    <ClInclude Include="RoadSegmentationUtil.h" />
     <ClInclude Include="RoadVertex.h" />
     <ClInclude Include="Util.h" />
     <CustomBuild Include="ControlWidget.h">

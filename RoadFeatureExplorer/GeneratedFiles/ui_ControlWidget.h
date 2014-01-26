@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Fri Jan 24 18:30:54 2014
+** Created: Sun Jan 26 10:58:15 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -46,6 +46,8 @@ public:
     QLineEdit *lineEditVertexNeighbors;
     QGroupBox *groupBox_4;
     QPushButton *pushButtonDetectPlaza;
+    QGroupBox *groupBox_6;
+    QPushButton *pushButtonDetectRadial;
 
     void setupUi(QDockWidget *ControlWidget)
     {
@@ -110,6 +112,12 @@ public:
         pushButtonDetectPlaza = new QPushButton(groupBox_4);
         pushButtonDetectPlaza->setObjectName(QString::fromUtf8("pushButtonDetectPlaza"));
         pushButtonDetectPlaza->setGeometry(QRect(10, 20, 151, 31));
+        groupBox_6 = new QGroupBox(dockWidgetContents);
+        groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
+        groupBox_6->setGeometry(QRect(10, 520, 171, 61));
+        pushButtonDetectRadial = new QPushButton(groupBox_6);
+        pushButtonDetectRadial->setObjectName(QString::fromUtf8("pushButtonDetectRadial"));
+        pushButtonDetectRadial->setGeometry(QRect(10, 20, 151, 31));
         ControlWidget->setWidget(dockWidgetContents);
 
         retranslateUi(ControlWidget);
@@ -131,6 +139,8 @@ public:
         label_8->setText(QApplication::translate("ControlWidget", "Neighbors", 0, QApplication::UnicodeUTF8));
         groupBox_4->setTitle(QApplication::translate("ControlWidget", "Plaza Detection", 0, QApplication::UnicodeUTF8));
         pushButtonDetectPlaza->setText(QApplication::translate("ControlWidget", "Detect Plaza", 0, QApplication::UnicodeUTF8));
+        groupBox_6->setTitle(QApplication::translate("ControlWidget", "Radial Detection", 0, QApplication::UnicodeUTF8));
+        pushButtonDetectRadial->setText(QApplication::translate("ControlWidget", "Detect Radial", 0, QApplication::UnicodeUTF8));
         Q_UNUSED(ControlWidget);
     } // retranslateUi
 

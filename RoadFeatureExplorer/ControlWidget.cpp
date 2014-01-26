@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include "GLWidget.h"
 #include "GraphUtil.h"
+#include "RoadSegmentationUtil.h"
 
 ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget", (QWidget*)mainWin) {
 	this->mainWin = mainWin;
@@ -12,6 +13,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	// register the event handlers
 	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
 	connect(ui.pushButtonDetectPlaza, SIGNAL(clicked()), this, SLOT(detectPlaza()));
+	connect(ui.pushButtonDetectRadial, SIGNAL(clicked()), this, SLOT(detectRadial()));
 
 	hide();
 }
@@ -83,7 +85,7 @@ void ControlWidget::setRoadEdge(RoadEdgePtr selectedEdge) {
  * Event handler for button [Detect Grid]
  */
 void ControlWidget::detectGrid() {
-	GraphUtil::detectGrid(mainWin->glWidget->roads);
+	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads);
 
 	mainWin->glWidget->updateGL();
 }
@@ -92,8 +94,18 @@ void ControlWidget::detectGrid() {
  * Event handler for button [Detect Plaza]
  */
 void ControlWidget::detectPlaza() {
-	GraphUtil::detectPlaza(mainWin->glWidget->roads);
+	RoadSegmentationUtil::detectPlaza(mainWin->glWidget->roads);
 
 	mainWin->glWidget->updateGL();
 }
+
+/**
+ * Event handler for button [Detect Radial]
+ */
+void ControlWidget::detectRadial() {
+	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads);
+
+	mainWin->glWidget->updateGL();
+}
+
 
