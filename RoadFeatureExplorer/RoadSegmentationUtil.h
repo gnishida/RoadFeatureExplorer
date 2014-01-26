@@ -19,5 +19,6 @@ public:
 	static QVector2D detectOneRadial(RoadGraph& roads, float scale);
 	static QVector2D detectOneRadial(RoadGraph& roads, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold);
 	static void reduceRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float distanceThreshold);
+	static void extendRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio);
 };
 

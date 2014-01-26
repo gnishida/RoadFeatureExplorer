@@ -146,8 +146,8 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads) {
 		roads.graph[*ei]->group = -1;
 	}
 
-	for (int i = 0; i < 3; i++) {
-		if (!detectOneGrid(roads, 9, 3000, 0.5f)) break;
+	for (int i = 0; i < 6; i++) {
+		if (!detectOneGrid(roads, 9, 1000, 0.5f)) break;
 	}
 }
 
@@ -276,14 +276,19 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads) {
  * Hough transformにより、円を検知する。
  */
 void RoadSegmentationUtil::detectRadial(RoadGraph& roads) {
+	float angleTheshold = 0.2f;
+
 	// 0.01スケールで、円の中心を求める
 	QVector2D center = detectOneRadial(roads, 0.01f);
 
 	// 0.1スケールで、より正確な円の中心を求める
-	center = detectOneRadial(roads, 0.1f, center, 200.0f, 0.4f);
+	center = detectOneRadial(roads, 0.1f, center, 200.0f, angleTheshold * 2.0f);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	//center = detectOneRadial(roads, 1.0f, center, 100.0f, 0.2f);
+	center = detectOneRadial(roads, 0.2f, center, 100.0f, angleTheshold);
+
+	// 0.5スケールで、より正確な円の中心を求める
+	//center = detectOneRadial(roads, 0.5f, center, 50.0f, 0.1f);
 
 	// 各エッジについて、radialの中心点に合うもののグループIDを1にする
 	RoadEdgeIter ei, eend;
@@ -295,19 +300,23 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads) {
 			QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
 			QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
 
-			if (GraphUtil::diffAngle(dir1, dir2) < 0.5f || GraphUtil::diffAngle(dir1, -dir2) < 0.5f) {
+			if (GraphUtil::diffAngle(dir1, dir2) < angleTheshold || GraphUtil::diffAngle(dir1, -dir2) < angleTheshold) {
 				length += dir1.length();
 			}
 		}
 
-		// 50%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
-		if (length >= roads.graph[*ei]->getLength() * 0.5f) {
+		// 70%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
+		if (length >= roads.graph[*ei]->getLength() * 0.7f) {
 			roads.graph[*ei]->group = 1;
 		}
 	}
 
-	// 円の中心から一定距離以内のエッジをシードとし、シードと連結されていないエッジのグループを-1に戻す
+	// 円の中心から一定距離以内のエッジのみを残し、それ以外はグループIDを一旦-1に戻す
 	reduceRadialGroup(roads, center, 1, 200.0f);
+
+	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、グループに再度登録していく
+	extendRadialGroup(roads, center, 1, angleTheshold, 0.7f);
+
 
 	roads.setModified();
 }
@@ -411,9 +420,6 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale, Q
 
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (src == 68 || tgt == 68) {
-			int k = 0;
-		}
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
@@ -498,7 +504,7 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale, Q
 
 /**
  * 円の中心からdistanceThreshold以内のRadialグループをシードとし、
- * シードと連結されていないエッジのradial groupを-1い戻す。
+ * シードと同じ方向に伸びているエッジ以外は、グループIDを-1に戻す。
  */
 void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float distanceThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
@@ -532,7 +538,7 @@ void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 		edges.insert(*ei, true);
 	}
 
-	//
+	/*
 	while (!queue.empty()) {
 		RoadVertexDesc v = queue.front();
 		queue.pop_front();
@@ -555,6 +561,7 @@ void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 			queue.push_back(u);
 		}
 	}
+	*/
 
 	// 登録されたエッジ以外は、group_idを-1に戻す
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -566,4 +573,65 @@ void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
 		roads.graph[it.key()]->group = group_id;
 	}
+}
+
+/**
+ * 指定したグループに属するエッジについて、円の中心から離れる方向に周辺のエッジを辿り、グループに登録していく。
+ */
+void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio) {
+	QList<RoadVertexDesc> queue;
+
+	QList<RoadVertexDesc> visited;
+
+	QMap<RoadEdgeDesc, bool> edges;
+
+	// シードの構築
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+		if (roads.graph[*ei]->group != group_id) continue;
+
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+
+		queue.push_back(src);
+		queue.push_back(tgt);
+		visited.push_back(src);
+		visited.push_back(tgt);
+
+		edges.insert(*ei, true);
+	}
+
+	while (!queue.empty()) {
+		RoadVertexDesc v = queue.front();
+		queue.pop_front();
+
+		RoadOutEdgeIter ei, eend;
+		for (boost::tie(ei, eend) = boost::out_edges(v, roads.graph); ei != eend; ++ei) {
+			if (!roads.graph[*ei]->valid) continue;
+
+			float length = 0.0f;
+			for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+				QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+				QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
+
+				if (GraphUtil::diffAngle(dir1, dir2) < angleThreshold || GraphUtil::diffAngle(dir1, -dir2) < angleThreshold) {
+					length += dir1.length();
+				}
+			}
+
+			// 方向がずれてたら、そのエッジは当該グループに入れない
+			if (length < roads.graph[*ei]->getLength() * dirCheckRatio) continue;
+
+			roads.graph[*ei]->group = group_id;
+
+			RoadVertexDesc u = boost::target(*ei, roads.graph);
+			if (!roads.graph[u]->valid) continue;
+			if (visited.contains(u)) continue;
+
+			visited.push_back(u);
+			queue.push_back(u);
+		}
+	}
+
 }
