@@ -200,7 +200,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 				dir.setY(-tmpX);
 			}
 
-			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold) {
+			// エッジの方向が、グリッド方向に近い場合、投票する
+			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold || GraphUtil::diffAngle(dir, gridDir) > M_PI * 0.5f - angleThreshold) {
 				length += dir.length();
 			}
 		}
@@ -364,7 +365,8 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area,
 				dir.setY(-tmpX);
 			}
 
-			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold) {
+			// エッジの方向が、グリッド方向に近い場合、投票する
+			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold || GraphUtil::diffAngle(dir, gridDir) > M_PI * 0.5f - angleThreshold) {
 				length += dir.length();
 			}
 		}

@@ -11,13 +11,13 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	ui.setupUi(this);
 	ui.checkBoxRoadTypeAvenue->setChecked(true);
 	ui.checkBoxRoadTypeLocalStreet->setChecked(true);
-	ui.lineEditGridMaxIteration->setText("6");
+	ui.lineEditGridMaxIteration->setText("2");
 	ui.lineEditNumBins->setText("9");
 	ui.lineEditMinTotalLength->setText("3000");
 	ui.lineEditMinMaxBinRatio->setText("0.5");
 	ui.lineEditGridAngleThreshold->setText("0.1");
 	ui.lineEditGridVotingThreshold->setText("0.7");
-	ui.lineEditGridExtendingDistanceThreshold->setText("50");
+	ui.lineEditGridExtendingDistanceThreshold->setText("20");
 
 	ui.lineEditRadialMaxIteration->setText("2");
 	ui.lineEditScale1->setText("0.05");
