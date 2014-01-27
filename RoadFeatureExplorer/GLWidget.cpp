@@ -16,10 +16,10 @@ GLWidget::GLWidget(MainWindow* mainWin) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	// set up the camera
 	camera = new Camera();
 	camera->setLookAt(0.0f, 0.0f, 0.0f);
-	camera->setTranslation(0.0f, 0.0f, MIN_Z);
+	camera->setTranslation(0.0f, 0.0f, (MIN_Z + MAX_Z) / 2.0f);
 
 	// initialize the width and others
-	roads.setZ(MIN_Z);
+	roads.setZ((MIN_Z + MAX_Z) / 2.0f);
 
 	selected = false;
 
