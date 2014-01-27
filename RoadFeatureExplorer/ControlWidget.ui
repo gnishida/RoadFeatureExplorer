@@ -24,7 +24,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>60</y>
       <width>201</width>
       <height>211</height>
      </rect>
@@ -232,7 +232,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>250</y>
+      <y>280</y>
       <width>201</width>
       <height>61</height>
      </rect>
@@ -258,7 +258,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>340</y>
+      <y>350</y>
       <width>201</width>
       <height>291</height>
      </rect>
@@ -600,6 +600,32 @@
       <string>Detect Grid / Radial</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxRoadTypeAvenue">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Avenues</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxRoadTypeLocalStreet">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>10</y>
+      <width>91</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Local Streets</string>
+    </property>
    </widget>
   </widget>
  </widget>

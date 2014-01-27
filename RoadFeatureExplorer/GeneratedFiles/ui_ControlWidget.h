@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Mon Jan 27 15:24:53 2014
+** Created: Mon Jan 27 16:06:50 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -14,6 +14,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QCheckBox>
 #include <QtGui/QDockWidget>
 #include <QtGui/QGroupBox>
 #include <QtGui/QHeaderView>
@@ -72,6 +73,8 @@ public:
     QLabel *label_19;
     QGroupBox *groupBox_7;
     QPushButton *pushButtonDetectGridRadial;
+    QCheckBox *checkBoxRoadTypeAvenue;
+    QCheckBox *checkBoxRoadTypeLocalStreet;
 
     void setupUi(QDockWidget *ControlWidget)
     {
@@ -84,7 +87,7 @@ public:
         dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
         groupBox_3 = new QGroupBox(dockWidgetContents);
         groupBox_3->setObjectName(QString::fromUtf8("groupBox_3"));
-        groupBox_3->setGeometry(QRect(10, 10, 201, 211));
+        groupBox_3->setGeometry(QRect(10, 60, 201, 211));
         pushButtonDetectGrid = new QPushButton(groupBox_3);
         pushButtonDetectGrid->setObjectName(QString::fromUtf8("pushButtonDetectGrid"));
         pushButtonDetectGrid->setGeometry(QRect(40, 170, 121, 31));
@@ -139,13 +142,13 @@ public:
         label_21->setGeometry(QRect(10, 140, 101, 21));
         groupBox_4 = new QGroupBox(dockWidgetContents);
         groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
-        groupBox_4->setGeometry(QRect(10, 250, 201, 61));
+        groupBox_4->setGeometry(QRect(10, 280, 201, 61));
         pushButtonDetectPlaza = new QPushButton(groupBox_4);
         pushButtonDetectPlaza->setObjectName(QString::fromUtf8("pushButtonDetectPlaza"));
         pushButtonDetectPlaza->setGeometry(QRect(40, 20, 121, 31));
         groupBox_6 = new QGroupBox(dockWidgetContents);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
-        groupBox_6->setGeometry(QRect(10, 340, 201, 291));
+        groupBox_6->setGeometry(QRect(10, 350, 201, 291));
         pushButtonDetectRadial = new QPushButton(groupBox_6);
         pushButtonDetectRadial->setObjectName(QString::fromUtf8("pushButtonDetectRadial"));
         pushButtonDetectRadial->setGeometry(QRect(40, 250, 121, 31));
@@ -232,6 +235,12 @@ public:
         pushButtonDetectGridRadial = new QPushButton(groupBox_7);
         pushButtonDetectGridRadial->setObjectName(QString::fromUtf8("pushButtonDetectGridRadial"));
         pushButtonDetectGridRadial->setGeometry(QRect(40, 20, 121, 31));
+        checkBoxRoadTypeAvenue = new QCheckBox(dockWidgetContents);
+        checkBoxRoadTypeAvenue->setObjectName(QString::fromUtf8("checkBoxRoadTypeAvenue"));
+        checkBoxRoadTypeAvenue->setGeometry(QRect(20, 10, 70, 17));
+        checkBoxRoadTypeLocalStreet = new QCheckBox(dockWidgetContents);
+        checkBoxRoadTypeLocalStreet->setObjectName(QString::fromUtf8("checkBoxRoadTypeLocalStreet"));
+        checkBoxRoadTypeLocalStreet->setGeometry(QRect(100, 10, 91, 17));
         ControlWidget->setWidget(dockWidgetContents);
 
         retranslateUi(ControlWidget);
@@ -270,6 +279,8 @@ public:
         label_19->setText(QApplication::translate("ControlWidget", "Max Iteration", 0, QApplication::UnicodeUTF8));
         groupBox_7->setTitle(QApplication::translate("ControlWidget", "Grid / Radial Detection", 0, QApplication::UnicodeUTF8));
         pushButtonDetectGridRadial->setText(QApplication::translate("ControlWidget", "Detect Grid / Radial", 0, QApplication::UnicodeUTF8));
+        checkBoxRoadTypeAvenue->setText(QApplication::translate("ControlWidget", "Avenues", 0, QApplication::UnicodeUTF8));
+        checkBoxRoadTypeLocalStreet->setText(QApplication::translate("ControlWidget", "Local Streets", 0, QApplication::UnicodeUTF8));
         Q_UNUSED(ControlWidget);
     } // retranslateUi
 

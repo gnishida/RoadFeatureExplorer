@@ -9,6 +9,8 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 	// set up the UI
 	ui.setupUi(this);
+	ui.checkBoxRoadTypeAvenue->setChecked(true);
+	ui.checkBoxRoadTypeLocalStreet->setChecked(true);
 	ui.lineEditGridMaxIteration->setText("6");
 	ui.lineEditNumBins->setText("9");
 	ui.lineEditMinTotalLength->setText("1000");
@@ -45,6 +47,8 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
  * Event handler for button [Detect Grid]
  */
 void ControlWidget::detectGrid() {
+	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
+
 	int maxIteration = ui.lineEditGridMaxIteration->text().toInt();
 	int numBins = ui.lineEditNumBins->text().toInt();
 	float minTotalLength = ui.lineEditMinTotalLength->text().toFloat();
@@ -54,7 +58,7 @@ void ControlWidget::detectGrid() {
 	float extendingDistanceThreshold = ui.lineEditGridExtendingDistanceThreshold->text().toFloat();
 
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
-	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, maxIteration, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingThreshold, extendingDistanceThreshold);
+	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, maxIteration, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingThreshold, extendingDistanceThreshold);
 
 	mainWin->glWidget->updateGL();
 }
@@ -73,6 +77,8 @@ void ControlWidget::detectPlaza() {
  * Event handler for button [Detect Radial]
  */
 void ControlWidget::detectRadial() {
+	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
+
 	int maxIteration = ui.lineEditRadialMaxIteration->text().toInt();
 	float scale1 = ui.lineEditScale1->text().toFloat();
 	float scale2 = ui.lineEditScale2->text().toFloat();
@@ -86,12 +92,14 @@ void ControlWidget::detectRadial() {
 	float extendingAngleThreshold = ui.lineEditRadialExtendingAngleThreshold->text().toFloat();
 
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
-	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, maxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingThreshold, seedDistance, extendingAngleThreshold);
+	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, maxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingThreshold, seedDistance, extendingAngleThreshold);
 
 	mainWin->glWidget->updateGL();
 }
 
 void ControlWidget::detectGridRadial() {
+	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
+
 	int gridMaxIteration = ui.lineEditGridMaxIteration->text().toInt();
 	int numBins = ui.lineEditNumBins->text().toInt();
 	float minTotalLength = ui.lineEditMinTotalLength->text().toFloat();
@@ -114,8 +122,8 @@ void ControlWidget::detectGridRadial() {
 
 
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
-	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, radialMaxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, radialVotingThreshold, seedDistance, radialExtendingAngleThreshold);
-	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, gridMaxIteration, numBins, minTotalLength, minMaxBinRatio, gridAngleThreshold, gridVotingThreshold, gridExtendingDistanceThreshold);
+	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, radialMaxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, radialVotingThreshold, seedDistance, radialExtendingAngleThreshold);
+	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, gridMaxIteration, numBins, minTotalLength, minMaxBinRatio, gridAngleThreshold, gridVotingThreshold, gridExtendingDistanceThreshold);
 
 	mainWin->glWidget->updateGL();
 }

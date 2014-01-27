@@ -55,9 +55,9 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param votingRatioThreshold	各エッジについて、構成するラインが所定のグリッド方向に従っているかの投票率を計算し、この閾値未満なら、グリッドに従っていないと見なす
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
 	for (int i = 0; i < maxIteration; i++) {
-		if (!detectOneGrid(roads, area, i, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold)) break;
+		if (!detectOneGrid(roads, area, roadType, i, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold)) break;
 	}
 }
 
@@ -69,7 +69,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int 
  * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  */
-bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int group_id, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
+bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
 	// ヒストグラムの初期化
 	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
@@ -77,6 +77,9 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -121,6 +124,9 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	count = 0;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 		
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -164,6 +170,9 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	// 最頻値（モード）のビンに入るエッジを、グループに登録する
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 		
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -208,7 +217,7 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	reduceGridGroup(roads, group_id);
 
 	//
-	extendGridGroup(roads, area, group_id, gridDir, angleThreshold, votingRatioThreshold, extendingDistanceThreshold);
+	extendGridGroup(roads, area, roadType, group_id, gridDir, angleThreshold, votingRatioThreshold, extendingDistanceThreshold);
 
 	roads.setModified();
 
@@ -319,12 +328,15 @@ void RoadSegmentationUtil::reduceGridGroup(RoadGraph& roads, int group_id) {
  * グリッドのグループの属さないエッジについて、近くに属するエッジがあれば、そのグループの仲間に入れちゃう。
  * これをしてあげないと、例えばラウンドアバウトに挟まれたエッジなどが、グリッドの仲間に入れない。
  */
-void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area, int group_id, const QVector2D& gridDir, float angleThreshold, float votingRatioThreshold, float distanceThreshold) {
+void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, const QVector2D& gridDir, float angleThreshold, float votingRatioThreshold, float distanceThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
 
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 		
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -363,6 +375,9 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area,
 		RoadEdgeIter ei2, eend2;
 		for (boost::tie(ei2, eend2) = boost::edges(roads.graph); ei2 != eend2; ++ei2) {
 			if (!roads.graph[*ei2]->valid) continue;
+
+			// 指定されたタイプ以外は、スキップする。
+			if (!(roads.graph[*ei]->type & roadType)) continue;
 
 			// グリッドshape以外のエッジは、スキップ
 			if (roads.graph[*ei2]->shapeType != RoadEdge::SHAPE_GRID) continue;
@@ -438,9 +453,9 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
+void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
 	for (int i = 0; i < maxIteration; i++) {
-		if (!detectOneRadial(roads, area, i, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, extendingAngleThreshold)) break;
+		if (!detectOneRadial(roads, area, roadType, i, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, extendingAngleThreshold)) break;
 	}
 }
 
@@ -448,20 +463,23 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area, in
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area, int group_id, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
+bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
 	// 0.01スケールで、円の中心を求める
-	QVector2D center = detectRadialCenterInScaled(roads, area, scale1);
+	QVector2D center = detectRadialCenterInScaled(roads, area, roadType, scale1);
 
 	// 0.1スケールで、より正確な円の中心を求める
-	center = refineRadialCenterInScaled(roads, area, scale2, center, centerErrorTol2, angleThreshold2);
+	center = refineRadialCenterInScaled(roads, area, roadType, scale2, center, centerErrorTol2, angleThreshold2);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	center = refineRadialCenterInScaled(roads, area, scale3, center, centerErrorTol3, angleThreshold3);
+	center = refineRadialCenterInScaled(roads, area, roadType, scale3, center, centerErrorTol3, angleThreshold3);
 
-	// 各エッジについて、radialの中心点に合うもののグループIDを1にする
+	// 各エッジについて、radialの中心点に合うものを、グループに登録する
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -494,7 +512,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
 	if (!reduceRadialGroup(roads, center, group_id, seedDistance, 5)) return false;
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、グループに再度登録していく
-	extendRadialGroup(roads, area, center, group_id, extendingAngleThreshold, votingRatioThreshold);
+	extendRadialGroup(roads, area, roadType, center, group_id, extendingAngleThreshold, votingRatioThreshold);
 
 	roads.setModified();
 
@@ -505,7 +523,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
  * Plazaを１つ検知し、円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, float scale) {
+QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale) {
 	BBox bbox = GraphUtil::getAABoundingBox(roads);
 	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
 
@@ -514,6 +532,9 @@ QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, Abs
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+		
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -599,7 +620,7 @@ QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, Abs
  * 円のだいたいの中心点を使って、より正確な円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold) {
+QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold) {
 	BBox bbox = GraphUtil::getAABoundingBox(roads);
 	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
 
@@ -610,6 +631,9 @@ QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, Abs
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
@@ -751,7 +775,7 @@ bool RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 /**
  * 指定したグループに属するエッジについて、円の中心から離れる方向に周辺のエッジを辿り、グループに登録していく。
  */
-void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& area, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio) {
+void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& area, int roadType, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio) {
 	QList<RoadVertexDesc> queue;
 
 	QList<RoadVertexDesc> visited;
@@ -762,6 +786,9 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!(roads.graph[*ei]->type & roadType)) continue;
 
 		// radialタイプではないエッジは、スキップする
 		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_RADIAL) continue;
