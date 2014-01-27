@@ -49,7 +49,7 @@ void RoadGraph::generateMesh() {
 			color = QColor(255, 255, 255);
 			break;
 		case 1:	// grid
-			color = QColor(0, 0, 255 * graph[*ei]->gridness);
+			color = QColor(255 * (1.0f - graph[*ei]->gridness), 255 * (1.0f - graph[*ei]->gridness), 255);
 			break;
 		case 2:	// radial
 			color = QColor(0, 255, 0);
