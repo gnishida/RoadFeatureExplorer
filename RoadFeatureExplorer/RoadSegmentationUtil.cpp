@@ -48,20 +48,14 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
 
 /**
  * グリッドを検知する
+ * まず、最初に最も大きいグリッド領域を抽出する。次に、それ以外の領域について、次に大きいグリッド領域を抽出する。以降、最大6回、一定サイズ以上のグリッド領域が見つからなくなるまで繰り返す。
+ *
+ * @param numBins				ヒストグラムのビン数
+ * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
+ * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
+ * @param votingRatioThreshold	各エッジについて、構成するラインが所定のグリッド方向に従っているかの投票率を計算し、この閾値未満なら、グリッドに従っていないと見なす
  */
 void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, float numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold) {
-	// 全てのエッジのグループIDを-1に初期化する
-	RoadEdgeIter ei, eend;
-	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-
-		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
-
-		roads.graph[*ei]->group = -1;
-		roads.graph[*ei]->gridness = 0.0f;
-	}
-
 	for (int i = 0; i < 6; i++) {
 		if (!detectOneGrid(roads, area, numBins, minTotalLength, minMaxBinRatio, votingRatioThreshold)) break;
 	}
@@ -71,7 +65,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, floa
  * １つのグリッドを検知する。
  * 既にグループに属しているエッジはスキップする。
  *
- * @param numBins				ヒストグラムのビンの数
+ * @param numBins				ヒストグラムのビン数
  * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  */
@@ -86,9 +80,6 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
 		if (roads.graph[*ei]->shapeType > 0) continue;
-
-		// 既にどこかのグループに属しているエッジは、スキップする
-		//if (roads.graph[*ei]->group >= 0) continue;
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
