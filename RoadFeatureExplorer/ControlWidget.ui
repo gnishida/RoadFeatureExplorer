@@ -26,7 +26,7 @@
       <x>10</x>
       <y>10</y>
       <width>201</width>
-      <height>171</height>
+      <height>191</height>
      </rect>
     </property>
     <property name="title">
@@ -36,7 +36,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>130</y>
+       <y>150</y>
        <width>121</width>
        <height>31</height>
       </rect>
@@ -127,7 +127,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>100</y>
+       <y>120</y>
        <width>101</width>
        <height>21</height>
       </rect>
@@ -140,7 +140,7 @@
      <property name="geometry">
       <rect>
        <x>110</x>
-       <y>100</y>
+       <y>120</y>
        <width>81</width>
        <height>20</height>
       </rect>
@@ -175,12 +175,38 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Angle Threshold</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEditGridAngleThreshold">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>100</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_4">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>200</y>
+      <y>220</y>
       <width>201</width>
       <height>61</height>
      </rect>
@@ -206,7 +232,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>280</y>
+      <y>310</y>
       <width>201</width>
       <height>291</height>
      </rect>
@@ -527,7 +553,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>590</y>
+      <y>620</y>
       <width>201</width>
       <height>61</height>
      </rect>

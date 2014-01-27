@@ -55,9 +55,9 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param votingRatioThreshold	各エッジについて、構成するラインが所定のグリッド方向に従っているかの投票率を計算し、この閾値未満なら、グリッドに従っていないと見なす
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold) {
 	for (int i = 0; i < maxIteration; i++) {
-		if (!detectOneGrid(roads, area, i, numBins, minTotalLength, minMaxBinRatio, votingRatioThreshold)) break;
+		if (!detectOneGrid(roads, area, i, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold)) break;
 	}
 }
 
@@ -69,7 +69,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int 
  * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  */
-bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int group_id, int numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold) {
+bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int group_id, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold) {
 	// ヒストグラムの初期化
 	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
@@ -116,8 +116,9 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	// 最頻値（モード）のビンの割合がminMaxBinRatio%未満なら、グリッドとは見なさない
 	if (max_hist_value < minTotalLength || max_hist_value < (float)count * minMaxBinRatio) return false;
 
-	// 最頻値（モード）のビンに入るエッジを、グループに登録する
-	QVector2D dir1, dir2;
+	// 最頻値（モード）のビンに入るエッジを使って、高精度のグリッド方向を計算する
+	QVector2D gridDir;
+	count = 0;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 		
@@ -134,15 +135,66 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
 			float theta = atan2f(dir.y(), dir.x());
-			if (theta < 0) theta += M_PI;
-			if (theta > M_PI * 0.5f) theta -= M_PI * 0.5f;
+			if (theta < 0) {
+				theta += M_PI;
+				dir = -dir;
+			}
+
+			if (theta > M_PI * 0.5f) {
+				theta -= M_PI * 0.5f;
+				float tmpX = dir.x();
+				float tmpY = dir.y();
+				dir.setX(tmpY);
+				dir.setY(-tmpX);
+			}
 
 			// どのビンか決定
 			int bin_id = theta * (float)numBins / M_PI * 2.0f;
-			if (bin_id >= numBins) bin_id = numBins - 1;
+			if (bin_id >= numBins) continue;
 
-			// 同じビンに入るなら、カウントをインクリメント
-			if (bin_id == max_bin_id) length += dir.length();
+			if (bin_id != max_bin_id) continue;
+
+			// 同じビンに入るエッジを使って、高精度のグリッド方向を計算する
+			gridDir += dir.normalized();
+			count++;
+		}
+	}
+	gridDir /= (float)count;
+
+	// 最頻値（モード）のビンに入るエッジを、グループに登録する
+	QVector2D dir1, dir2;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+		
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
+		// エリアの外のエッジは、スキップする
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;
+
+		float length = 0.0f;
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+			float theta = atan2f(dir.y(), dir.x());
+			if (theta < 0) {
+				theta += M_PI;
+				dir = -dir;
+			}
+
+			if (theta > M_PI * 0.5f) {
+				theta -= M_PI * 0.5f;
+				float tmpX = dir.x();
+				float tmpY = dir.y();
+				dir.setX(tmpY);
+				dir.setY(-tmpX);
+			}
+
+			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold) {
+				length += dir.length();
+			}
 		}
 
 		// votingRatioThreshold%以上、グリッドの方向と同じ方向のエッジなら、そのエッジを当該グループに入れる

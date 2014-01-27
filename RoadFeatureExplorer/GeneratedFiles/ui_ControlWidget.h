@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Mon Jan 27 13:42:22 2014
+** Created: Mon Jan 27 14:59:23 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -40,6 +40,8 @@ public:
     QLineEdit *lineEditGridVotingThreshold;
     QLabel *label_18;
     QLineEdit *lineEditGridMaxIteration;
+    QLabel *label_20;
+    QLineEdit *lineEditGridAngleThreshold;
     QGroupBox *groupBox_4;
     QPushButton *pushButtonDetectPlaza;
     QGroupBox *groupBox_6;
@@ -80,10 +82,10 @@ public:
         dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
         groupBox_3 = new QGroupBox(dockWidgetContents);
         groupBox_3->setObjectName(QString::fromUtf8("groupBox_3"));
-        groupBox_3->setGeometry(QRect(10, 10, 201, 171));
+        groupBox_3->setGeometry(QRect(10, 10, 201, 191));
         pushButtonDetectGrid = new QPushButton(groupBox_3);
         pushButtonDetectGrid->setObjectName(QString::fromUtf8("pushButtonDetectGrid"));
-        pushButtonDetectGrid->setGeometry(QRect(40, 130, 121, 31));
+        pushButtonDetectGrid->setGeometry(QRect(40, 150, 121, 31));
         label_4 = new QLabel(groupBox_3);
         label_4->setObjectName(QString::fromUtf8("label_4"));
         label_4->setGeometry(QRect(10, 40, 46, 21));
@@ -107,10 +109,10 @@ public:
         lineEditMinMaxBinRatio->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         label_17 = new QLabel(groupBox_3);
         label_17->setObjectName(QString::fromUtf8("label_17"));
-        label_17->setGeometry(QRect(10, 100, 101, 21));
+        label_17->setGeometry(QRect(10, 120, 101, 21));
         lineEditGridVotingThreshold = new QLineEdit(groupBox_3);
         lineEditGridVotingThreshold->setObjectName(QString::fromUtf8("lineEditGridVotingThreshold"));
-        lineEditGridVotingThreshold->setGeometry(QRect(110, 100, 81, 20));
+        lineEditGridVotingThreshold->setGeometry(QRect(110, 120, 81, 20));
         lineEditGridVotingThreshold->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         label_18 = new QLabel(groupBox_3);
         label_18->setObjectName(QString::fromUtf8("label_18"));
@@ -119,15 +121,22 @@ public:
         lineEditGridMaxIteration->setObjectName(QString::fromUtf8("lineEditGridMaxIteration"));
         lineEditGridMaxIteration->setGeometry(QRect(110, 20, 81, 20));
         lineEditGridMaxIteration->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        label_20 = new QLabel(groupBox_3);
+        label_20->setObjectName(QString::fromUtf8("label_20"));
+        label_20->setGeometry(QRect(10, 100, 101, 21));
+        lineEditGridAngleThreshold = new QLineEdit(groupBox_3);
+        lineEditGridAngleThreshold->setObjectName(QString::fromUtf8("lineEditGridAngleThreshold"));
+        lineEditGridAngleThreshold->setGeometry(QRect(110, 100, 81, 20));
+        lineEditGridAngleThreshold->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         groupBox_4 = new QGroupBox(dockWidgetContents);
         groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
-        groupBox_4->setGeometry(QRect(10, 200, 201, 61));
+        groupBox_4->setGeometry(QRect(10, 220, 201, 61));
         pushButtonDetectPlaza = new QPushButton(groupBox_4);
         pushButtonDetectPlaza->setObjectName(QString::fromUtf8("pushButtonDetectPlaza"));
         pushButtonDetectPlaza->setGeometry(QRect(40, 20, 121, 31));
         groupBox_6 = new QGroupBox(dockWidgetContents);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
-        groupBox_6->setGeometry(QRect(10, 280, 201, 291));
+        groupBox_6->setGeometry(QRect(10, 310, 201, 291));
         pushButtonDetectRadial = new QPushButton(groupBox_6);
         pushButtonDetectRadial->setObjectName(QString::fromUtf8("pushButtonDetectRadial"));
         pushButtonDetectRadial->setGeometry(QRect(40, 250, 121, 31));
@@ -210,7 +219,7 @@ public:
         label_19->setGeometry(QRect(10, 20, 81, 21));
         groupBox_7 = new QGroupBox(dockWidgetContents);
         groupBox_7->setObjectName(QString::fromUtf8("groupBox_7"));
-        groupBox_7->setGeometry(QRect(10, 590, 201, 61));
+        groupBox_7->setGeometry(QRect(10, 620, 201, 61));
         pushButtonDetectGridRadial = new QPushButton(groupBox_7);
         pushButtonDetectGridRadial->setObjectName(QString::fromUtf8("pushButtonDetectGridRadial"));
         pushButtonDetectGridRadial->setGeometry(QRect(40, 20, 121, 31));
@@ -230,6 +239,7 @@ public:
         label_6->setText(QApplication::translate("ControlWidget", "Min Max Bin Ratio", 0, QApplication::UnicodeUTF8));
         label_17->setText(QApplication::translate("ControlWidget", "Vote Ratio Threshold", 0, QApplication::UnicodeUTF8));
         label_18->setText(QApplication::translate("ControlWidget", "Max Iteration", 0, QApplication::UnicodeUTF8));
+        label_20->setText(QApplication::translate("ControlWidget", "Angle Threshold", 0, QApplication::UnicodeUTF8));
         groupBox_4->setTitle(QApplication::translate("ControlWidget", "Plaza Detection", 0, QApplication::UnicodeUTF8));
         pushButtonDetectPlaza->setText(QApplication::translate("ControlWidget", "Detect Plaza", 0, QApplication::UnicodeUTF8));
         groupBox_6->setTitle(QApplication::translate("ControlWidget", "Radial Detection", 0, QApplication::UnicodeUTF8));
