@@ -11,8 +11,8 @@ protected:
 	~RoadSegmentationUtil() {}
 
 public:
-	static void detectGrid(RoadGraph& roads, AbstractArea& area, float numBins, float minTotalLength, float minMaxBinRatio);
-	static bool detectOneGrid(RoadGraph& roads, AbstractArea& area, int numBins, float minTotalLength, float minMaxBinRatio);
+	static void detectGrid(RoadGraph& roads, AbstractArea& area, float numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold);
+	static bool detectOneGrid(RoadGraph& roads, AbstractArea& area, int numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold);
 	static int traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc e, QMap<RoadEdgeDesc, int>& edges, int segment_id);
 	static void reduceGroup(RoadGraph& roads, int group_id);
 

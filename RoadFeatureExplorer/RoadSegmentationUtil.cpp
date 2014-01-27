@@ -49,18 +49,21 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
 /**
  * グリッドを検知する
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, float numBins, float minTotalLength, float minMaxBinRatio) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, float numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold) {
 	// 全てのエッジのグループIDを-1に初期化する
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
 
 		roads.graph[*ei]->group = -1;
 		roads.graph[*ei]->gridness = 0.0f;
 	}
 
 	for (int i = 0; i < 6; i++) {
-		if (!detectOneGrid(roads, area, 9, 1000, 0.5f)) break;
+		if (!detectOneGrid(roads, area, numBins, minTotalLength, minMaxBinRatio, votingRatioThreshold)) break;
 	}
 }
 
@@ -72,7 +75,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, floa
  * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  */
-bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int numBins, float minTotalLength, float minMaxBinRatio) {
+bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int numBins, float minTotalLength, float minMaxBinRatio, float votingRatioThreshold) {
 	// ヒストグラムの初期化
 	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
@@ -154,8 +157,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 			if (bin_id == max_bin_id) length += dir.length();
 		}
 
-		// 80%以上、グリッドの方向と同じ方向のエッジなら、そのエッジを当該グループに入れる
-		if (length >= roads.graph[*ei]->getLength() * 0.8f) {
+		// votingRatioThreshold%以上、グリッドの方向と同じ方向のエッジなら、そのエッジを当該グループに入れる
+		if (length >= roads.graph[*ei]->getLength() * votingRatioThreshold) {
 			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_GRID;
 			roads.graph[*ei]->group = max_bin_id;
 			roads.graph[*ei]->gridness = length / roads.graph[*ei]->getLength();
