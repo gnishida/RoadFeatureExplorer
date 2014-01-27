@@ -44,36 +44,18 @@ void RoadGraph::generateMesh() {
 		color = graph[*ei]->color;
 
 		// グループに基づいて色を決定
-		switch (graph[*ei]->group) {
+		switch (graph[*ei]->shapeType) {
 		case 0:
+			color = QColor(255, 255, 255);
+			break;
+		case 1:	// grid
+			color = QColor(0, 0, 255 * graph[*ei]->gridness);
+			break;
+		case 2:	// radial
 			color = QColor(0, 255, 0);
 			break;
-		case 1:
-			color = QColor(0, 128, 0);
-			break;
-		case 2:
+		case 3: // plaza
 			color = QColor(255, 0, 0);
-			break;
-		case 3:
-			color = QColor(128, 0, 0);
-			break;
-		case 4:
-			color = QColor(128, 128, 0);
-			break;
-		case 5:
-			color = QColor(0, 0, 255);
-			break;
-		case 6:
-			color = QColor(0, 0, 128);
-			break;
-		case 7:
-			color = QColor(0, 128, 128);
-			break;
-		case 8:
-			color = QColor(128, 0, 128);
-			break;
-		case 9:
-			color = QColor(0, 0, 64);
 			break;
 		default:
 			color = QColor(255, 255, 255);

@@ -7,6 +7,9 @@
 
 class RoadEdge {
 public:
+	static enum { SHAPE_DEFAULT = 0, SHAPE_GRID, SHAPE_RADIAL, SHAPE_PLAZA };
+
+public:
 	int type;
 	int lanes;
 	bool oneWay;
@@ -15,7 +18,10 @@ public:
 
 	bool valid;			// if this edge is valid
 	bool seed;			// if this edge is used as a seed of a forest
+
+	int shapeType;		// 0 - default / 1 - grid / 2 - radial / 3 - plaza
 	int group;			// to which tree in the forest this edge belongs to
+	float gridness;		// how much it looks like grid
 	bool fullyPaired;	// if this edge has a corresponding edge
 
 public:

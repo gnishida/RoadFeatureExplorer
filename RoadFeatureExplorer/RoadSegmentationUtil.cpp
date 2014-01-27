@@ -67,6 +67,9 @@ int RoadSegmentationUtil::traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc 
 		for (boost::tie(ei, eend) = boost::out_edges(v, roads.graph); ei != eend; ++ei) {
 			if (!roads.graph[*ei]->valid) continue;
 
+			// グリッド以外のタイプのエッジは、辿らない
+			if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
+
 			// 異なるグループに属するエッジは、辿らない
 			if (roads.graph[*ei]->group != roads.graph[e]->group) continue;
 
@@ -90,6 +93,7 @@ int RoadSegmentationUtil::traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc 
  * 最大連結成分に属さないエッジは、group_idを-1に戻す
  */
 void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
+	// 各エッジが、どのグループに属するか
 	QMap<RoadEdgeDesc, int> edges;
 
 	// 指定されたグループに属するエッジのセットを生成する
@@ -113,7 +117,7 @@ void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
 		numSegments++;
 	}
 
-	// 最大セグメントを取得
+	// 最大グループを取得
 	int max_num = 0;
 	int max_segment;
 	for (int i = 0; i < hist.size(); i++) {
@@ -123,13 +127,21 @@ void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
 		}
 	}
 
-	// 最大セグメント以外は、グループIDを-1に戻す
+	// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 他のshapeTypeのエッジは、スキップする
+		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
+
+		// 他のグループのエッジは、スキップする
 		if (roads.graph[*ei]->group != group_id) continue;
 
+		// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
 		if (edges[*ei] != max_segment) {
+			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_DEFAULT;
 			roads.graph[*ei]->group = -1;
+			roads.graph[*ei]->gridness = 0.0f;
 		}
 	}
 }
@@ -138,12 +150,13 @@ void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
  * グリッドを検知する
  */
 void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area) {
-	// 全てのエッジのグループIDを0に初期化する
+	// 全てのエッジのグループIDを-1に初期化する
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
 		roads.graph[*ei]->group = -1;
+		roads.graph[*ei]->gridness = 0.0f;
 	}
 
 	for (int i = 0; i < 6; i++) {
@@ -154,6 +167,10 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area) {
 /**
  * １つのグリッドを検知する。
  * 既にグループに属しているエッジはスキップする。
+ *
+ * @param numBins				ヒストグラムのビンの数
+ * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
+ * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  */
 bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int numBins, float minTotalLength, float minMaxBinRatio) {
 	// ヒストグラムの初期化
@@ -163,8 +180,14 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
-		if (roads.graph[*ei]->group >= 0) continue;
 
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
+		// 既にどこかのグループに属しているエッジは、スキップする
+		//if (roads.graph[*ei]->group >= 0) continue;
+
+		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
@@ -186,7 +209,7 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 		}
 	}
 
-	// ビンの中で、最大値を探す
+	// ヒストグラムの中で、最大頻度となるビンを探す
 	float max_hist_value = 0.0f;
 	int max_bin_id;
 	for (int i = 0; i < dirMat.rows; i++) {
@@ -196,15 +219,21 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 		}
 	}
 
-	// 最大頻度のビンの割合が50%未満なら、グリッドとは見なさない
+	// 最大頻度のビンの割合がminMaxBinRatio%未満なら、グリッドとは見なさない
 	if (max_hist_value < minTotalLength || max_hist_value < (float)count * minMaxBinRatio) return false;
 
-	// 最大値となるビンと同じビンに入るエッジについて、青色にする
+	// 最大頻度となるビンと同じビンに入るエッジについて、青色にする
 	QVector2D dir1, dir2;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+		
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
+		// すでにどこかのグループに属しているエッジは、スキップする
 		if (roads.graph[*ei]->group >= 0) continue;
 
+		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
@@ -225,13 +254,15 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 			if (bin_id == max_bin_id) length += dir.length();
 		}
 
-		// 80%以上、グリッドの方向と同じエッジなら、そのエッジを当該グループに入れる
+		// 80%以上、グリッドの方向と同じ方向のエッジなら、そのエッジを当該グループに入れる
 		if (length >= roads.graph[*ei]->getLength() * 0.8f) {
+			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_GRID;
 			roads.graph[*ei]->group = max_bin_id;
+			roads.graph[*ei]->gridness = length / roads.graph[*ei]->getLength();
 		}
 	}
 
-	// 
+	// 最大連結成分に属さないエッジは、group_idを-1に戻す
 	reduceGroup(roads, max_bin_id);
 
 	roads.setModified();
@@ -278,7 +309,7 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
 			RoadVertexDesc tgt = boost::target(e, roads.graph);
 			if (!area.contains(roads.graph[tgt]->pt)) continue;
 
-			//roads.graph[e]->color = QColor(0, 255, 0);
+			roads.graph[e]->shapeType = RoadEdge::SHAPE_PLAZA;
 			roads.graph[e]->group = 8;
 		}
 	}
@@ -292,6 +323,7 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
  */
 void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area) {
 	float angleTheshold = 0.2f;
+	float votingRatioThreshold = 0.7f;
 
 	// 0.01スケールで、円の中心を求める
 	QVector2D center = detectOneRadial(roads, area, 0.01f);
@@ -326,9 +358,11 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area) {
 			}
 		}
 
-		// 70%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
-		if (length >= roads.graph[*ei]->getLength() * 0.7f) {
+		// votingRatioThreshold%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
+		if (length >= roads.graph[*ei]->getLength() * votingRatioThreshold) {
+			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_RADIAL;
 			roads.graph[*ei]->group = 1;
+			roads.graph[*ei]->gridness = 0.0f;
 		}
 	}
 
@@ -503,14 +537,6 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& 
 		}
 	}
 
-	/*
-	cv::flip(houghTransform, houghTransform, 0);
-	cv::namedWindow("drawing", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-	cv::imshow("drawing", houghTransform);
-
-	cv::imwrite("result.jpg", houghTransform);
-	*/
-
 	// 最大値を取得する
 	QVector2D center;
 	float max_value = 0.0f;
@@ -532,75 +558,31 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& 
 }
 
 /**
- * 円の中心からdistanceThreshold以内のRadialグループをシードとし、
- * シードと同じ方向に伸びているエッジ以外は、グループIDを-1に戻す。
+ * 円の中心からdistanceThreshold以内のRadialグループのエッジのみを残し、それ以外はグループから外す。
+ *
+ * @param	distanceThreshold		円の中心から、この距離よりも遠いエッジは、グループから外す
  */
 void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float distanceThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
 
-	QList<RoadVertexDesc> queue;
-	//RoadVertexDesc src = boost::source(e, roads.graph);
-	//queue.push_back(src);
-
-	QList<RoadVertexDesc> visited;
-	//visited.push_back(src);
-
-	QMap<RoadEdgeDesc, bool> edges;
-
-	// シードの構築
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 異なるshapeTypeのエッジは、スキップする
+		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_RADIAL) continue;
+
+		// 異なるグループのエッジは、スキップする
 		if (roads.graph[*ei]->group != group_id) continue;
 
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 
-		// 円の中心から離れているエッジは、シードにしない
-		if ((roads.graph[src]->pt - center).lengthSquared() > distanceThreshold2 && (roads.graph[tgt]->pt - center).lengthSquared() > distanceThreshold2) continue;
-
-		queue.push_back(src);
-		queue.push_back(tgt);
-		visited.push_back(src);
-		visited.push_back(tgt);
-
-		edges.insert(*ei, true);
-	}
-
-	/*
-	while (!queue.empty()) {
-		RoadVertexDesc v = queue.front();
-		queue.pop_front();
-
-		RoadOutEdgeIter ei, eend;
-		for (boost::tie(ei, eend) = boost::out_edges(v, roads.graph); ei != eend; ++ei) {
-			if (!roads.graph[*ei]->valid) continue;
-
-			// 異なるグループに属するエッジは、辿らない
-			if (roads.graph[*ei]->group != group_id) continue;
-
-			// 当該エッジを登録する
-			edges.insert(*ei, true);
-
-			RoadVertexDesc u = boost::target(*ei, roads.graph);
-			if (!roads.graph[u]->valid) continue;
-			if (visited.contains(u)) continue;
-
-			visited.push_back(u);
-			queue.push_back(u);
+		// 円の中心から離れているエッジは、グループから外す
+		if ((roads.graph[src]->pt - center).lengthSquared() > distanceThreshold2 && (roads.graph[tgt]->pt - center).lengthSquared() > distanceThreshold2) {
+			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_DEFAULT;
+			roads.graph[*ei]->group = -1;
 		}
-	}
-	*/
-
-	// 登録されたエッジ以外は、group_idを-1に戻す
-	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-		if (roads.graph[*ei]->group != group_id) continue;
-
-		roads.graph[*ei]->group = -1;
-	}
-	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		roads.graph[it.key()]->group = group_id;
 	}
 }
 
@@ -618,6 +600,11 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// radialタイプではないエッジは、スキップする
+		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_RADIAL) continue;
+
+		// 異なるグループのエッジは、スキップする
 		if (roads.graph[*ei]->group != group_id) continue;
 
 		// 範囲の外のエッジは除外する
@@ -658,15 +645,18 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 			// 方向がずれてたら、そのエッジは当該グループに入れない
 			if (length < roads.graph[*ei]->getLength() * dirCheckRatio) continue;
 
+			// グループに追加する
+			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_RADIAL;
 			roads.graph[*ei]->group = group_id;
+			roads.graph[*ei]->gridness = 0.0f;
 
 			RoadVertexDesc u = boost::target(*ei, roads.graph);
 			if (!roads.graph[u]->valid) continue;
 			if (visited.contains(u)) continue;
 
+			// シードとして、追加する
 			visited.push_back(u);
 			queue.push_back(u);
 		}
 	}
-
 }
