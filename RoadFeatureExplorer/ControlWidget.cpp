@@ -85,7 +85,8 @@ void ControlWidget::setRoadEdge(RoadEdgePtr selectedEdge) {
  * Event handler for button [Detect Grid]
  */
 void ControlWidget::detectGrid() {
-	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads);
+	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
+	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea);
 
 	mainWin->glWidget->updateGL();
 }
@@ -94,7 +95,8 @@ void ControlWidget::detectGrid() {
  * Event handler for button [Detect Plaza]
  */
 void ControlWidget::detectPlaza() {
-	RoadSegmentationUtil::detectPlaza(mainWin->glWidget->roads);
+	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
+	RoadSegmentationUtil::detectPlaza(mainWin->glWidget->roads, mainWin->glWidget->selectedArea);
 
 	mainWin->glWidget->updateGL();
 }
@@ -103,7 +105,8 @@ void ControlWidget::detectPlaza() {
  * Event handler for button [Detect Radial]
  */
 void ControlWidget::detectRadial() {
-	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads);
+	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
+	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea);
 
 	mainWin->glWidget->updateGL();
 }

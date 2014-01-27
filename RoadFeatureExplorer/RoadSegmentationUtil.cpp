@@ -101,7 +101,7 @@ void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
 		}
 	}
 
-	// エッジと接続されているエッジ群
+	// 各エッジと接続されているエッジの数をカウントする
 	int numSegments = 0;
 	std::vector<int> hist;
 	for (QMap<RoadEdgeDesc, int>::iterator it = edges.begin(); it != edges.end(); ++it) {
@@ -137,7 +137,7 @@ void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
 /**
  * グリッドを検知する
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area) {
 	// 全てのエッジのグループIDを0に初期化する
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -147,7 +147,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads) {
 	}
 
 	for (int i = 0; i < 6; i++) {
-		if (!detectOneGrid(roads, 9, 1000, 0.5f)) break;
+		if (!detectOneGrid(roads, area, 9, 1000, 0.5f)) break;
 	}
 }
 
@@ -155,7 +155,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads) {
  * １つのグリッドを検知する。
  * 既にグループに属しているエッジはスキップする。
  */
-bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, int numBins, float minTotalLength, float minMaxBinRatio) {
+bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int numBins, float minTotalLength, float minMaxBinRatio) {
 	// ヒストグラムの初期化
 	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
@@ -164,6 +164,11 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, int numBins, float mi
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 		if (roads.graph[*ei]->group >= 0) continue;
+
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;		
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
@@ -200,6 +205,11 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, int numBins, float mi
 		if (!roads.graph[*ei]->valid) continue;
 		if (roads.graph[*ei]->group >= 0) continue;
 
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;	
+
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
@@ -234,7 +244,7 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, int numBins, float mi
  * グラフのfaceについて、そのサイズ、faceから出るスポークの数などから、プラザかどうか判断する。
  * ぜんぜん検知精度が良くない。
  */
-void RoadSegmentationUtil::detectPlaza(RoadGraph& roads) {
+void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
 	plaza_list.clear();
 	roadGraphPtr = &roads;
 
@@ -263,6 +273,11 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads) {
 		for (int j = 0; j < plaza_list[i].size(); j++) {
 			RoadEdgeDesc e = plaza_list[i][j];
 
+			RoadVertexDesc src = boost::source(e, roads.graph);
+			if (!area.contains(roads.graph[src]->pt)) continue;
+			RoadVertexDesc tgt = boost::target(e, roads.graph);
+			if (!area.contains(roads.graph[tgt]->pt)) continue;
+
 			//roads.graph[e]->color = QColor(0, 255, 0);
 			roads.graph[e]->group = 8;
 		}
@@ -275,17 +290,17 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads) {
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::detectRadial(RoadGraph& roads) {
+void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area) {
 	float angleTheshold = 0.2f;
 
 	// 0.01スケールで、円の中心を求める
-	QVector2D center = detectOneRadial(roads, 0.01f);
+	QVector2D center = detectOneRadial(roads, area, 0.01f);
 
 	// 0.1スケールで、より正確な円の中心を求める
-	center = detectOneRadial(roads, 0.1f, center, 200.0f, angleTheshold * 2.0f);
+	center = detectOneRadial(roads, area, 0.1f, center, 200.0f, angleTheshold * 2.0f);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	center = detectOneRadial(roads, 0.2f, center, 100.0f, angleTheshold);
+	center = detectOneRadial(roads, area, 0.2f, center, 100.0f, angleTheshold);
 
 	// 0.5スケールで、より正確な円の中心を求める
 	//center = detectOneRadial(roads, 0.5f, center, 50.0f, 0.1f);
@@ -294,6 +309,12 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads) {
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 範囲外のエッジはスキップ
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
@@ -315,8 +336,7 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads) {
 	reduceRadialGroup(roads, center, 1, 200.0f);
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、グループに再度登録していく
-	extendRadialGroup(roads, center, 1, angleTheshold, 0.7f);
-
+	extendRadialGroup(roads, area, center, 1, angleTheshold, 0.7f);
 
 	roads.setModified();
 }
@@ -325,7 +345,7 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads) {
  * Plazaを１つ検知し、円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale) {
+QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area, float scale) {
 	BBox bbox = GraphUtil::getAABoundingBox(roads);
 	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
 
@@ -334,6 +354,12 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale) {
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 範囲の外のエッジはスキップする
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
@@ -406,7 +432,7 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale) {
  * 円のだいたいの中心点を使って、より正確な円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold) {
+QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold) {
 	BBox bbox = GraphUtil::getAABoundingBox(roads);
 	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
 
@@ -418,8 +444,11 @@ QVector2D RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, float scale, Q
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
+		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
@@ -578,7 +607,7 @@ void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 /**
  * 指定したグループに属するエッジについて、円の中心から離れる方向に周辺のエッジを辿り、グループに登録していく。
  */
-void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio) {
+void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& area, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio) {
 	QList<RoadVertexDesc> queue;
 
 	QList<RoadVertexDesc> visited;
@@ -591,8 +620,11 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, QVector2D& center
 		if (!roads.graph[*ei]->valid) continue;
 		if (roads.graph[*ei]->group != group_id) continue;
 
+		// 範囲の外のエッジは除外する
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[tgt]->pt)) continue;
 
 		queue.push_back(src);
 		queue.push_back(tgt);
@@ -605,6 +637,9 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, QVector2D& center
 	while (!queue.empty()) {
 		RoadVertexDesc v = queue.front();
 		queue.pop_front();
+
+		// 範囲の外の頂点は除外する
+		if (!area.contains(roads.graph[v]->pt)) continue;
 
 		RoadOutEdgeIter ei, eend;
 		for (boost::tie(ei, eend) = boost::out_edges(v, roads.graph); ei != eend; ++ei) {

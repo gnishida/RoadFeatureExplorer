@@ -50,6 +50,7 @@ void MainWindow::onOpen() {
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 	GraphUtil::loadRoads(glWidget->roads, filename);
+	GraphUtil::copyRoads(glWidget->roads, glWidget->origRoads);
 	glWidget->updateGL();
 	QApplication::restoreOverrideCursor();
 }

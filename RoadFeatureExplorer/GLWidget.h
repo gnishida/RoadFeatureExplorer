@@ -18,6 +18,7 @@ public:
 	MainWindow* mainWin;
 	Camera* camera;
 	RoadGraph roads;
+	RoadGraph origRoads;
 	RoadGraphRenderer* renderer;
 	QPoint lastPos;
 	QVector2D last2DPos;

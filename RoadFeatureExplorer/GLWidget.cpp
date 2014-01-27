@@ -37,9 +37,9 @@ void GLWidget::drawScene() {
 	// draw the road graph
 	roads.generateMesh();
 	renderer->render(roads.renderables);
-
+	
 	// define the height for other items
-	float height = (float)((int)(camera->dz * 0.012f)) * 0.1f * 1.5f;
+	float height = (float)((int)(camera->dz * 0.012f)) * 0.15f;
 
 	// draw the selected area
 	if (selected) {
@@ -114,7 +114,9 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e) {
 	lastPos = e->pos();
 
 	//stopDefiningArea();
-	if (selectedArea.dx() < 0.1f && selectedArea.dy() < 0.1f) selected = false;
+	if (selectedArea.dx() < 0.1f && selectedArea.dy() < 0.1f) {
+		selected = false;
+	}
 
 	e->ignore();
 
