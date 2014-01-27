@@ -392,6 +392,9 @@ QVector2D RoadSegmentationUtil::detectOneRadialInScaled(RoadGraph& roads, Abstra
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt)) continue;
@@ -480,6 +483,9 @@ QVector2D RoadSegmentationUtil::detectOneRadialInScaled(RoadGraph& roads, Abstra
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
+
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
 
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
