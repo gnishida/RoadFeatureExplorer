@@ -25,5 +25,6 @@ public slots:
 	void detectGrid();
 	void detectPlaza();
 	void detectRadial();
+	void detectGridRadial();
 };
 

@@ -47,109 +47,9 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
 };
 
 /**
- * 指定されたエッジから、同じグループに属するエッジを辿っていく。
- */
-int RoadSegmentationUtil::traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc e, QMap<RoadEdgeDesc, int>& edges, int segment_id) {
-	int count = 0;
-
-	QList<RoadVertexDesc> queue;
-	RoadVertexDesc src = boost::source(e, roads.graph);
-	queue.push_back(src);
-
-	QList<RoadVertexDesc> visited;
-	visited.push_back(src);
-
-	while (!queue.empty()) {
-		RoadVertexDesc v = queue.front();
-		queue.pop_front();
-
-		RoadOutEdgeIter ei, eend;
-		for (boost::tie(ei, eend) = boost::out_edges(v, roads.graph); ei != eend; ++ei) {
-			if (!roads.graph[*ei]->valid) continue;
-
-			// グリッド以外のタイプのエッジは、辿らない
-			if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
-
-			// 異なるグループに属するエッジは、辿らない
-			if (roads.graph[*ei]->group != roads.graph[e]->group) continue;
-
-			// 当該エッジのセグメントIDを登録する
-			edges.insert(*ei, segment_id);
-
-			RoadVertexDesc u = boost::target(*ei, roads.graph);
-			if (!roads.graph[u]->valid) continue;
-			if (visited.contains(u)) continue;
-
-			visited.push_back(u);
-			queue.push_back(u);
-			count++;
-		}
-	}
-
-	return count;
-}
-
-/**
- * 最大連結成分に属さないエッジは、group_idを-1に戻す
- */
-void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
-	// 各エッジが、どのグループに属するか
-	QMap<RoadEdgeDesc, int> edges;
-
-	// 指定されたグループに属するエッジのセットを生成する
-	RoadEdgeIter ei, eend;
-	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-		if (roads.graph[*ei]->group == group_id) {
-			edges.insert(*ei, -1);
-		}
-	}
-
-	// 各エッジと接続されているエッジの数をカウントする
-	int numSegments = 0;
-	std::vector<int> hist;
-	for (QMap<RoadEdgeDesc, int>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		if (edges[it.key()] >= 0) continue;
-
-		int num = traverseConnectedEdges(roads, it.key(), edges, numSegments);
-		hist.push_back(num);
-
-		numSegments++;
-	}
-
-	// 最大グループを取得
-	int max_num = 0;
-	int max_segment;
-	for (int i = 0; i < hist.size(); i++) {
-		if (hist[i] > max_num) {
-			max_num = hist[i];
-			max_segment = i;
-		}
-	}
-
-	// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
-	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-
-		// 他のshapeTypeのエッジは、スキップする
-		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
-
-		// 他のグループのエッジは、スキップする
-		if (roads.graph[*ei]->group != group_id) continue;
-
-		// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
-		if (edges[*ei] != max_segment) {
-			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_DEFAULT;
-			roads.graph[*ei]->group = -1;
-			roads.graph[*ei]->gridness = 0.0f;
-		}
-	}
-}
-
-/**
  * グリッドを検知する
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, float numBins, float minTotalLength, float minMaxBinRatio) {
 	// 全てのエッジのグループIDを-1に初期化する
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -271,6 +171,106 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 }
 
 /**
+ * 指定されたエッジから、同じグループに属するエッジを辿っていく。
+ */
+int RoadSegmentationUtil::traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc e, QMap<RoadEdgeDesc, int>& edges, int segment_id) {
+	int count = 0;
+
+	QList<RoadVertexDesc> queue;
+	RoadVertexDesc src = boost::source(e, roads.graph);
+	queue.push_back(src);
+
+	QList<RoadVertexDesc> visited;
+	visited.push_back(src);
+
+	while (!queue.empty()) {
+		RoadVertexDesc v = queue.front();
+		queue.pop_front();
+
+		RoadOutEdgeIter ei, eend;
+		for (boost::tie(ei, eend) = boost::out_edges(v, roads.graph); ei != eend; ++ei) {
+			if (!roads.graph[*ei]->valid) continue;
+
+			// グリッド以外のタイプのエッジは、辿らない
+			if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
+
+			// 異なるグループに属するエッジは、辿らない
+			if (roads.graph[*ei]->group != roads.graph[e]->group) continue;
+
+			// 当該エッジのセグメントIDを登録する
+			edges.insert(*ei, segment_id);
+
+			RoadVertexDesc u = boost::target(*ei, roads.graph);
+			if (!roads.graph[u]->valid) continue;
+			if (visited.contains(u)) continue;
+
+			visited.push_back(u);
+			queue.push_back(u);
+			count++;
+		}
+	}
+
+	return count;
+}
+
+/**
+ * 最大連結成分に属さないエッジは、group_idを-1に戻す
+ */
+void RoadSegmentationUtil::reduceGroup(RoadGraph& roads, int group_id) {
+	// 各エッジが、どのグループに属するか
+	QMap<RoadEdgeDesc, int> edges;
+
+	// 指定されたグループに属するエッジのセットを生成する
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+		if (roads.graph[*ei]->group == group_id) {
+			edges.insert(*ei, -1);
+		}
+	}
+
+	// 各エッジと接続されているエッジの数をカウントする
+	int numSegments = 0;
+	std::vector<int> hist;
+	for (QMap<RoadEdgeDesc, int>::iterator it = edges.begin(); it != edges.end(); ++it) {
+		if (edges[it.key()] >= 0) continue;
+
+		int num = traverseConnectedEdges(roads, it.key(), edges, numSegments);
+		hist.push_back(num);
+
+		numSegments++;
+	}
+
+	// 最大グループを取得
+	int max_num = 0;
+	int max_segment;
+	for (int i = 0; i < hist.size(); i++) {
+		if (hist[i] > max_num) {
+			max_num = hist[i];
+			max_segment = i;
+		}
+	}
+
+	// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		// 他のshapeTypeのエッジは、スキップする
+		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
+
+		// 他のグループのエッジは、スキップする
+		if (roads.graph[*ei]->group != group_id) continue;
+
+		// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
+		if (edges[*ei] != max_segment) {
+			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_DEFAULT;
+			roads.graph[*ei]->group = -1;
+			roads.graph[*ei]->gridness = 0.0f;
+		}
+	}
+}
+
+/**
  * Plazaを検知する
  * グラフのfaceについて、そのサイズ、faceから出るスポークの数などから、プラザかどうか判断する。
  * ぜんぜん検知精度が良くない。
@@ -321,21 +321,15 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area) {
-	float angleTheshold = 0.2f;
-	float votingRatioThreshold = 0.7f;
-
+void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
 	// 0.01スケールで、円の中心を求める
-	QVector2D center = detectOneRadial(roads, area, 0.01f);
+	QVector2D center = detectOneRadial(roads, area, scale1);
 
 	// 0.1スケールで、より正確な円の中心を求める
-	center = detectOneRadial(roads, area, 0.1f, center, 200.0f, angleTheshold * 2.0f);
+	center = detectOneRadial(roads, area, scale2, center, centerErrorTol2, angleThreshold2);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	center = detectOneRadial(roads, area, 0.2f, center, 100.0f, angleTheshold);
-
-	// 0.5スケールで、より正確な円の中心を求める
-	//center = detectOneRadial(roads, 0.5f, center, 50.0f, 0.1f);
+	center = detectOneRadial(roads, area, scale3, center, centerErrorTol3, angleThreshold3);
 
 	// 各エッジについて、radialの中心点に合うもののグループIDを1にする
 	RoadEdgeIter ei, eend;
@@ -353,7 +347,7 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area) {
 			QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
 			QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
 
-			if (GraphUtil::diffAngle(dir1, dir2) < angleTheshold || GraphUtil::diffAngle(dir1, -dir2) < angleTheshold) {
+			if (GraphUtil::diffAngle(dir1, dir2) < angleThreshold3 || GraphUtil::diffAngle(dir1, -dir2) < angleThreshold3) {
 				length += dir1.length();
 			}
 		}
@@ -367,10 +361,10 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area) {
 	}
 
 	// 円の中心から一定距離以内のエッジのみを残し、それ以外はグループIDを一旦-1に戻す
-	reduceRadialGroup(roads, center, 1, 200.0f);
+	reduceRadialGroup(roads, center, 1, seedDistance);
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、グループに再度登録していく
-	extendRadialGroup(roads, area, center, 1, angleTheshold, 0.7f);
+	extendRadialGroup(roads, area, center, 1, extendingAngleThreshold, votingRatioThreshold);
 
 	roads.setModified();
 }
