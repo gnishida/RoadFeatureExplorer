@@ -57,7 +57,8 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
  */
 void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
 	for (int i = 0; i < maxIteration; i++) {
-		if (!detectOneGrid(roads, area, roadType, i, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold)) break;
+		GridFeature gf(i);
+		if (!detectOneGrid(roads, area, roadType, gf, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold)) break;
 	}
 }
 
@@ -69,7 +70,7 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int 
  * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  */
-bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
+bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, GridFeature& gf, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
 	// ヒストグラムの初期化
 	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
@@ -119,9 +120,10 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 	// 最頻値（モード）のビンの割合がminMaxBinRatio%未満なら、グリッドとは見なさない
 	if (max_hist_value < minTotalLength || max_hist_value < (float)count * minMaxBinRatio) return false;
 
+	// グリッド方向の近似値をセットする
+	gf.setAngle(((float)max_bin_id + 0.5f) / (float)numBins * M_PI * 0.5f);
+
 	// 最頻値（モード）のビンに入るエッジを使って、高精度のグリッド方向を計算する
-	QVector2D gridDir;
-	count = 0;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
@@ -139,33 +141,10 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
-			float theta = atan2f(dir.y(), dir.x());
-			if (theta < 0) {
-				theta += M_PI;
-				dir = -dir;
-			}
-
-			if (theta > M_PI * 0.5f) {
-				theta -= M_PI * 0.5f;
-				float tmpX = dir.x();
-				float tmpY = dir.y();
-				dir.setX(tmpY);
-				dir.setY(-tmpX);
-			}
-
-			// どのビンか決定
-			int bin_id = theta * (float)numBins / M_PI * 2.0f;
-			if (bin_id >= numBins) continue;
-
-			if (bin_id != max_bin_id) continue;
-
-			// 同じビンに入るエッジを使って、高精度のグリッド方向を計算する
-			gridDir += dir.normalized();
-			count++;
+			gf.addDirection(roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i], M_PI * 0.5f / (float)numBins);
 		}
 	}
-	gridDir /= (float)count;
+	gf.computeDirection();
 
 	// 最頻値（モード）のビンに入るエッジを、グループに登録する
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -186,22 +165,9 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
-			float theta = atan2f(dir.y(), dir.x());
-			if (theta < 0) {
-				theta += M_PI;
-				dir = -dir;
-			}
-
-			if (theta > M_PI * 0.5f) {
-				theta -= M_PI * 0.5f;
-				float tmpX = dir.x();
-				float tmpY = dir.y();
-				dir.setX(tmpY);
-				dir.setY(-tmpX);
-			}
 
 			// エッジの方向が、グリッド方向に近い場合、投票する
-			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold || GraphUtil::diffAngle(dir, gridDir) > M_PI * 0.5f - angleThreshold) {
+			if (gf.isClose(dir, angleThreshold)) {
 				length += dir.length();
 			}
 		}
@@ -209,16 +175,16 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 		// votingRatioThreshold%以上、グリッドの方向と同じ方向のエッジなら、そのエッジを当該グループに入れる
 		if (length >= roads.graph[*ei]->getLength() * votingRatioThreshold) {
 			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_GRID;
-			roads.graph[*ei]->group = group_id;
+			roads.graph[*ei]->group = gf.group_id;
 			roads.graph[*ei]->gridness = length / roads.graph[*ei]->getLength();
 		}
 	}
 
 	// 最大連結成分に属さないエッジは、グループから外す
-	reduceGridGroup(roads, group_id);
+	reduceGridGroup(roads, gf);
 
 	//
-	extendGridGroup(roads, area, roadType, group_id, gridDir, angleThreshold, votingRatioThreshold, extendingDistanceThreshold);
+	extendGridGroup(roads, area, roadType, gf, angleThreshold, votingRatioThreshold, extendingDistanceThreshold);
 
 	roads.setModified();
 
@@ -271,7 +237,7 @@ int RoadSegmentationUtil::traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc 
 /**
  * 最大連結成分に属さないエッジは、group_idを-1に戻す
  */
-void RoadSegmentationUtil::reduceGridGroup(RoadGraph& roads, int group_id) {
+void RoadSegmentationUtil::reduceGridGroup(RoadGraph& roads, GridFeature& gf) {
 	// 各エッジが、どのグループに属するか
 	QMap<RoadEdgeDesc, int> edges;
 
@@ -279,7 +245,7 @@ void RoadSegmentationUtil::reduceGridGroup(RoadGraph& roads, int group_id) {
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
-		if (roads.graph[*ei]->group == group_id) {
+		if (roads.graph[*ei]->group == gf.group_id) {
 			edges.insert(*ei, -1);
 		}
 	}
@@ -314,7 +280,7 @@ void RoadSegmentationUtil::reduceGridGroup(RoadGraph& roads, int group_id) {
 		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_GRID) continue;
 
 		// 他のグループのエッジは、スキップする
-		if (roads.graph[*ei]->group != group_id) continue;
+		if (roads.graph[*ei]->group != gf.group_id) continue;
 
 		// 当該グループに属するエッジについて、最大グループ以外は、グループから外す
 		if (edges[*ei] != max_segment) {
@@ -329,7 +295,7 @@ void RoadSegmentationUtil::reduceGridGroup(RoadGraph& roads, int group_id) {
  * グリッドのグループの属さないエッジについて、近くに属するエッジがあれば、そのグループの仲間に入れちゃう。
  * これをしてあげないと、例えばラウンドアバウトに挟まれたエッジなどが、グリッドの仲間に入れない。
  */
-void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, const QVector2D& gridDir, float angleThreshold, float votingRatioThreshold, float distanceThreshold) {
+void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area, int roadType, GridFeature& gf, float angleThreshold, float votingRatioThreshold, float distanceThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
 
 	RoadEdgeIter ei, eend;
@@ -351,22 +317,9 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area,
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
-			float theta = atan2f(dir.y(), dir.x());
-			if (theta < 0) {
-				theta += M_PI;
-				dir = -dir;
-			}
-
-			if (theta > M_PI * 0.5f) {
-				theta -= M_PI * 0.5f;
-				float tmpX = dir.x();
-				float tmpY = dir.y();
-				dir.setX(tmpY);
-				dir.setY(-tmpX);
-			}
 
 			// エッジの方向が、グリッド方向に近い場合、投票する
-			if (GraphUtil::diffAngle(dir, gridDir) < angleThreshold || GraphUtil::diffAngle(dir, gridDir) > M_PI * 0.5f - angleThreshold) {
+			if (gf.isClose(dir, angleThreshold)) {
 				length += dir.length();
 			}
 		}
@@ -385,7 +338,7 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area,
 			if (roads.graph[*ei2]->shapeType != RoadEdge::SHAPE_GRID) continue;
 
 			// 異なるグループのエッジは、スキップ
-			if (roads.graph[*ei2]->group != group_id) continue;
+			if (roads.graph[*ei2]->group != gf.group_id) continue;
 
 			RoadVertexDesc src2 = boost::source(*ei2, roads.graph);
 			RoadVertexDesc tgt2 = boost::target(*ei2, roads.graph);
@@ -396,7 +349,7 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area,
 				(roads.graph[tgt]->pt - roads.graph[src2]->pt).lengthSquared() < distanceThreshold2 || 
 				(roads.graph[tgt]->pt - roads.graph[tgt2]->pt).lengthSquared() < distanceThreshold2) {
 				roads.graph[*ei]->shapeType = RoadEdge::SHAPE_GRID;
-				roads.graph[*ei]->group = group_id;
+				roads.graph[*ei]->group = gf.group_id;
 				roads.graph[*ei]->gridness = length / roads.graph[*ei]->getLength();
 				break;
 			}

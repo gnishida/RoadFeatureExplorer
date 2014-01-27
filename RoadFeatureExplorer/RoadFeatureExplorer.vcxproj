@@ -163,6 +163,7 @@
     </ClCompile>
     <ClCompile Include="GLWidget.cpp" />
     <ClCompile Include="GraphUtil.cpp" />
+    <ClCompile Include="GridFeature.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Renderable.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="GeneratedFiles\ui_ControlWidget.h" />
     <ClInclude Include="GLWidget.h" />
     <ClInclude Include="GraphUtil.h" />
+    <ClInclude Include="GridFeature.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="RoadEdge.h" />
     <ClInclude Include="RoadGraph.h" />

@@ -2,6 +2,7 @@
 
 #include "RoadGraph.h"
 #include "AbstractArea.h"
+#include "GridFeature.h"
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
@@ -12,10 +13,10 @@ protected:
 
 public:
 	static void detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold);
-	static bool detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold);
+	static bool detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, GridFeature& gf, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold);
 	static int traverseConnectedEdges(RoadGraph& roads, RoadEdgeDesc e, QMap<RoadEdgeDesc, int>& edges, int segment_id);
-	static void reduceGridGroup(RoadGraph& roads, int group_id);
-	static void extendGridGroup(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, const QVector2D& gridDir, float angleThreshold, float votingRatioThreshold, float distanceThreshold);
+	static void reduceGridGroup(RoadGraph& roads, GridFeature& gf);
+	static void extendGridGroup(RoadGraph& roads, AbstractArea& area, int roadType, GridFeature& gf, float angleThreshold, float votingRatioThreshold, float distanceThreshold);
 
 	static void detectPlaza(RoadGraph& roads, AbstractArea& area);
 

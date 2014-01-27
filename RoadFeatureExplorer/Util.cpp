@@ -1,4 +1,4 @@
-#include "Util.h"
+﻿#include "Util.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -167,3 +167,48 @@ float Util::pointSegmentDistanceXY(const QVector2D& a, const QVector2D& b, const
 
 	return abs(dist);
 }
+
+/**
+ * 角度を正規化し、[-PI , PI]の範囲にする。
+ */
+float Util::normalizeAngle(float angle) {
+	// まずは、正の値に変換する
+	if (angle < 0.0f) {
+		angle += ((int)(fabs(angle) / M_PI / 2.0f) + 1) * M_PI * 2;
+	}
+
+	// 次に、[0, PI * 2]の範囲にする
+	angle -= (int)(angle / M_PI / 2.0f) * M_PI * 2;
+
+	// 最後に、[-PI, PI]の範囲にする
+	//if (angle > M_PI) angle = M_PI * 2.0f - angle;
+	if (angle > M_PI) angle = angle - M_PI * 2.0f;		// fix this bug on 12/17
+
+	return angle;
+}
+
+/**
+ * Compute the difference in angle that is normalized in the range of [0, PI].
+ */
+float Util::diffAngle(const QVector2D& dir1, const QVector2D& dir2, bool absolute) {
+	float ang1 = atan2f(dir1.y(), dir1.x());
+	float ang2 = atan2f(dir2.y(), dir2.x());
+
+	if (absolute) {
+		return fabs(normalizeAngle(ang1 - ang2));
+	} else {
+		return normalizeAngle(ang1 - ang2);
+	}
+}
+
+/**
+ * Compute the difference in angle that is normalized in the range of [0, PI].
+ */
+float Util::diffAngle(float angle1, float angle2, bool absolute) {
+	if (absolute) {
+		return fabs(normalizeAngle(angle1 - angle2));
+	} else {
+		return normalizeAngle(angle1 - angle2);
+	}
+}
+

@@ -107,6 +107,9 @@
     <ClCompile Include="RoadSegmentationUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GridFeature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -178,6 +181,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="RoadSegmentationUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GridFeature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
