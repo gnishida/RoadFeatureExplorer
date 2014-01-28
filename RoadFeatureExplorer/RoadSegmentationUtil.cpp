@@ -141,10 +141,10 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			gf.addDirection(roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i], M_PI * 0.5f / (float)numBins);
+			gf.addEdge(roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i], M_PI * 0.5f / (float)numBins);
 		}
 	}
-	gf.computeDirection();
+	gf.computeFeature();
 
 	// 正確なグリッド方向を使って、グリッド方向に近いエッジをグループに登録する
 	QMap<RoadEdgeDesc, float> edges;
