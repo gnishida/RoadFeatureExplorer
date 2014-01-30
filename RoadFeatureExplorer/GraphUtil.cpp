@@ -140,7 +140,7 @@ RoadVertexDesc GraphUtil::getVertex(RoadGraph& roads, const QVector2D& pt, float
 
 		QVector2D vec = roads.graph[*vi]->getPt() - pt;
 		float angle2 = atan2f(vec.y(), vec.x());
-		if (diffAngle(angle, angle2) > angle_threshold) continue;
+		if (Util::diffAngle(angle, angle2) > angle_threshold) continue;
 
 		float dist = vec.lengthSquared();
 		if (dist < min_dist) {
@@ -716,7 +716,7 @@ float GraphUtil::computeDissimilarityOfEdges(RoadGraph* roads1, RoadEdgeDesc e1,
 
 	// compute each factor
 	float dist = (roads1->graph[src1]->pt - roads2->graph[src2]->pt).length() + (roads1->graph[tgt1]->pt - roads2->graph[tgt2]->pt).length();
-	float angle = diffAngle(roads1->graph[src1]->pt - roads1->graph[tgt1]->pt, roads2->graph[src2]->pt - roads2->graph[tgt2]->pt);
+	float angle = Util::diffAngle(roads1->graph[src1]->pt - roads1->graph[tgt1]->pt, roads2->graph[src2]->pt - roads2->graph[tgt2]->pt);
 	float degree = abs(getDegree(*roads1, src1) - getDegree(*roads2, src2)) + abs(getDegree(*roads1, tgt1) - getDegree(*roads2, tgt2));
 	float lanes = abs((double)(roads1->graph[e1]->lanes - roads2->graph[e2]->lanes));
 
@@ -825,7 +825,7 @@ bool GraphUtil::hasCloseEdge(RoadGraph* roads, RoadVertexDesc v1, RoadVertexDesc
 
 		RoadVertexDesc tgt = boost::target(*ei, roads->graph);
 
-		float angle = diffAngle(roads->graph[tgt]->pt - roads->graph[v1]->pt, roads->graph[v2]->pt - roads->graph[v1]->pt);
+		float angle = Util::diffAngle(roads->graph[tgt]->pt - roads->graph[v1]->pt, roads->graph[v2]->pt - roads->graph[v1]->pt);
 		if (angle < angle_threshold) return true;
 	}
 
@@ -2432,13 +2432,13 @@ RoadGraph* GraphUtil::convertToGridNetwork(RoadGraph* roads, RoadVertexDesc star
 			QVector2D dir = roads->graph[u_desc]->getPt() - roads->graph[v_desc]->getPt();
 
 			QVector2D pos;
-			if (diffAngle(dir, QVector2D(1, 0)) < M_PI * 0.25f) { // X軸正方向
+			if (Util::diffAngle(dir, QVector2D(1, 0)) < M_PI * 0.25f) { // X軸正方向
 				pos = new_roads->graph[new_v_desc]->getPt() + QVector2D(100.0f, 0.0f);
-			} else if (diffAngle(dir, QVector2D(0, 1)) < M_PI * 0.25f) { // Y軸正方向
+			} else if (Util::diffAngle(dir, QVector2D(0, 1)) < M_PI * 0.25f) { // Y軸正方向
 				pos = new_roads->graph[new_v_desc]->getPt() + QVector2D(0.0f, 100.0f);
-			} else if (diffAngle(dir, QVector2D(-1, 0)) < M_PI * 0.25f) { // X軸負方向
+			} else if (Util::diffAngle(dir, QVector2D(-1, 0)) < M_PI * 0.25f) { // X軸負方向
 				pos = new_roads->graph[new_v_desc]->getPt() + QVector2D(-100.0f, 0.0f);
-			} else if (diffAngle(dir, QVector2D(0, -1)) < M_PI * 0.25f) { // Y軸負方向
+			} else if (Util::diffAngle(dir, QVector2D(0, -1)) < M_PI * 0.25f) { // Y軸負方向
 				pos = new_roads->graph[new_v_desc]->getPt() + QVector2D(0.0f, -100.0f);
 			} 
 			
@@ -2664,7 +2664,7 @@ void GraphUtil::snapDeadendEdges(RoadGraph& roads, float threshold) {
 				if (!roads.graph[*ei]->valid) continue;
 
 				RoadVertexDesc tgt2 = boost::target(*ei, roads.graph);
-				float angle = GraphUtil::diffAngle(roads.graph[*vi]->pt - roads.graph[tgt]->pt, roads.graph[*vi2]->pt - roads.graph[tgt2]->pt);
+				float angle = Util::diffAngle(roads.graph[*vi]->pt - roads.graph[tgt]->pt, roads.graph[*vi2]->pt - roads.graph[tgt2]->pt);
 				if (angle < min_angle) {
 					min_angle = angle;
 				}
@@ -2710,7 +2710,7 @@ void GraphUtil::snapDeadendEdges(RoadGraph& roads, float threshold) {
 					if (!roads.graph[*ei]->valid) continue;
 
 					RoadVertexDesc tgt2 = boost::target(*ei, roads.graph);
-					float angle = GraphUtil::diffAngle(roads.graph[*vi]->pt - roads.graph[tgt]->pt, roads.graph[*vi2]->pt - roads.graph[tgt2]->pt);
+					float angle = Util::diffAngle(roads.graph[*vi]->pt - roads.graph[tgt]->pt, roads.graph[*vi2]->pt - roads.graph[tgt2]->pt);
 					if (angle < min_angle) {
 						min_angle = angle;
 					}
@@ -2795,7 +2795,7 @@ void GraphUtil::snapDeadendEdges2(RoadGraph& roads, int degree, float threshold)
 		if ((roads.graph[nearest_desc]->pt - roads.graph[tgt]->pt).length() < (roads.graph[*vi]->pt - roads.graph[tgt]->pt).length()) continue;
 
 		// スナップによるエッジの角度変化が大きすぎる場合は、対象からはずす
-		float diff_angle = diffAngle(roads.graph[*vi]->pt - roads.graph[tgt]->pt, roads.graph[nearest_desc]->pt - roads.graph[tgt]->pt);
+		float diff_angle = Util::diffAngle(roads.graph[*vi]->pt - roads.graph[tgt]->pt, roads.graph[nearest_desc]->pt - roads.graph[tgt]->pt);
 		if (diff_angle > angle_threshold) continue;
 
 		// tgtとスナップ先との間に既にエッジがある場合は、スナップしない
@@ -2868,7 +2868,7 @@ float GraphUtil::computeMinDiffAngle(std::vector<float> *data1, std::vector<floa
 			for (int j = 0; j < data2->size(); j++) {
 				if (paired2[j]) continue;
 
-				float diff = diffAngle(data1->at(i), data2->at(j));
+				float diff = Util::diffAngle(data1->at(i), data2->at(j));
 				if (diff < min_diff) {
 					min_diff = diff;
 					min_id = j;
@@ -2892,7 +2892,7 @@ float GraphUtil::computeMinDiffAngle(std::vector<float> *data1, std::vector<floa
 			for (int j = 0; j < data1->size(); j++) {
 				if (paired1[j]) continue;
 
-				float diff = fabs(diffAngle(data2->at(i), data1->at(j)));
+				float diff = fabs(Util::diffAngle(data2->at(i), data1->at(j)));
 				if (diff < min_diff) {
 					min_diff = diff;
 					min_id = j;
@@ -2906,176 +2906,6 @@ float GraphUtil::computeMinDiffAngle(std::vector<float> *data1, std::vector<floa
 
 	return ret;
 }
-
-/**
- * 角度を正規化し、[-PI , PI]の範囲にする。
- */
-float GraphUtil::normalizeAngle(float angle) {
-	// まずは、正の値に変換する
-	if (angle < 0.0f) {
-		angle += ((int)(fabs(angle) / M_PI / 2.0f) + 1) * M_PI * 2;
-	}
-
-	// 次に、[0, PI * 2]の範囲にする
-	angle -= (int)(angle / M_PI / 2.0f) * M_PI * 2;
-
-	// 最後に、[-PI, PI]の範囲にする
-	//if (angle > M_PI) angle = M_PI * 2.0f - angle;
-	if (angle > M_PI) angle = angle - M_PI * 2.0f;		// fix this bug on 12/17
-
-	return angle;
-}
-
-/**
- * Compute the difference in angle that is normalized in the range of [0, PI].
- */
-float GraphUtil::diffAngle(const QVector2D& dir1, const QVector2D& dir2, bool absolute) {
-	float ang1 = atan2f(dir1.y(), dir1.x());
-	float ang2 = atan2f(dir2.y(), dir2.x());
-
-	if (absolute) {
-		return fabs(normalizeAngle(ang1 - ang2));
-	} else {
-		return normalizeAngle(ang1 - ang2);
-	}
-}
-
-/**
- * Compute the difference in angle that is normalized in the range of [0, PI].
- */
-float GraphUtil::diffAngle(float angle1, float angle2, bool absolute) {
-	if (absolute) {
-		return fabs(normalizeAngle(angle1 - angle2));
-	} else {
-		return normalizeAngle(angle1 - angle2);
-	}
-}
-
-/**
- * 対応する頂点が与えられている時に、２つの道路網のトポロジーの違いを数値化して返却する。
- * トポロジーの違いなので、座標は一切関係ない。隣接ノードとの接続性のみを考慮する。
- *
- * @param w_connectivity		対応するエッジがない場合のペナルティ
- * @param w_split				対応が重複している場合のペナルティ
- * @param w_angle				エッジの角度のペナルティ
- * @param w_distance			対応する頂点の距離に対するペナルティ
- */
-/*float GraphUtil::computeDissimilarity(RoadGraph* roads1, QMap<RoadVertexDesc, RoadVertexDesc>& map1, RoadGraph* roads2, QMap<RoadVertexDesc, RoadVertexDesc>& map2, float w_connectivity, float w_split, float w_angle, float w_distance) {
-	float penalty = 0.0f;
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	// コネクティビティに基づいたペナルティの計上
-	RoadVertexIter vi, vend;
-	for (boost::tie(vi, vend) = boost::vertices(roads1->graph); vi != vend; ++vi) {
-		if (!roads1->graph[*vi]->valid) continue;
-
-		if (map1.contains(*vi)) {
-			RoadVertexDesc v2 = map1[*vi];
-
-			RoadOutEdgeIter ei, eend;
-			for (boost::tie(ei, eend) = boost::out_edges(*vi, roads1->graph); ei != eend; ++ei) {
-				if (!roads1->graph[*ei]->valid) continue;
-
-				RoadVertexDesc v1b = boost::target(*ei, roads1->graph);
-				RoadVertexDesc v2b = map1[v1b];
-
-				if (v2 == v2b || !isConnected(roads2, v2, v2b)) { // 対応ノード間が接続されてない場合
-				//if (v2 == v2b || !roads2->isConnected(v2, v2b)) { // キャッシュによる高速化（ただし、事前にconnectivityを計算する必要有り
-					penalty += roads1->graph[*ei]->getLength() * roads1->graph[*ei]->weight * w_connectivity;
-				} else {
-					QVector2D dir1 = roads1->graph[v1b]->getPt() - roads1->graph[*vi]->getPt();
-					QVector2D dir2 = roads2->graph[v2b]->getPt() - roads2->graph[v2]->getPt();
-					if (dir1.lengthSquared() > 0.0f && dir2.lengthSquared() > 0.0f) {
-						penalty += diffAngle(dir1, dir2) * w_angle;
-					} else {
-						// どちらかのエッジの長さ＝０、つまり、エッジがないので、コネクティビティのペナルティを課す
-						// 道路網１の方のエッジの長さが０の場合、ペナルティは０となるが、
-						// 道路網２の計算の際に、ペナルティが加算されるので、良いだろう。
-						penalty += roads1->graph[*ei]->getLength() * roads1->graph[*ei]->weight * w_connectivity;
-					}
-				}
-			}
-		} else { // 当該ノードに対応するノードがない場合は、全てのエッジをペナルティとして計上する
-			RoadOutEdgeIter ei, eend;
-			for (boost::tie(ei, eend) = boost::out_edges(*vi, roads1->graph); ei != eend; ++ei) {
-				if (!roads1->graph[*ei]->valid) continue;
-
-				RoadVertexDesc v1b = boost::target(*ei, roads1->graph);
-
-				penalty += roads1->graph[*ei]->getLength() * roads1->graph[*ei]->weight * w_connectivity;
-			}
-		}
-	}
-
-	for (boost::tie(vi, vend) = boost::vertices(roads2->graph); vi != vend; ++vi) {
-		if (!roads2->graph[*vi]->valid) continue;
-
-		if (map2.contains(*vi)) {
-			RoadVertexDesc v1 = map2[*vi];
-
-			RoadOutEdgeIter ei, eend;
-			for (boost::tie(ei, eend) = boost::out_edges(*vi, roads2->graph); ei != eend; ++ei) {
-				if (!roads2->graph[*ei]->valid) continue;
-
-				RoadVertexDesc v2b = boost::target(*ei, roads2->graph);
-				RoadVertexDesc v1b = map2[v2b];
-
-				if (v1 == v1b || !isConnected(roads1, v1, v1b)) { // 対応ノード間が接続されてない場合
-				//if (v1 == v1b || !roads1->isConnected(v1, v1b)) { // キャッシュによる高速化（ただし、事前にconnectivityを計算する必要有り
-					penalty += roads2->graph[*ei]->getLength() * roads2->graph[*ei]->weight * w_connectivity;
-				} else {
-					QVector2D dir1 = roads1->graph[v1b]->getPt() - roads1->graph[v1]->getPt();
-					QVector2D dir2 = roads2->graph[v2b]->getPt() - roads2->graph[*vi]->getPt();
-					if (dir1.lengthSquared() > 0.0f && dir2.lengthSquared() > 0.0f) {
-						penalty += diffAngle(dir1, dir2) * w_angle;
-					} else {
-						// どちらかのエッジの長さ＝０、つまり、エッジがないので、コネクティビティのペナルティを課す
-						// 道路網２の方のエッジの長さが０の場合、ペナルティは０となるが、
-						// 道路網１の計算の際に、ペナルティが加算されるので、良いだろう。
-						penalty += roads2->graph[*ei]->getLength() * roads2->graph[*ei]->weight * w_connectivity;
-					}
-				}
-			}
-		} else { // 当該ノードに対応するノードがない場合は、全てのエッジをペナルティとして計上する
-			RoadOutEdgeIter ei, eend;
-			for (boost::tie(ei, eend) = boost::out_edges(*vi, roads2->graph); ei != eend; ++ei) {
-				if (!roads2->graph[*ei]->valid) continue;
-
-				RoadVertexDesc v2b = boost::target(*ei, roads2->graph);
-
-				penalty += roads2->graph[*ei]->getLength() * roads2->graph[*ei]->weight * w_connectivity;
-			}
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	// 重複マッチング（モーフィングの際に、スプリットが発生）によるペナルティの計上
-	QSet<RoadVertexDesc> used;
-	for (QMap<RoadVertexDesc, RoadVertexDesc>::iterator it = map1.begin(); it != map1.end(); ++it) {
-		if (used.contains(it.value())) {
-			penalty += w_split;
-		} else {
-			used.insert(it.value());
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	// 頂点に距離に関するペナルティの計上
-	for (boost::tie(vi, vend) = boost::vertices(roads1->graph); vi != vend; ++vi) {
-		if (!roads1->graph[*vi]->valid) continue;
-
-		if (map1.contains(*vi)) {
-			RoadVertexDesc v2 = map1[*vi];
-
-			penalty+= (roads1->graph[*vi]->pt - roads2->graph[v2]->pt).length() * w_distance;
-		} else {
-			// 対応する頂点がない場合、ペナルティはなし？
-		}
-	}
-
-	return penalty;
-}
-*/
 
 /**
  * 対応する頂点が与えられている時に、２つの道路網のトポロジーの違いを数値化して返却する。
@@ -3153,9 +2983,9 @@ float GraphUtil::computeSimilarity(RoadGraph* roads1, QMap<RoadVertexDesc, RoadV
 			getOrderedPolyLine(*roads1, *ei, polyLine1);
 			std::vector<QVector2D> polyLine2;
 			getOrderedPolyLine(*roads2, e2, polyLine2);
-			float angle_diff1 = diffAngle(polyLine1[1] - polyLine1[0], polyLine2[1] - polyLine2[0]);
+			float angle_diff1 = Util::diffAngle(polyLine1[1] - polyLine1[0], polyLine2[1] - polyLine2[0]);
 			score += expf(-angle_diff1) * w_angle * 0.5f;
-			float angle_diff2 = diffAngle(polyLine1[polyLine1.size() - 1] - polyLine1[polyLine1.size() - 2], polyLine2[polyLine2.size() - 1] - polyLine2[polyLine2.size() - 2]);
+			float angle_diff2 = Util::diffAngle(polyLine1[polyLine1.size() - 1] - polyLine1[polyLine1.size() - 2], polyLine2[polyLine2.size() - 1] - polyLine2[polyLine2.size() - 2]);
 			score += expf(-angle_diff2) * w_angle * 0.5f;
 
 			// increase the score according to the length of the edges
@@ -3199,9 +3029,9 @@ float GraphUtil::computeSimilarity(RoadGraph* roads1, QMap<RoadVertexDesc, RoadV
 			getOrderedPolyLine(*roads1, e1, polyLine1);
 			std::vector<QVector2D> polyLine2;
 			getOrderedPolyLine(*roads2, *ei, polyLine2);
-			float angle_diff1 = diffAngle(polyLine1[1] - polyLine1[0], polyLine2[1] - polyLine2[0]);
+			float angle_diff1 = Util::diffAngle(polyLine1[1] - polyLine1[0], polyLine2[1] - polyLine2[0]);
 			score += expf(-angle_diff1) * w_angle * 0.5f;
-			float angle_diff2 = diffAngle(polyLine1[polyLine1.size() - 1] - polyLine1[polyLine1.size() - 2], polyLine2[polyLine2.size() - 1] - polyLine2[polyLine2.size() - 2]);
+			float angle_diff2 = Util::diffAngle(polyLine1[polyLine1.size() - 1] - polyLine1[polyLine1.size() - 2], polyLine2[polyLine2.size() - 1] - polyLine2[polyLine2.size() - 2]);
 			score += expf(-angle_diff2) * w_angle * 0.5f;
 
 			// increase the score according to the length of the edges
@@ -3313,7 +3143,7 @@ QMap<RoadVertexDesc, RoadVertexDesc> GraphUtil::findCorrespondentEdges(RoadGraph
 				QVector2D dir2 = roads2->graph[children2[permutation[i]]]->pt - roads2->graph[parent2]->pt;
 				*/
 
-				diff = std::max(diff, diffAngle(dir1, dir2));
+				diff = std::max(diff, Util::diffAngle(dir1, dir2));
 			}
 
 			if (diff < min_diff) {
@@ -3355,7 +3185,7 @@ QMap<RoadVertexDesc, RoadVertexDesc> GraphUtil::findCorrespondentEdges(RoadGraph
 				//QVector2D dir1 = roads1->graph[children1[permutation[i]]]->pt - roads1->graph[parent1]->pt;
 				//QVector2D dir2 = roads2->graph[children2[i]]->pt - roads2->graph[parent2]->pt;
 
-				diff = std::max(diff, diffAngle(dir1, dir2));
+				diff = std::max(diff, Util::diffAngle(dir1, dir2));
 			}
 
 			if (diff < min_diff) {
@@ -3393,7 +3223,7 @@ QMap<RoadVertexDesc, RoadVertexDesc> GraphUtil::findApproximateCorrespondentEdge
 			for (int j = 0; j < children2.size(); j++) {
 				if (used2.contains(j)) continue;
 
-				float diff = diffAngle(roads1->graph[children1[i]]->pt - roads1->graph[parent1]->pt, roads2->graph[children2[j]]->pt - roads2->graph[parent2]->pt);
+				float diff = Util::diffAngle(roads1->graph[children1[i]]->pt - roads1->graph[parent1]->pt, roads2->graph[children2[j]]->pt - roads2->graph[parent2]->pt);
 				if (diff < min_diff) {
 					min_diff = diff;
 					min_i = i;
@@ -3453,7 +3283,7 @@ void GraphUtil::findCorrespondence(RoadGraph* roads1, AbstractForest* forest1, R
 			RoadVertexDesc child2 = it.value();
 
 			// if the difference in angle is too large, skip this pair.
-			if (diffAngle(roads1->graph[child1]->pt - roads1->graph[parent1]->pt, roads2->graph[child2]->pt - roads2->graph[parent2]->pt) > threshold_angle) continue;
+			if (Util::diffAngle(roads1->graph[child1]->pt - roads1->graph[parent1]->pt, roads2->graph[child2]->pt - roads2->graph[parent2]->pt) > threshold_angle) continue;
 
 			// set fullyPaired flags
 			roads1->graph[getEdge(*roads1, parent1, child1)]->fullyPaired = true;
@@ -3748,7 +3578,7 @@ cv::MatND GraphUtil::computeEdgeCurvatureHistogram(RoadGraph& roads, int size) {
 		QVector2D baseDir = roads.graph[*ei]->polyLine[1] - roads.graph[*ei]->polyLine[0];
 		for (int i = 2; i < roads.graph[*ei]->polyLine.size(); i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i] - roads.graph[*ei]->polyLine[i - 1];
-			curvatureMat.at<float>(0, count) += diffAngle(baseDir, dir);
+			curvatureMat.at<float>(0, count) += Util::diffAngle(baseDir, dir);
 		}
 		if (curvatureMat.at<float>(0, count) > M_PI) {
 			curvatureMat.at<float>(0, count) = M_PI;
@@ -3978,7 +3808,7 @@ cv::Mat GraphUtil::rigidICP(RoadGraph* roads1, RoadGraph* roads2, QMap<RoadVerte
 		RoadVertexDesc src2 = map[src1];
 		RoadVertexDesc tgt2 = map[tgt1];
 
-		angle += GraphUtil::diffAngle(roads2->graph[src2]->pt - roads2->graph[tgt2]->pt, roads1->graph[src1]->pt - roads1->graph[tgt1]->pt, false);
+		angle += Util::diffAngle(roads2->graph[src2]->pt - roads2->graph[tgt2]->pt, roads1->graph[src1]->pt - roads1->graph[tgt1]->pt, false);
 		count++;
 	}
 

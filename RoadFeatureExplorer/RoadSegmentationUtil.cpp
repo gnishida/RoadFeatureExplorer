@@ -428,7 +428,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
 			QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
 			QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
 
-			if (GraphUtil::diffAngle(dir1, dir2) < angleThreshold3 || GraphUtil::diffAngle(dir1, -dir2) < angleThreshold3) {
+			if (Util::diffAngle(dir1, dir2) < angleThreshold3 || Util::diffAngle(dir1, -dir2) < angleThreshold3) {
 				length += dir1.length();
 			}
 		}
@@ -443,6 +443,9 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
 
 	// 円の中心から一定距離以内のエッジのみを残す
 	if (!reduceRadialGroup(roads, center, group_id, seedDistance, 5)) return false;
+
+	// 中心から伸びるアームの方向を量子化してカウントする
+	if (countNumDirections(roads, center, group_id, 12) <= 5) return false;
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、グループに再度登録していく
 	extendRadialGroup(roads, area, roadType, center, group_id, extendingAngleThreshold, votingRatioThreshold);
@@ -587,7 +590,7 @@ QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, Abs
 			QVector2D dir = v2 - v1;
 
 			// だいたいの中心点への方向が大きくずれている場合は、スキップする
-			if (GraphUtil::diffAngle(v1 - c, dir) > angleThreshold && GraphUtil::diffAngle(v1 - c, -dir) > angleThreshold) continue;
+			if (Util::diffAngle(v1 - c, dir) > angleThreshold && Util::diffAngle(v1 - c, -dir) > angleThreshold) continue;
 			
 			float len = dir.length();
 
@@ -759,7 +762,7 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 				QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
 				QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
 
-				if (GraphUtil::diffAngle(dir1, dir2) < angleThreshold || GraphUtil::diffAngle(dir1, -dir2) < angleThreshold) {
+				if (Util::diffAngle(dir1, dir2) < angleThreshold || Util::diffAngle(dir1, -dir2) < angleThreshold) {
 					length += dir1.length();
 				}
 			}
@@ -781,6 +784,46 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 			queue.push_back(u);
 		}
 	}
+}
+
+/**
+ * 指定された中心から伸びるradial道路の方向を、指定されたサイズで量子化し、道路が延びている方向の数を返却する。
+ */
+int RoadSegmentationUtil::countNumDirections(RoadGraph& roads, const QVector2D& center, int group_id, int size) {
+	QSet<int> directions;
+
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		// 異なるshapeTypeのエッジは、スキップする
+		if (roads.graph[*ei]->shapeType != RoadEdge::SHAPE_RADIAL) continue;
+
+		// 異なるグループのエッジは、スキップする
+		if (roads.graph[*ei]->group != group_id) continue;
+
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+
+		// 円の中心から離れている方の頂点と、円の中心を使って、方向を計算する
+		QVector2D vec;
+		if ((roads.graph[src]->pt - center).lengthSquared() > (roads.graph[tgt]->pt - center).lengthSquared()) {
+			vec = roads.graph[src]->pt - center;
+		} else {
+			vec = roads.graph[tgt]->pt - center;
+		}
+		float angle = atan2f(vec.y(), vec.x());
+		if (angle < 0) angle += M_PI * 2.0f;
+
+		// 方向を量子化する
+		int bin_id = angle / M_PI / 2.0f * size;
+		if (bin_id < 0) bin_id = 0;
+		if (bin_id >= size) bin_id = size - 1;
+
+		directions.insert(bin_id);
+	}
+
+	return directions.size();
 }
 
 /**

@@ -26,6 +26,7 @@ public:
 	static QVector2D refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold);
 	static bool reduceRadialGroup(RoadGraph& roads, QVector2D& center, int group_id, float distanceThreshold, int minNumSeeds);
 	static void extendRadialGroup(RoadGraph& roads, AbstractArea& area, int roadType, QVector2D& center, int group_id, float angleThreshold, float dirCheckRatio);
+	static int countNumDirections(RoadGraph& roads, const QVector2D& center, int group_id, int size);
 
 	static void detectRoundabout(RoadGraph& roads, AbstractArea& area);
 };
