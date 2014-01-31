@@ -2,6 +2,7 @@
 #include "GraphUtil.h"
 #include "Util.h"
 #include "BBox.h"
+#include "ConvexHull.h"
 #include <math.h>
 
 #ifndef Q_MOC_RUN
@@ -55,10 +56,10 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param votingRatioThreshold	各エッジについて、構成するラインが所定のグリッド方向に従っているかの投票率を計算し、この閾値未満なら、グリッドに従っていないと見なす
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold, float minObbLength) {
 	for (int i = 0; i < maxIteration; i++) {
 		GridFeature gf(i);
-		if (!detectOneGrid(roads, area, roadType, gf, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold)) break;
+		if (!detectOneGrid(roads, area, roadType, gf, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold, minObbLength)) break;
 	}
 }
 
@@ -69,8 +70,10 @@ void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int 
  * @param numBins				ヒストグラムのビン数
  * @param minTotalLength		最大頻度となるビンに入ったエッジの総延長距離が、この値より小さい場合、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
+ *
+ * @param minObbLength			エッジ群を囲むOriented Bounding Boxの短い方の辺の長さが、この値より小さい場合、グリッド検知せずにfalseを返却する
  */
-bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, GridFeature& gf, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold) {
+bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, int roadType, GridFeature& gf, int numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold, float minObbLength) {
 	// ヒストグラムの初期化
 	cv::Mat dirMat = cv::Mat::zeros(numBins, 1, CV_32F);
 
@@ -196,6 +199,24 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 		}
 	}
 	if (len < minTotalLength || len < total_edge_length * minMaxBinRatio) return false;
+
+	// 候補のエッジ群を囲むconvex hullを求める
+	ConvexHull ch;
+	for (QMap<RoadEdgeDesc, float>::iterator it = edges.begin(); it != edges.end(); ++it) {
+		for (int i = 0; i < roads.graph[it.key()]->polyLine.size(); i++) {
+			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
+		}
+	}
+	std::vector<QVector2D> hull;
+	ch.convexHull(hull);
+
+	// convex hullのOriented Bounding Boxを求める
+	QVector2D obb_size;
+	QMatrix4x4 obb_mat;
+	Util::getOBB(hull, obb_size, obb_mat);
+
+	// もしOBBの短い方のエッジの長さがminObbLength未満なら、グリッドと見なさない
+	if (std::min(obb_size.x(), obb_size.y()) < minObbLength) return false;
 
 	// 最後に、このグループに属するエッジを、RoadGraphオブジェクトに反映させる
 	for (QMap<RoadEdgeDesc, float>::iterator it = edges.begin(); it != edges.end(); ++it) {

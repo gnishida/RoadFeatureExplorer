@@ -135,6 +135,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CircleArea.cpp" />
     <ClCompile Include="ControlWidget.cpp" />
+    <ClCompile Include="ConvexHull.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_ControlWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -224,6 +225,7 @@
     <ClInclude Include="BFSTree.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CircleArea.h" />
+    <ClInclude Include="ConvexHull.h" />
     <ClInclude Include="GeneratedFiles\ui_ControlWidget.h" />
     <ClInclude Include="GLWidget.h" />
     <ClInclude Include="GraphUtil.h" />

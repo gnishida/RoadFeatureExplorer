@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Mon Jan 27 16:06:50 2014
+** Created: Fri Jan 31 10:42:11 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -45,6 +45,8 @@ public:
     QLineEdit *lineEditGridAngleThreshold;
     QLineEdit *lineEditGridExtendingDistanceThreshold;
     QLabel *label_21;
+    QLineEdit *lineEditGridMinOBBLength;
+    QLabel *label_22;
     QGroupBox *groupBox_4;
     QPushButton *pushButtonDetectPlaza;
     QGroupBox *groupBox_6;
@@ -87,10 +89,10 @@ public:
         dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
         groupBox_3 = new QGroupBox(dockWidgetContents);
         groupBox_3->setObjectName(QString::fromUtf8("groupBox_3"));
-        groupBox_3->setGeometry(QRect(10, 60, 201, 211));
+        groupBox_3->setGeometry(QRect(10, 60, 201, 231));
         pushButtonDetectGrid = new QPushButton(groupBox_3);
         pushButtonDetectGrid->setObjectName(QString::fromUtf8("pushButtonDetectGrid"));
-        pushButtonDetectGrid->setGeometry(QRect(40, 170, 121, 31));
+        pushButtonDetectGrid->setGeometry(QRect(40, 190, 121, 31));
         label_4 = new QLabel(groupBox_3);
         label_4->setObjectName(QString::fromUtf8("label_4"));
         label_4->setGeometry(QRect(10, 40, 46, 21));
@@ -140,15 +142,22 @@ public:
         label_21 = new QLabel(groupBox_3);
         label_21->setObjectName(QString::fromUtf8("label_21"));
         label_21->setGeometry(QRect(10, 140, 101, 21));
+        lineEditGridMinOBBLength = new QLineEdit(groupBox_3);
+        lineEditGridMinOBBLength->setObjectName(QString::fromUtf8("lineEditGridMinOBBLength"));
+        lineEditGridMinOBBLength->setGeometry(QRect(110, 160, 81, 20));
+        lineEditGridMinOBBLength->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        label_22 = new QLabel(groupBox_3);
+        label_22->setObjectName(QString::fromUtf8("label_22"));
+        label_22->setGeometry(QRect(10, 160, 101, 21));
         groupBox_4 = new QGroupBox(dockWidgetContents);
         groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
-        groupBox_4->setGeometry(QRect(10, 280, 201, 61));
+        groupBox_4->setGeometry(QRect(10, 300, 201, 61));
         pushButtonDetectPlaza = new QPushButton(groupBox_4);
         pushButtonDetectPlaza->setObjectName(QString::fromUtf8("pushButtonDetectPlaza"));
         pushButtonDetectPlaza->setGeometry(QRect(40, 20, 121, 31));
         groupBox_6 = new QGroupBox(dockWidgetContents);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
-        groupBox_6->setGeometry(QRect(10, 350, 201, 291));
+        groupBox_6->setGeometry(QRect(10, 380, 201, 291));
         pushButtonDetectRadial = new QPushButton(groupBox_6);
         pushButtonDetectRadial->setObjectName(QString::fromUtf8("pushButtonDetectRadial"));
         pushButtonDetectRadial->setGeometry(QRect(40, 250, 121, 31));
@@ -231,7 +240,7 @@ public:
         label_19->setGeometry(QRect(10, 20, 81, 21));
         groupBox_7 = new QGroupBox(dockWidgetContents);
         groupBox_7->setObjectName(QString::fromUtf8("groupBox_7"));
-        groupBox_7->setGeometry(QRect(10, 650, 201, 61));
+        groupBox_7->setGeometry(QRect(10, 690, 201, 61));
         pushButtonDetectGridRadial = new QPushButton(groupBox_7);
         pushButtonDetectGridRadial->setObjectName(QString::fromUtf8("pushButtonDetectGridRadial"));
         pushButtonDetectGridRadial->setGeometry(QRect(40, 20, 121, 31));
@@ -259,6 +268,7 @@ public:
         label_18->setText(QApplication::translate("ControlWidget", "Max Iteration", 0, QApplication::UnicodeUTF8));
         label_20->setText(QApplication::translate("ControlWidget", "Angle Threshold", 0, QApplication::UnicodeUTF8));
         label_21->setText(QApplication::translate("ControlWidget", "Ext Dist Threshold", 0, QApplication::UnicodeUTF8));
+        label_22->setText(QApplication::translate("ControlWidget", "Min OBB Length", 0, QApplication::UnicodeUTF8));
         groupBox_4->setTitle(QApplication::translate("ControlWidget", "Plaza Detection", 0, QApplication::UnicodeUTF8));
         pushButtonDetectPlaza->setText(QApplication::translate("ControlWidget", "Detect Plaza", 0, QApplication::UnicodeUTF8));
         groupBox_6->setTitle(QApplication::translate("ControlWidget", "Radial Detection", 0, QApplication::UnicodeUTF8));
