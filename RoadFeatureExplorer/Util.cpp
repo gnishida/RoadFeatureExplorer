@@ -293,3 +293,4 @@ void Util::transformRing(const std::vector<QVector2D>& srcRing, std::vector<QVec
 		dstRing[i].setY(pt.y());
 	}
 }
+

@@ -141,3 +141,74 @@ void RoadGraphRenderer::renderPolyline(std::vector<QVector2D>& polyline, float h
 	render(renderables);
 }
 
+/*void RoadGraphRenderer::tessellate(const Loop2D& polygon) {
+	if (polygon.size() < 3) return;
+
+	float minX = (std::numeric_limits<float>::max)();
+	float maxX = (std::numeric_limits<float>::min)();
+	float minY = (std::numeric_limits<float>::max)();
+	float maxY = (std::numeric_limits<float>::min)();
+
+	for (int i = 0; i < polygon.size(); i++) {
+		minX = std::min<float>(polygon[i].x(), minX);
+		maxX = std::max<float>(polygon[i].x(), maxX);
+		minY = std::min<float>(polygon[i].y(), minY);
+		maxY = std::max<float>(polygon[i].y(), maxY);
+	}
+
+	std::vector<Loop2D> trapezoids;
+	polygon.tessellate(trapezoids);
+
+	for (int i = 0; i < trapezoids.size(); ++i) {
+		if (trapezoids[i].size() < 3) continue;
+
+		QVector2D tex0((trapezoids[i][0].x() - minX) / (maxX - minX), (trapezoids[i][0].y() - minY) / (maxY - minY));
+		for (int j = 1; j < trapezoids[i].size() - 1; ++j) {
+			generateMeshVertex(trapezoids[i][0].x(), trapezoids[i][0].y(), trapezoids[i][0].z(), 0, 0, 1, tex0.x(), tex0.y());
+			generateMeshVertex(trapezoids[i][j].x(), trapezoids[i][j].y(), trapezoids[i][j].z(), 0, 0, 1, (trapezoids[i][j].x() - minX) / (maxX - minX), (trapezoids[i][j].y() - minY) / (maxY - minY));
+			generateMeshVertex(trapezoids[i][j+1].x(), trapezoids[i][j+1].y(), trapezoids[i][j+1].z(), 0, 0, 1, (trapezoids[i][j+1].x() - minX) / (maxX - minX), (trapezoids[i][j+1].y() - minY) / (maxY - minY));
+		}
+	}
+}*/
+
+void RoadGraphRenderer::renderConcave(const Loop2D& polygon, const QColor& color, float height) {
+	std::vector<RenderablePtr> renderables;
+	renderables.push_back(RenderablePtr(new Renderable(GL_TRIANGLES)));
+
+	if (polygon.size() < 3) return;
+
+	Vertex v;
+	v.color[0] = color.redF();
+	v.color[1] = color.greenF();
+	v.color[2] = color.blueF();
+	v.color[3] = color.alphaF();
+	v.normal[0] = 0.0f;
+	v.normal[1] = 0.0f;
+	v.normal[2] = 1.0f;
+
+	std::vector<Loop2D> trapezoids;
+	polygon.tessellate(trapezoids);
+
+	for (int i = 0; i < trapezoids.size(); ++i) {
+		if (trapezoids[i].size() < 3) continue;
+
+		for (int j = 1; j < trapezoids[i].size() - 1; ++j) {
+			v.location[0] = trapezoids[i][0].x();
+			v.location[1] = trapezoids[i][0].y();
+			v.location[2] = height;
+			renderables[0]->vertices.push_back(v);
+
+			v.location[0] = trapezoids[i][j].x();
+			v.location[1] = trapezoids[i][j].y();
+			v.location[2] = height;
+			renderables[0]->vertices.push_back(v);
+
+			v.location[0] = trapezoids[i][j+1].x();
+			v.location[1] = trapezoids[i][j+1].y();
+			v.location[2] = height;
+			renderables[0]->vertices.push_back(v);
+		}
+	}
+
+	render(renderables);
+}

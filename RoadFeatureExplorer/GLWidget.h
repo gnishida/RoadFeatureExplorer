@@ -5,6 +5,7 @@
 #include "RoadGraphRenderer.h"
 #include "BBox.h"
 #include "PolygonArea.h"
+#include "GridFeature.h"
 #include <QGLWidget>
 #include <QString>
 
@@ -25,6 +26,7 @@ public:
 	QVector2D last2DPos;
 	//BBox selectedArea;
 	PolygonArea selectedArea;
+	std::vector<GridFeature> gridFeatures;
 
 	bool selecting;
 	bool selected;

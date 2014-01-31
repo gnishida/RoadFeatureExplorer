@@ -135,3 +135,7 @@ bool GridFeature::isClose(const QVector2D& dir, float threshold) {
 	if (Util::diffAngle(angle1, a1) <= threshold || Util::diffAngle(angle1, a2) <= threshold || Util::diffAngle(angle2, a1) <= threshold || Util::diffAngle(angle2, a2) <= threshold) return true;
 	else return false;
 }
+
+QColor GridFeature::color() {
+	return QColor(0, (int)(angle1 * 2.0f / M_PI * 255.0f), 0);
+}

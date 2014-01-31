@@ -3,6 +3,7 @@
 #include "RoadGraph.h"
 #include "Renderable.h"
 #include "BBox.h"
+#include "Polygon2D.h"
 
 class RoadGraphRenderer {
 public:
@@ -18,5 +19,8 @@ public:
 	void renderDenseArea(const AbstractArea& area, float height);
 	void renderPoint(const QVector2D& pt, float height);
 	void renderPolyline(std::vector<QVector2D>& polyline, float height);
+
+	//void tessellate(const Loop2D& polygon);
+	void renderConcave(const Loop2D& polygon, const QColor& color, float height);
 };
 

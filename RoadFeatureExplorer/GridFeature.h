@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Polygon2D.h"
 #include <QMap>
 #include <QVector2D>
+#include <QColor>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
@@ -20,6 +22,8 @@ public:
 	int accmLenCount1;			// 横方向の累積長カウンタ
 	int accmLenCount2;			// 縦方向の累積長カウンタ
 
+	Loop2D polyline;	// 領域を表すポリゴン（時計回り）
+
 public:
 	GridFeature(int group_id) : group_id(group_id) {}
 	~GridFeature() {}
@@ -28,5 +32,6 @@ public:
 	void addEdge(const QVector2D& edge_vec, float threshold);
 	void computeFeature();
 	bool isClose(const QVector2D& dir, float threshold);
+	QColor color();
 };
 

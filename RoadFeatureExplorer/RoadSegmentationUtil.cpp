@@ -56,10 +56,11 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
  * @param minMaxBinRatio		最大頻度となるビンの割合が、この値より小さい場合は、顕著な特徴ではないと考え、グリッド検知せずにfalseを返却する
  * @param votingRatioThreshold	各エッジについて、構成するラインが所定のグリッド方向に従っているかの投票率を計算し、この閾値未満なら、グリッドに従っていないと見なす
  */
-void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold, float minObbLength) {
+void RoadSegmentationUtil::detectGrid(RoadGraph& roads, AbstractArea& area, int roadType, std::vector<GridFeature>& gridFeatures, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold, float minObbLength) {
 	for (int i = 0; i < maxIteration; i++) {
 		GridFeature gf(i);
 		if (!detectOneGrid(roads, area, roadType, gf, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold, minObbLength)) break;
+		gridFeatures.push_back(gf);
 	}
 }
 
@@ -214,6 +215,11 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 	// もしOBBの短い方のエッジの長さがminObbLength未満なら、グリッドと見なさない
 	if (std::min(obb_size.x(), obb_size.y()) < minObbLength) return false;
+
+	// 領域を表すポリゴンを設定
+	for (int i = 0; i < hull.size(); ++i) {
+		gf.polyline.push_back(hull[i]);
+	}
 
 	// 最後に、このグループに属するエッジを、RoadGraphオブジェクトに反映させる
 	for (QMap<RoadEdgeDesc, float>::iterator it = edges.begin(); it != edges.end(); ++it) {

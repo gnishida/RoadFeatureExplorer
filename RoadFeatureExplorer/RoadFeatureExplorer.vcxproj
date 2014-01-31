@@ -167,6 +167,7 @@
     <ClCompile Include="GridFeature.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="Polygon2D.cpp" />
     <ClCompile Include="PolygonArea.cpp" />
     <ClCompile Include="RadialFeature.cpp" />
     <ClCompile Include="Renderable.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="GLWidget.h" />
     <ClInclude Include="GraphUtil.h" />
     <ClInclude Include="GridFeature.h" />
+    <ClInclude Include="Polygon2D.h" />
     <ClInclude Include="PolygonArea.h" />
     <ClInclude Include="RadialFeature.h" />
     <ClInclude Include="Renderable.h" />

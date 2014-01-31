@@ -45,6 +45,10 @@ void GLWidget::drawScene() {
 	// draw the selected area
 	if (selected) {
 		renderer->renderArea(selectedArea, height);
+
+		for (int i = 0; i < mainWin->glWidget->gridFeatures.size(); ++i) {
+			renderer->renderConcave(mainWin->glWidget->gridFeatures[i].polyline, mainWin->glWidget->gridFeatures[i].color(), -10);
+		}
 	}
 }
 
