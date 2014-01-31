@@ -29,23 +29,23 @@ bool PolygonArea::contains(const QVector2D& pt) const {
 
 QVector2D PolygonArea::midPt() const {
 	QVector2D minCorner, maxCorner;
-	Util::getAABB(polygon, minCorner, maxCorner);
+	Polygon2D::getLoopAABB(polygon, minCorner, maxCorner);
 
 	return (minCorner + maxCorner) * 0.5f;
 }
 
 float PolygonArea::dx() const {
 	QVector2D minCorner, maxCorner;
-	Util::getAABB(polygon, minCorner, maxCorner);
+	QVector2D size = Polygon2D::getLoopAABB(polygon, minCorner, maxCorner);
 
-	return maxCorner.x() - minCorner.x();
+	return size.x();
 }
 
 float PolygonArea::dy() const {
 	QVector2D minCorner, maxCorner;
-	Util::getAABB(polygon, minCorner, maxCorner);
+	QVector2D size = Polygon2D::getLoopAABB(polygon, minCorner, maxCorner);
 
-	return maxCorner.y() - minCorner.y();
+	return size.y();
 }
 
 void PolygonArea::translate(float x, float y) {

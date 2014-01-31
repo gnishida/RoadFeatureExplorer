@@ -205,13 +205,13 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
 		}
 	}
-	std::vector<QVector2D> hull;
+	Loop2D hull;
 	ch.convexHull(hull);
 
 	// convex hullのOriented Bounding Boxを求める
 	QVector2D obb_size;
 	QMatrix4x4 obb_mat;
-	Util::getOBB(hull, obb_size, obb_mat);
+	Polygon2D::getLoopOBB(hull, obb_size, obb_mat);
 
 	// もしOBBの短い方のエッジの長さがminObbLength未満なら、グリッドと見なさない
 	if (std::min(obb_size.x(), obb_size.y()) < minObbLength) return false;

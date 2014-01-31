@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Polygon2D.h"
 #include <vector>
 #include <QVector2D>
 #include <boost/geometry.hpp>
@@ -19,6 +20,6 @@ public:
 	~ConvexHull() {}
 
 	void addPoint(const QVector2D& p);
-	void convexHull(std::vector<QVector2D>& hull);
+	void convexHull(Loop2D& hull);
 };
 

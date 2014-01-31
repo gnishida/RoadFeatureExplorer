@@ -18,7 +18,10 @@ This file is part of QtUrban.
 
 #include <vector>
 #include <QVector2D>
+#include <QVector3D>
 #include "float.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 class Loop2D : public std::vector<QVector2D> {
 public:
@@ -115,11 +118,11 @@ public:
 	//static QVector3D getLoopNormalVector(const Loop2D &pin);
 	static bool reorientFace(Loop2D& pface, bool onlyCheck = false);
 	//static int cleanLoop(const Loop2D& pin, Loop2D &pout, float threshold);
-	//static void transformLoop(const Loop2D& pin, Loop2D& pout, QMatrix4x4& transformMat);
+	static void transformLoop(const Loop2D& pin, Loop2D& pout, QMatrix4x4& transformMat);
 	//static float computeLoopArea(const Loop2D& pin, bool parallelToXY = false);
 	//static void sampleTriangularLoopInterior(const Loop2D& pin, std::vector<QVector3D>& pts, float density);
-	//static QVector3D getLoopAABB(const Loop2D& pin, QVector3D& minCorner, QVector3D& maxCorner);
-	//static void getLoopOBB(const Loop2D& pin, QVector3D& size, QMatrix4x4& xformMat);
+	static QVector2D getLoopAABB(const Loop2D& pin, QVector2D& minCorner, QVector2D& maxCorner);
+	static void getLoopOBB(const Loop2D& pin, QVector2D& size, QMatrix4x4& xformMat);
 	//void getMyOBB(QVector3D& size, QMatrix4x4& xformMat);
 	//static void extrudePolygon(const Loop2D& basePgon, float height, std::vector<Polygon2D>& pgonExtrusion);
 

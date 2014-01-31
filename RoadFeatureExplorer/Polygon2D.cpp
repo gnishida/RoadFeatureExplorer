@@ -708,12 +708,14 @@ bool Polygon2D::reorientFace(Loop2D& pface, bool onlyCheck) {
 	return 0;
 }*/
 
-/*void Polygon2D::transformLoop(const Loop2D& pin, Loop2D& pout, QMatrix4x4& transformMat) {
+void Polygon2D::transformLoop(const Loop2D& pin, Loop2D& pout, QMatrix4x4& transformMat) {
 	pout = pin;
 	for (int i=0; i<pin.size(); ++i) {
-		pout.at(i) = transformMat * pin.at(i);
+		QVector3D pt = transformMat * QVector3D(pin[i].x(), pin[i].y(), 0.0f);
+		pout[i].setX(pt.x());
+		pout[i].setY(pt.y());
 	}
-}*/
+}
 
 /*float Polygon2D::computeLoopArea(const Loop2D& pin, bool parallelToXY) {
 	float _area = 0.0f;
@@ -767,52 +769,42 @@ bool Polygon2D::reorientFace(Loop2D& pface, bool onlyCheck) {
 * @brief: Get polygon axis aligned bounding box
 * @return: The dimensions of the AABB 
 **/
-/*QVector3D Polygon2D::getLoopAABB(const Loop2D& pin, QVector3D& minCorner, QVector3D& maxCorner) {
-	maxCorner = QVector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	minCorner = QVector3D( FLT_MAX,  FLT_MAX,  FLT_MAX);
-
-	QVector3D curPt;
+QVector2D Polygon2D::getLoopAABB(const Loop2D& pin, QVector2D& minCorner, QVector2D& maxCorner) {
+	maxCorner = QVector2D(-FLT_MAX, -FLT_MAX);
+	minCorner = QVector2D( FLT_MAX,  FLT_MAX);
 
 	for (int i = 0; i < pin.size(); ++i) {
-		curPt = pin.at(i);
-		if( curPt.x() > maxCorner.x() ){
-			maxCorner.setX(curPt.x());
+		if (pin[i].x() > maxCorner.x()) {
+			maxCorner.setX(pin[i].x());
 		}
-		if( curPt.y() > maxCorner.y() ){
-			maxCorner.setY(curPt.y());
+		if (pin[i].y() > maxCorner.y()) {
+			maxCorner.setY(pin[i].y());
 		}
-		if( curPt.z() > maxCorner.z() ){
-			maxCorner.setZ(curPt.z());
+
+		if (pin[i].x() < minCorner.x()) {
+			minCorner.setX(pin[i].x());
 		}
-		//------------
-		if( curPt.x() < minCorner.x() ){
-			minCorner.setX(curPt.x());
-		}
-		if( curPt.y() < minCorner.y() ){
-			minCorner.setY(curPt.y());
-		}
-		if( curPt.z() < minCorner.z() ){
-			minCorner.setZ(curPt.z());
+		if (pin[i].y() < minCorner.y()) {
+			minCorner.setY(pin[i].y());
 		}
 	}
-	return QVector3D(maxCorner - minCorner);
-}*/
+	return maxCorner - minCorner;
+}
 
 /**
 * Get polygon oriented bounding box
 **/
-/*
-void Polygon2D::getLoopOBB(const Loop2D& pin, QVector3D& size, QMatrix4x4& xformMat) {
+void Polygon2D::getLoopOBB(const Loop2D& pin, QVector2D& size, QMatrix4x4& xformMat) {
 	float alpha = 0.0f;			
 	float deltaAlpha = 0.05 * M_PI;
 	float bestAlpha;
 
 	Loop2D rotLoop;
 	QMatrix4x4 rotMat;
-	QVector3D minPt, maxPt;
-	QVector3D origMidPt;
-	QVector3D boxSz;
-	QVector3D bestBoxSz;
+	QVector2D minPt, maxPt;
+	QVector2D origMidPt;
+	QVector2D boxSz;
+	QVector2D bestBoxSz;
 	float curArea;
 	float minArea = FLT_MAX;
 
@@ -821,7 +813,7 @@ void Polygon2D::getLoopOBB(const Loop2D& pin, QVector3D& size, QMatrix4x4& xform
 	origMidPt = 0.5f*(minPt + maxPt);
 
 	int cSz = pin.size();
-	QVector3D difVec;
+	QVector2D difVec;
 	for (int i=0; i<pin.size(); ++i) {
 		difVec = (pin.at((i+1) % cSz) - pin.at(i)).normalized();
 		alpha = atan2(difVec.x(), difVec.y());
@@ -836,15 +828,13 @@ void Polygon2D::getLoopOBB(const Loop2D& pin, QVector3D& size, QMatrix4x4& xform
 			bestAlpha = alpha;
 			bestBoxSz = boxSz;
 		}
-		//alpha += deltaAlpha;
 	}
 
 	xformMat.setToIdentity();											
 	xformMat.rotate(Util::rad2deg(bestAlpha), 0.0f, 0.0f, 1.0f);
-	xformMat.setRow(3, QVector4D(origMidPt.x(), origMidPt.y(), origMidPt.z(), 1.0f));			
+	xformMat.setRow(3, QVector4D(origMidPt.x(), origMidPt.y(), 0.0f, 1.0f));
 	size = bestBoxSz;
 }
-*/
 
 /*void Polygon2D::getMyOBB(QVector3D& size, QMatrix4x4& xformMat) {
 	Polygon2D::getLoopOBB(this->contour, size, xformMat);

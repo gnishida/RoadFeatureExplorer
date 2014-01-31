@@ -1,12 +1,14 @@
 #pragma once
 
 #include "AbstractArea.h"
+#include "Polygon2D.h"
 #include <vector>
 #include <QVector2D>
 
 class PolygonArea : public AbstractArea {
 private:
-	std::vector<QVector2D> polygon;
+	//std::vector<QVector2D> polygon;
+	Loop2D polygon;
 
 public:
 	PolygonArea(void);

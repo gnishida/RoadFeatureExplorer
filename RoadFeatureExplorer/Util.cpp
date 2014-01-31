@@ -1,6 +1,4 @@
 ﻿#include "Util.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 #define SQR(x)		((x) * (x))
 
@@ -213,84 +211,6 @@ float Util::diffAngle(float angle1, float angle2, bool absolute) {
 		return fabs(normalizeAngle(angle1 - angle2));
 	} else {
 		return normalizeAngle(angle1 - angle2);
-	}
-}
-
-QVector2D Util::getAABB(const std::vector<QVector2D>& ring, QVector2D& minCorner, QVector2D& maxCorner) {
-	maxCorner = QVector2D(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
-	minCorner = QVector2D(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-
-	QVector2D curPt;
-
-	for (int i = 0; i < ring.size(); ++i) {
-		if (ring.at(i).x() > maxCorner.x()) {
-			maxCorner.setX(ring[i].x());
-		}
-		if (ring.at(i).y() > maxCorner.y()) {
-			maxCorner.setY(ring[i].y());
-		}
-
-		if (ring.at(i).x() < minCorner.x()) {
-			minCorner.setX(ring[i].x());
-		}
-		if (ring.at(i).y() < minCorner.y()) {
-			minCorner.setY(ring[i].y());
-		}
-	}
-
-	return maxCorner - minCorner;
-}
-
-void Util::getOBB(std::vector<QVector2D>& ring, QVector2D& size, QMatrix4x4& transMat) {
-	float alpha = 0.0f;			
-	float deltaAlpha = 0.05 * M_PI;
-	float bestAlpha;
-
-	QMatrix4x4 rotMat;
-	QVector2D minPt, maxPt;
-	QVector2D origMidPt;
-	QVector2D boxSz;
-	QVector2D bestBoxSz;
-	float curArea;
-	float minArea = FLT_MAX;
-
-	std::vector<QVector2D> ring_temp = ring;
-
-	getAABB(ring_temp, minPt, maxPt);
-	origMidPt = 0.5f * (minPt + maxPt);
-
-	int cSz = ring.size();
-	QVector2D difVec;
-	for (int i = 0; i < ring.size(); ++i) {
-		difVec = (ring.at((i+1) % cSz) - ring.at(i)).normalized();
-		alpha = atan2(difVec.x(), difVec.y());
-		rotMat.setToIdentity();				
-		rotMat.rotate(Util::rad2deg(alpha), 0.0f, 0.0f, 1.0f);				
-
-		transformRing(ring, ring_temp, rotMat);
-		
-		boxSz = getAABB(ring_temp, minPt, maxPt);
-		curArea = boxSz.x() * boxSz.y();
-		if (curArea < minArea) {
-			minArea = curArea;
-			bestAlpha = alpha;
-			bestBoxSz = boxSz;
-		}
-	}
-
-	transMat.setToIdentity();											
-	transMat.rotate(Util::rad2deg(bestAlpha), 0.0f, 0.0f, 1.0f);
-	transMat.setRow(3, QVector4D(origMidPt.x(), origMidPt.y(), 0.0f, 1.0f));		
-
-	size = bestBoxSz;
-}
-
-void Util::transformRing(const std::vector<QVector2D>& srcRing, std::vector<QVector2D>& dstRing, QMatrix4x4& transformMat) {
-	dstRing = srcRing;
-	for (int i = 0; i < srcRing.size(); ++i) {
-		QVector3D pt = transformMat * QVector3D(srcRing[i].x(), srcRing[i].y(), 0.0f);
-		dstRing[i].setX(pt.x());
-		dstRing[i].setY(pt.y());
 	}
 }
 
