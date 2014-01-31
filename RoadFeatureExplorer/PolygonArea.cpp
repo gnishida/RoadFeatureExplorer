@@ -7,14 +7,20 @@ PolygonArea::PolygonArea() {
 PolygonArea::~PolygonArea() {
 }
 
+void PolygonArea::clear() {
+	polygon.clear();
+}
+
 void PolygonArea::addPoint(const QVector2D& pt) {
 	polygon.push_back(pt);
 }
 
 bool PolygonArea::contains(const QVector2D& pt) const {
-	for (int i = 0; i < polygon.size() - 1; ++i) {
-		QVector2D vec1 = polygon[i + 1] - polygon[i];
-		QVector2D vec2 = pt - polygon[i + 1];
+	int size = polygon.size();
+
+	for (int i = 0; i < size; ++i) {
+		QVector2D vec1 = polygon[(i + 1) % size] - polygon[i];
+		QVector2D vec2 = pt - polygon[i];
 		if (vec1.x() * vec2.y() - vec1.y() * vec2.x() > 0) return false;
 	}
 

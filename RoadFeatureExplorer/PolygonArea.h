@@ -12,6 +12,7 @@ public:
 	PolygonArea(void);
 	~PolygonArea(void);
 
+	void clear();
 	void addPoint(const QVector2D& pt);
 	bool contains(const QVector2D& pt) const;
 	QVector2D midPt() const;

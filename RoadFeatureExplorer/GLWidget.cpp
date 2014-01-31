@@ -101,8 +101,14 @@ void GLWidget::mousePressEvent(QMouseEvent *e) {
 	mouseTo2D(e->x(), e->y(), &last2DPos);
 
 	if (e->buttons() & Qt::LeftButton) {
-		selectedArea = BBox(last2DPos);
-		selected = true;
+		//selectedArea = BBox(last2DPos);
+		//selected = true;
+
+		if (!shiftPressed) {
+			selected = true;
+			selectedArea.clear();
+		}
+		selectedArea.addPoint(last2DPos);
 	}
 
 	updateGL();
@@ -114,9 +120,12 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e) {
 	
 	lastPos = e->pos();
 
-	//stopDefiningArea();
-	if (selectedArea.dx() < 0.1f && selectedArea.dy() < 0.1f) {
-		selected = false;
+	if (selectedArea.polyline().size() > 3) {
+		if ((selectedArea.polyline()[0] - selectedArea.polyline()[selectedArea.polyline().size() - 1]).lengthSquared() < 10000.0f) {
+			// close the polygon
+			selecting = false;
+			selected = true;
+		}
 	}
 
 	e->ignore();
@@ -138,7 +147,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e) {
 	last2DPos = pos;
 
 	if (e->buttons() & Qt::LeftButton) {
-		selectedArea.addPoint(last2DPos);
+		//selectedArea.addPoint(last2DPos);
 	} else if (e->buttons() & Qt::MidButton) {   // Shift the camera
 		camera->changeXYZTranslation(-dx * camera->dz * 0.001f, dy * camera->dz * 0.001f, 0);
 	} else if (e->buttons() & Qt::RightButton) { // Zoom the camera

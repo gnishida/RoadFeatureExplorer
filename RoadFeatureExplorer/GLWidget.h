@@ -4,6 +4,7 @@
 #include "RoadGraph.h"
 #include "RoadGraphRenderer.h"
 #include "BBox.h"
+#include "PolygonArea.h"
 #include <QGLWidget>
 #include <QString>
 
@@ -22,7 +23,8 @@ public:
 	RoadGraphRenderer* renderer;
 	QPoint lastPos;
 	QVector2D last2DPos;
-	BBox selectedArea;
+	//BBox selectedArea;
+	PolygonArea selectedArea;
 
 	bool selecting;
 	bool selected;

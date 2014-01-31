@@ -91,9 +91,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;		
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;		
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
@@ -140,9 +139,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;	
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;	
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
@@ -164,9 +162,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, AbstractArea& area, i
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
@@ -333,9 +330,8 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, AbstractArea& area,
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
@@ -403,9 +399,8 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
 			RoadEdgeDesc e = plaza_list[i][j];
 
 			RoadVertexDesc src = boost::source(e, roads.graph);
-			if (!area.contains(roads.graph[src]->pt)) continue;
 			RoadVertexDesc tgt = boost::target(e, roads.graph);
-			if (!area.contains(roads.graph[tgt]->pt)) continue;
+			if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 			roads.graph[e]->shapeType = RoadEdge::SHAPE_PLAZA;
 			roads.graph[e]->group = 8;
@@ -453,9 +448,8 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
 
 		// 範囲外のエッジはスキップ
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
@@ -523,9 +517,8 @@ QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, Abs
 
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
@@ -622,9 +615,8 @@ QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, Abs
 
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt)) continue;
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[tgt]->pt)) continue;
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
