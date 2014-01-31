@@ -25,7 +25,7 @@ public:
 	static float diffAngle(const QVector2D& dir1, const QVector2D& dir2, bool absolute = true);
 	static float diffAngle(float angle1, float angle2, bool absolute = true);
 
-	static QVector2D getAABB(std::vector<QVector2D>& ring, QVector2D& minCorner, QVector2D& maxCorner);
+	static QVector2D getAABB(const std::vector<QVector2D>& ring, QVector2D& minCorner, QVector2D& maxCorner);
 	static void getOBB(std::vector<QVector2D>& ring, QVector2D& size, QMatrix4x4& transMat);
 	static void transformRing(const std::vector<QVector2D>& srcRing, std::vector<QVector2D>& dstRing, QMatrix4x4& transformMat);
 };

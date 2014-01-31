@@ -216,24 +216,24 @@ float Util::diffAngle(float angle1, float angle2, bool absolute) {
 	}
 }
 
-QVector2D Util::getAABB(std::vector<QVector2D>& ring, QVector2D& minCorner, QVector2D& maxCorner) {
+QVector2D Util::getAABB(const std::vector<QVector2D>& ring, QVector2D& minCorner, QVector2D& maxCorner) {
 	maxCorner = QVector2D(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 	minCorner = QVector2D(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 
 	QVector2D curPt;
 
-	for (int i = 0; i < ring.size() - 1; ++i) {
-		if (ring[i].x() > maxCorner.x()) {
+	for (int i = 0; i < ring.size(); ++i) {
+		if (ring.at(i).x() > maxCorner.x()) {
 			maxCorner.setX(ring[i].x());
 		}
-		if (ring[i].y() > maxCorner.y()) {
+		if (ring.at(i).y() > maxCorner.y()) {
 			maxCorner.setY(ring[i].y());
 		}
 
-		if (ring[i].x() < minCorner.x()) {
+		if (ring.at(i).x() < minCorner.x()) {
 			minCorner.setX(ring[i].x());
 		}
-		if (ring[i].y() < minCorner.y()) {
+		if (ring.at(i).y() < minCorner.y()) {
 			minCorner.setY(ring[i].y());
 		}
 	}

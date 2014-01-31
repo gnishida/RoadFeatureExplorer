@@ -23,6 +23,8 @@ public:
 	QPoint lastPos;
 	QVector2D last2DPos;
 	BBox selectedArea;
+
+	bool selecting;
 	bool selected;
 
 	// key status

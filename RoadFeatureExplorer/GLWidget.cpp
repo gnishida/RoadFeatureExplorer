@@ -21,6 +21,7 @@ GLWidget::GLWidget(MainWindow* mainWin) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	// initialize the width and others
 	roads.setZ((MIN_Z + MAX_Z) / 2.0f);
 
+	selecting = false;
 	selected = false;
 
 	// initialize the key status
