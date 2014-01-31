@@ -4,8 +4,6 @@
 #include <QVector3D>
 #include <QVector2D>
 #include <QMatrix4x4>
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 class Util {
 	static const float MTC_FLOAT_TOL;

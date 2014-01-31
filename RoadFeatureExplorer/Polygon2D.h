@@ -27,6 +27,7 @@ class Loop2D : public std::vector<QVector2D> {
 public:
 	void close();
 	void tessellate(std::vector<Loop2D>& trapezoids) const;
+	bool contains(const QVector2D& pt) const;
 	void findEdge(float x, float y, int& v1, int& v2, float& s) const;
 	static Loop2D createRectangle(float width, float height);
 };

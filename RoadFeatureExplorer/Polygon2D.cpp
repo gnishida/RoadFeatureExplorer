@@ -88,6 +88,16 @@ void Loop2D::tessellate(std::vector<Loop2D>& trapezoids) const {
 	}
 }
 
+bool Loop2D::contains(const QVector2D& pt) const {
+	for (int i = 0; i < size(); ++i) {
+		QVector2D vec1 = at((i + 1) % size()) - at(i);
+		QVector2D vec2 = pt - at(i);
+		if (vec1.x() * vec2.y() - vec1.y() * vec2.x() > 0) return false;
+	}
+
+	return true;
+}
+
 void Loop2D::findEdge(float x, float y, int& v1, int& v2, float& s) const {
 	float minDist = (std::numeric_limits<float>::max)();
 
