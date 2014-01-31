@@ -10,6 +10,7 @@
 
 RoadGraph::RoadGraph() {
 	modified = true;
+	showLocalStreets = true;
 }
 
 RoadGraph::~RoadGraph() {
@@ -65,7 +66,7 @@ void RoadGraph::generateMesh() {
 		// draw the border of the road segment
 		if (!showLocalStreets && edge->type == 1) {
 			// If this is the local street and it should be drawn in gray color, it should be a little narrow line.
-			addMeshFromEdge(renderables[0], edge, widthBase * 0.6f, color, 0.0f);
+			addMeshFromEdge(renderables[0], edge, widthBase * 0.6f, bColor, 0.0f);
 		} else {
 			addMeshFromEdge(renderables[0], edge, widthBase * (1.0f + curbRatio), bColor, 0.0f);
 			addMeshFromEdge(renderables[0], edge, widthBase, color, height);
@@ -188,18 +189,6 @@ void RoadGraph::setZ(float z) {
 	}
 	if (curbRatio != curbRatio2) {
 		curbRatio = curbRatio2;
-		modified = true;
-	}
-
-	// define whether to draw local street
-	bool showLocalStreets2;
-	if (z < 5760.0f) {
-		showLocalStreets2 = true;
-	} else {
-		showLocalStreets2 = false;
-	}
-	if (showLocalStreets != showLocalStreets2) {
-		showLocalStreets = showLocalStreets2;
 		modified = true;
 	}
 

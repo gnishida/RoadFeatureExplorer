@@ -32,6 +32,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	ui.lineEditRadialExtendingAngleThreshold->setText("0.2");
 
 	// register the event handlers
+	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showLocalStreet(int)));
 	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
 	connect(ui.pushButtonDetectPlaza, SIGNAL(clicked()), this, SLOT(detectPlaza()));
 	connect(ui.pushButtonDetectRadial, SIGNAL(clicked()), this, SLOT(detectRadial()));
@@ -42,6 +43,13 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event handlers
+
+void ControlWidget::showLocalStreet(int flag) {
+	mainWin->glWidget->roads.showLocalStreets = (flag == 1) ? true : false;
+	mainWin->glWidget->roads.setModified();
+
+	mainWin->glWidget->updateGL();
+}
 
 /**
  * Event handler for button [Detect Grid]

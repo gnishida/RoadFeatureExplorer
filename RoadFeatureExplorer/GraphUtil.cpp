@@ -2908,6 +2908,16 @@ float GraphUtil::computeMinDiffAngle(std::vector<float> *data1, std::vector<floa
 }
 
 /**
+ * 指定した道路エッジのタイプが、指定されたタイプに含まれるかチェックする。
+ * 例えば、タイプとして3を指定した場合、Local streetsとAvenuesが含まれる。
+ * 　　　　タイプとして7を指定した場合、全てのタイプのエッジが含まれることを意味する。
+ */
+bool GraphUtil::isRoadTypeMatched(int type, int ref_type) {
+	if (((int)powf(2, (type - 1)) & ref_type)) return true;
+	else return false;
+}
+
+/**
  * 対応する頂点が与えられている時に、２つの道路網のトポロジーの違いを数値化して返却する。
  * トポロジーの違いなので、座標は一切関係ない。隣接ノードとの接続性のみを考慮する。
  *
