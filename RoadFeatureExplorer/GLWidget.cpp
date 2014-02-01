@@ -21,9 +21,6 @@ GLWidget::GLWidget(MainWindow* mainWin) : QGLWidget(QGLFormat(QGL::SampleBuffers
 	// initialize the width and others
 	roads.setZ((MIN_Z + MAX_Z) / 2.0f);
 
-	selecting = false;
-	selected = false;
-
 	// initialize the key status
 	shiftPressed = false;
 	controlPressed = false;
@@ -43,12 +40,14 @@ void GLWidget::drawScene() {
 	float height = (float)((int)(camera->dz * 0.012f)) * 0.15f;
 
 	// draw the selected area
-	if (selected) {
-		renderer->renderArea(selectedArea, height);
+	if (selectedAreaBuilder.selected()) {
+		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, height);
 
 		for (int i = 0; i < mainWin->glWidget->gridFeatures.size(); ++i) {
 			renderer->renderConcave(mainWin->glWidget->gridFeatures[i].polyline, mainWin->glWidget->gridFeatures[i].color(), -10);
 		}
+	} else if (selectedAreaBuilder.selecting()) {
+		renderer->renderPolyline(selectedAreaBuilder.polyline(), GL_LINE_STIPPLE, height);
 	}
 }
 
@@ -102,26 +101,24 @@ void GLWidget::mousePressEvent(QMouseEvent *e) {
 	this->setFocus();
 
 	lastPos = e->pos();
-	mouseTo2D(e->x(), e->y(), &last2DPos);
+	QVector2D pos;
+	mouseTo2D(e->x(), e->y(), pos);
 
 	if (e->buttons() & Qt::LeftButton) {
-		if (shiftPressed) {
-			selected = true;
-			selectedArea.clear();
-			selectedArea.addPoint(last2DPos);
+		if (!selectedAreaBuilder.selecting()) {
+			selectedAreaBuilder.start(pos);
+			setMouseTracking(true);
 		}
-		selectedArea.addPoint(last2DPos);
-
-		setMouseTracking(true);
+		
+		if (selectedAreaBuilder.selecting()) {
+			selectedAreaBuilder.addPoint(pos);
+		}
 	}
 
 	updateGL();
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *e) {
-	float dx = (float)(e->x() - lastPos.x());
-	float dy = (float)(e->y() - lastPos.y());
-	
 	lastPos = e->pos();
 
 	setCursor(Qt::ArrowCursor);
@@ -132,13 +129,9 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e) {
 	float dx = (float)(e->x() - lastPos.x());
 	float dy = (float)(e->y() - lastPos.y());
 	lastPos = e->pos();
-	//float camElevation = camera->getCamElevation();
 
 	QVector2D pos;
-	mouseTo2D(e->x(), e->y(), &pos);
-	float dx2D = pos.x() - last2DPos.x();
-	float dy2D = pos.y() - last2DPos.y();
-	last2DPos = pos;
+	mouseTo2D(e->x(), e->y(), pos);
 
 	if (e->buttons() & Qt::MidButton) {   // Shift the camera
 		setCursor(Qt::ClosedHandCursor);
@@ -154,17 +147,18 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e) {
 		roads.setZ(camera->dz);
 
 		lastPos = e->pos();
-	} else {	// Move the last point of the selected polygonal area
-		selectedArea.moveLastPoint(last2DPos);
+	} else if (selectedAreaBuilder.selecting()) {	// Move the last point of the selected polygonal area
+		selectedAreaBuilder.moveLastPoint(pos);
 	}
-
-	last2DPos = pos;
 
 	updateGL();
 }
 
 void GLWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 	setMouseTracking(false);
+
+	selectedAreaBuilder.end();
+	selectedArea = selectedAreaBuilder.polygonArea();
 }
 
 void GLWidget::initializeGL() {
@@ -229,7 +223,7 @@ void GLWidget::paintGL() {
 /**
  * Convert the screen space coordinate (x, y) to the model space coordinate.
  */
-void GLWidget::mouseTo2D(int x,int y, QVector2D *result) {
+void GLWidget::mouseTo2D(int x,int y, QVector2D &result) {
 	GLint viewport[4];
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -252,6 +246,6 @@ void GLWidget::mouseTo2D(int x,int y, QVector2D *result) {
 	GLdouble posX, posY, posZ;
 	gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
-	result->setX(posX);
-	result->setY(posY);
+	result.setX(posX);
+	result.setY(posY);
 }

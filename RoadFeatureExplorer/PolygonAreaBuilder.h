@@ -1,17 +1,25 @@
 #pragma once
 
+#include "Polygon2D.h"
 #include "PolygonArea.h"
 
 class PolygonAreaBuilder {
-public:
-	PolygonArea area;
+private:
+	bool _selecting;
+	Loop2D _polyline;
 
 public:
 	PolygonAreaBuilder();
-	~PolygonAreaBuilder();
+	~PolygonAreaBuilder() {}
 
-	void init();
+	void start(const QVector2D& pt);
 	void addPoint(const QVector2D& pt);
-	void movePoint(const QVector2D& pt);
+	void moveLastPoint(const QVector2D& pt);
+	void end();
+
+	bool selected() const;
+	bool selecting() const;
+	Loop2D polyline() const;
+	PolygonArea polygonArea() const;
 };
 

@@ -7,12 +7,11 @@
 
 class PolygonArea : public AbstractArea {
 private:
-	//std::vector<QVector2D> polygon;
 	Loop2D polygon;
 
 public:
-	PolygonArea(void);
-	~PolygonArea(void);
+	PolygonArea();
+	~PolygonArea();
 
 	void clear();
 	void addPoint(const QVector2D& pt);

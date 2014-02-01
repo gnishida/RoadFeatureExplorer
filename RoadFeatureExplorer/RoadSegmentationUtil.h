@@ -3,6 +3,7 @@
 #include "RoadGraph.h"
 #include "AbstractArea.h"
 #include "GridFeature.h"
+#include "RadialFeature.h"
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
@@ -21,12 +22,12 @@ public:
 	static void detectPlaza(RoadGraph& roads, AbstractArea& area);
 
 	static void detectRadial(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold);
-	static bool detectOneRadial(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold);
-	static QVector2D detectRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale);
-	static QVector2D refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold);
-	static void reduceRadialGroup(RoadGraph& roads, QVector2D& center, QMap<RoadEdgeDesc, bool>& edges, float distanceThreshold);
-	static void extendRadialGroup(RoadGraph& roads, AbstractArea& area, int roadType, QVector2D& center, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio);
-	static int countNumDirections(RoadGraph& roads, const QVector2D& center, QMap<RoadEdgeDesc, bool>& edges, int size);
+	static bool detectOneRadial(RoadGraph& roads, AbstractArea& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold);
+	static void detectRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, RadialFeature& rf);
+	static void refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, RadialFeature& rf, float distanceThreshold, float angleThreshold);
+	static void reduceRadialGroup(RoadGraph& roads, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float distanceThreshold);
+	static void extendRadialGroup(RoadGraph& roads, AbstractArea& area, int roadType, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio);
+	static int countNumDirections(RoadGraph& roads, const RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, int size);
 
 	static void detectRoundabout(RoadGraph& roads, AbstractArea& area);
 };

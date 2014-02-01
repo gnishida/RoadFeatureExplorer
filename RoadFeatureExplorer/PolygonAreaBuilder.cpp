@@ -1,27 +1,48 @@
-﻿#include "PolygonAreaBuilder.h"
+#include "PolygonAreaBuilder.h"
 
-PolygonAreaBuilder::PolygonAreaBuilder(void)
-{
+PolygonAreaBuilder::PolygonAreaBuilder() {
+	_selecting = false;
 }
 
-PolygonAreaBuilder::~PolygonAreaBuilder(void)
-{
-}
+void PolygonAreaBuilder::start(const QVector2D& pt) {
+	_polyline.clear();
+	_polyline.push_back(pt);
 
-void PolygonAreaBuilder::init() {
-	area.clear();
+	_selecting = true;
 }
 
 void PolygonAreaBuilder::addPoint(const QVector2D& pt) {
-	area.addPoint(pt);
+	_polyline.push_back(pt);
 }
 
-/**
- * 一番最後の点を動かす。
- * 通常、マウスなどで領域を選択する場合、マウスの移動に伴って、一番最後の点を動かしたい場合に、このメソッドを使用する。
- */
-void PolygonAreaBuilder::movePoint(const QVector2D& pt) {
-	if (area.size() == 0) return;
+void PolygonAreaBuilder::moveLastPoint(const QVector2D& pt) {
+	if (_polyline.size() == 0) return;
 
-	area.p
+	_polyline[_polyline.size() - 1] = pt;
+}
+
+void PolygonAreaBuilder::end() {
+	_selecting = false;
+}
+
+bool PolygonAreaBuilder::selected() const {
+	return !_selecting && _polyline.size() >= 3;
+}
+
+bool PolygonAreaBuilder::selecting() const {
+	return _selecting;
+}
+
+Loop2D PolygonAreaBuilder::polyline() const {
+	return _polyline;
+}
+
+PolygonArea PolygonAreaBuilder::polygonArea() const {
+	PolygonArea area;
+
+	for (int i = 0; i < _polyline.size(); ++i) {
+		area.addPoint(_polyline[i]);
+	}
+
+	return area;
 }

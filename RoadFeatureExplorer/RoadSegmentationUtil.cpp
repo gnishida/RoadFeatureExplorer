@@ -422,7 +422,8 @@ void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
  */
 void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area, int roadType, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
 	for (int i = 0; i < maxIteration; i++) {
-		if (!detectOneRadial(roads, area, roadType, i, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, extendingAngleThreshold)) break;
+		RadialFeature rf(i);
+		if (!detectOneRadial(roads, area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, extendingAngleThreshold)) break;
 	}
 }
 
@@ -430,15 +431,15 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, AbstractArea& area, in
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area, int roadType, int group_id, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
+bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float extendingAngleThreshold) {
 	// 0.01スケールで、円の中心を求める
-	QVector2D center = detectRadialCenterInScaled(roads, area, roadType, scale1);
+	detectRadialCenterInScaled(roads, area, roadType, scale1, rf);
 
 	// 0.1スケールで、より正確な円の中心を求める
-	center = refineRadialCenterInScaled(roads, area, roadType, scale2, center, centerErrorTol2, angleThreshold2);
+	refineRadialCenterInScaled(roads, area, roadType, scale2, rf, centerErrorTol2, angleThreshold2);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	center = refineRadialCenterInScaled(roads, area, roadType, scale3, center, centerErrorTol3, angleThreshold3);
+	refineRadialCenterInScaled(roads, area, roadType, scale3, rf, centerErrorTol3, angleThreshold3);
 
 	// 各エッジについて、radialの中心点に合うものを、グループに登録する
 	QMap<RoadEdgeDesc, bool> edges;
@@ -460,7 +461,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
 		float length = 0.0f;
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
-			QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
+			QVector2D dir2 = roads.graph[*ei]->polyLine[i] - rf.center;
 
 			if (Util::diffAngle(dir1, dir2) < angleThreshold3 || Util::diffAngle(dir1, -dir2) < angleThreshold3) {
 				length += dir1.length();
@@ -479,20 +480,20 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
 	}
 
 	// 円の中心から一定距離以内のエッジのみを残す
-	reduceRadialGroup(roads, center, edges, seedDistance);
+	reduceRadialGroup(roads, rf, edges, seedDistance);
 	if (edges.size() < 5) return false;
 
 	// 中心から伸びるアームの方向を量子化してカウントする
-	if (countNumDirections(roads, center, edges, 12) <= 5) return false;
+	if (countNumDirections(roads, rf, edges, 12) <= 5) return false;
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、候補に登録していく
-	extendRadialGroup(roads, area, roadType, center, edges, extendingAngleThreshold, votingRatioThreshold);
+	extendRadialGroup(roads, area, roadType, rf, edges, extendingAngleThreshold, votingRatioThreshold);
 
 	// 最後に、候補エッジを、実際にグループに登録する
 	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
 		RoadEdgeDesc e = it.key();
 		roads.graph[e]->shapeType = RoadEdge::SHAPE_RADIAL;
-		roads.graph[e]->group = group_id;
+		roads.graph[e]->group = rf.group_id;
 		roads.graph[e]->gridness = 0;
 	}
 
@@ -505,7 +506,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, AbstractArea& area,
  * Plazaを１つ検知し、円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale) {
+void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, RadialFeature& rf) {
 	BBox bbox = GraphUtil::getAABoundingBox(roads);
 	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
 
@@ -594,20 +595,20 @@ QVector2D RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, Abs
 	center /= scale;
 	center += bbox.minPt;
 
-	return center;
+	rf.center = center;
 }
 
 /**
  * 円のだいたいの中心点を使って、より正確な円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, QVector2D& centerApprox, float distanceThreshold, float angleThreshold) {
+void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, AbstractArea& area, int roadType, float scale, RadialFeature& rf, float distanceThreshold, float angleThreshold) {
 	BBox bbox = GraphUtil::getAABoundingBox(roads);
 	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
 
 	float sigma = bbox.dx() * scale * 0.05f;
 
-	QVector2D c = (centerApprox - bbox.minPt) * scale;
+	QVector2D c = (rf.center - bbox.minPt) * scale;
 
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -698,7 +699,7 @@ QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, Abs
 	center /= scale;
 	center += bbox.minPt;
 
-	return center;
+	rf.center = center;
 }
 
 /**
@@ -707,7 +708,7 @@ QVector2D RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, Abs
  * @param edges					radialエッジの候補
  * @param distanceThreshold		円の中心から、この距離よりも遠いエッジは、グループから外す
  */
-void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center, QMap<RoadEdgeDesc, bool>& edges, float distanceThreshold) {
+void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float distanceThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
 
 	int count = 0;
@@ -716,7 +717,7 @@ void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 		RoadVertexDesc tgt = boost::target(it.key(), roads.graph);
 
 		// 円の中心から離れているエッジは、候補から一旦外す
-		if ((roads.graph[src]->pt - center).lengthSquared() > distanceThreshold2 && (roads.graph[tgt]->pt - center).lengthSquared() > distanceThreshold2) {			
+		if ((roads.graph[src]->pt - rf.center).lengthSquared() > distanceThreshold2 && (roads.graph[tgt]->pt - rf.center).lengthSquared() > distanceThreshold2) {
 			it = edges.erase(it);
 		} else {
 			++it;
@@ -727,7 +728,7 @@ void RoadSegmentationUtil::reduceRadialGroup(RoadGraph& roads, QVector2D& center
 /**
  * 指定したグループに属するエッジについて、円の中心から離れる方向に周辺のエッジを辿り、グループに登録していく。
  */
-void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& area, int roadType, QVector2D& center, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio) {
+void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& area, int roadType, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio) {
 	QList<RoadVertexDesc> queue;
 
 	QList<RoadVertexDesc> visited;
@@ -760,7 +761,7 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 			float length = 0.0f;
 			for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 				QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
-				QVector2D dir2 = roads.graph[*ei]->polyLine[i] - center;
+				QVector2D dir2 = roads.graph[*ei]->polyLine[i] - rf.center;
 
 				if (Util::diffAngle(dir1, dir2) < angleThreshold || Util::diffAngle(dir1, -dir2) < angleThreshold) {
 					length += dir1.length();
@@ -792,7 +793,7 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, AbstractArea& are
 /**
  * 指定された中心から伸びるradial道路の方向を、指定されたサイズで量子化し、道路が延びている方向の数を返却する。
  */
-int RoadSegmentationUtil::countNumDirections(RoadGraph& roads, const QVector2D& center, QMap<RoadEdgeDesc, bool>& edges, int size) {
+int RoadSegmentationUtil::countNumDirections(RoadGraph& roads, const RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, int size) {
 	QSet<int> directions;
 
 	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
@@ -801,10 +802,10 @@ int RoadSegmentationUtil::countNumDirections(RoadGraph& roads, const QVector2D& 
 
 		// 円の中心から離れている方の頂点と、円の中心を使って、方向を計算する
 		QVector2D vec;
-		if ((roads.graph[src]->pt - center).lengthSquared() > (roads.graph[tgt]->pt - center).lengthSquared()) {
-			vec = roads.graph[src]->pt - center;
+		if ((roads.graph[src]->pt - rf.center).lengthSquared() > (roads.graph[tgt]->pt - rf.center).lengthSquared()) {
+			vec = roads.graph[src]->pt - rf.center;
 		} else {
-			vec = roads.graph[tgt]->pt - center;
+			vec = roads.graph[tgt]->pt - rf.center;
 		}
 		float angle = atan2f(vec.y(), vec.x());
 		if (angle < 0) angle += M_PI * 2.0f;

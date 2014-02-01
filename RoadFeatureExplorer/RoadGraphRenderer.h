@@ -15,10 +15,10 @@ public:
 	void render(std::vector<RenderablePtr>& renderables);
 	void renderOne(RenderablePtr renderable);
 
-	void renderArea(const AbstractArea& area, float height);
+	void renderArea(const AbstractArea& area, GLenum lineType, float height);
 	void renderDenseArea(const AbstractArea& area, float height);
 	void renderPoint(const QVector2D& pt, float height);
-	void renderPolyline(std::vector<QVector2D>& polyline, float height);
+	void renderPolyline(std::vector<QVector2D>& polyline, GLenum lineType, float height);
 
 	//void tessellate(const Loop2D& polygon);
 	void renderConcave(const Loop2D& polygon, const QColor& color, float height);

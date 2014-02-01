@@ -40,9 +40,9 @@ void RoadGraphRenderer::renderOne(RenderablePtr renderable) {
 	glEnd();
 }
 
-void RoadGraphRenderer::renderArea(const AbstractArea& area, float height) {
+void RoadGraphRenderer::renderArea(const AbstractArea& area, GLenum lineType, float height) {
 	std::vector<RenderablePtr> renderables;
-	renderables.push_back(RenderablePtr(new Renderable(GL_LINE_STIPPLE, 3.0f)));
+	renderables.push_back(RenderablePtr(new Renderable(lineType, 3.0f)));
 	renderables.push_back(RenderablePtr(new Renderable(GL_POINTS, 10.0f)));
 
 	Vertex v;
@@ -115,9 +115,9 @@ void RoadGraphRenderer::renderPoint(const QVector2D& pt, float height) {
 	renderOne(renderable);
 }
 
-void RoadGraphRenderer::renderPolyline(std::vector<QVector2D>& polyline, float height) {
+void RoadGraphRenderer::renderPolyline(std::vector<QVector2D>& polyline, GLenum lineType, float height) {
 	std::vector<RenderablePtr> renderables;
-	renderables.push_back(RenderablePtr(new Renderable(GL_LINE_STRIP, 3.0f)));
+	renderables.push_back(RenderablePtr(new Renderable(lineType, 3.0f)));
 	renderables.push_back(RenderablePtr(new Renderable(GL_POINTS, 10.0f)));
 	
 	Vertex v;
@@ -140,36 +140,6 @@ void RoadGraphRenderer::renderPolyline(std::vector<QVector2D>& polyline, float h
 
 	render(renderables);
 }
-
-/*void RoadGraphRenderer::tessellate(const Loop2D& polygon) {
-	if (polygon.size() < 3) return;
-
-	float minX = (std::numeric_limits<float>::max)();
-	float maxX = (std::numeric_limits<float>::min)();
-	float minY = (std::numeric_limits<float>::max)();
-	float maxY = (std::numeric_limits<float>::min)();
-
-	for (int i = 0; i < polygon.size(); i++) {
-		minX = std::min<float>(polygon[i].x(), minX);
-		maxX = std::max<float>(polygon[i].x(), maxX);
-		minY = std::min<float>(polygon[i].y(), minY);
-		maxY = std::max<float>(polygon[i].y(), maxY);
-	}
-
-	std::vector<Loop2D> trapezoids;
-	polygon.tessellate(trapezoids);
-
-	for (int i = 0; i < trapezoids.size(); ++i) {
-		if (trapezoids[i].size() < 3) continue;
-
-		QVector2D tex0((trapezoids[i][0].x() - minX) / (maxX - minX), (trapezoids[i][0].y() - minY) / (maxY - minY));
-		for (int j = 1; j < trapezoids[i].size() - 1; ++j) {
-			generateMeshVertex(trapezoids[i][0].x(), trapezoids[i][0].y(), trapezoids[i][0].z(), 0, 0, 1, tex0.x(), tex0.y());
-			generateMeshVertex(trapezoids[i][j].x(), trapezoids[i][j].y(), trapezoids[i][j].z(), 0, 0, 1, (trapezoids[i][j].x() - minX) / (maxX - minX), (trapezoids[i][j].y() - minY) / (maxY - minY));
-			generateMeshVertex(trapezoids[i][j+1].x(), trapezoids[i][j+1].y(), trapezoids[i][j+1].z(), 0, 0, 1, (trapezoids[i][j+1].x() - minX) / (maxX - minX), (trapezoids[i][j+1].y() - minY) / (maxY - minY));
-		}
-	}
-}*/
 
 void RoadGraphRenderer::renderConcave(const Loop2D& polygon, const QColor& color, float height) {
 	std::vector<RenderablePtr> renderables;

@@ -3,9 +3,8 @@
 #include "Camera.h"
 #include "RoadGraph.h"
 #include "RoadGraphRenderer.h"
-#include "BBox.h"
-#include "PolygonAreaBuilder.h"
 #include "PolygonArea.h"
+#include "PolygonAreaBuilder.h"
 #include "GridFeature.h"
 #include <QGLWidget>
 #include <QString>
@@ -24,13 +23,9 @@ public:
 	RoadGraph origRoads;
 	RoadGraphRenderer* renderer;
 	QPoint lastPos;
-	QVector2D last2DPos;
-	//BBox selectedArea;
 	PolygonArea selectedArea;
+	PolygonAreaBuilder selectedAreaBuilder;
 	std::vector<GridFeature> gridFeatures;
-
-	bool selecting;
-	bool selected;
 
 	// key status
 	bool shiftPressed;
@@ -58,7 +53,7 @@ protected:
 	void paintGL();
 
 private:
-	void mouseTo2D(int x, int y, QVector2D *result);
+	void mouseTo2D(int x, int y, QVector2D &result);
 	bool hitTest(const AbstractArea& area, const QVector2D& pt);
 	bool hitTestDistortionPoint(const AbstractArea& area, const QVector2D& pt);
 	bool hitTestResizingPoint(const AbstractArea& area, const QVector2D& pt);

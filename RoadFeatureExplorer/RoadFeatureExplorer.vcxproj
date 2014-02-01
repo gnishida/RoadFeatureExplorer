@@ -169,6 +169,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Polygon2D.cpp" />
     <ClCompile Include="PolygonArea.cpp" />
+    <ClCompile Include="PolygonAreaBuilder.cpp" />
     <ClCompile Include="RadialFeature.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="RoadEdge.cpp" />
@@ -234,6 +235,7 @@
     <ClInclude Include="GridFeature.h" />
     <ClInclude Include="Polygon2D.h" />
     <ClInclude Include="PolygonArea.h" />
+    <ClInclude Include="PolygonAreaBuilder.h" />
     <ClInclude Include="RadialFeature.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="RoadEdge.h" />
