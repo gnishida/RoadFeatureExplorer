@@ -124,10 +124,6 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e) {
 	
 	lastPos = e->pos();
 
-
-
-	e->ignore();
-
 	setCursor(Qt::ArrowCursor);
 	updateGL();
 }
@@ -145,6 +141,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e) {
 	last2DPos = pos;
 
 	if (e->buttons() & Qt::MidButton) {   // Shift the camera
+		setCursor(Qt::ClosedHandCursor);
 		camera->changeXYZTranslation(-dx * camera->dz * 0.001f, dy * camera->dz * 0.001f, 0);
 	} else if (e->buttons() & Qt::RightButton) { // Zoom the camera
 		setCursor(Qt::SizeVerCursor);
