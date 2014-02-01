@@ -15,6 +15,11 @@ void PolygonArea::addPoint(const QVector2D& pt) {
 	polygon.push_back(pt);
 }
 
+void PolygonArea::moveLastPoint(const QVector2D& pt) {
+	if (polygon.size() == 0) return;
+	polygon[polygon.size() - 1] = pt;
+}
+
 bool PolygonArea::contains(const QVector2D& pt) const {
 	return polygon.contains(pt);
 }

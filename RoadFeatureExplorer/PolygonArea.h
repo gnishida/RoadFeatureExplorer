@@ -16,6 +16,8 @@ public:
 
 	void clear();
 	void addPoint(const QVector2D& pt);
+	void moveLastPoint(const QVector2D& pt);
+
 	bool contains(const QVector2D& pt) const;
 	QVector2D midPt() const;
 	float dx() const;

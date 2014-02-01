@@ -4,6 +4,7 @@
 #include "RoadGraph.h"
 #include "RoadGraphRenderer.h"
 #include "BBox.h"
+#include "PolygonAreaBuilder.h"
 #include "PolygonArea.h"
 #include "GridFeature.h"
 #include <QGLWidget>
@@ -51,6 +52,7 @@ protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
+	void mouseDoubleClickEvent(QMouseEvent *e);
 	void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
