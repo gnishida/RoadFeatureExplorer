@@ -33,15 +33,11 @@ bool PolygonAreaBuilder::selecting() const {
 	return _selecting;
 }
 
-Loop2D PolygonAreaBuilder::polyline() const {
-	return _polyline;
-}
-
-PolygonArea PolygonAreaBuilder::polygonArea() const {
-	PolygonArea area;
+Polygon2D PolygonAreaBuilder::polygon() const {
+	Polygon2D area;
 
 	for (int i = 0; i < _polyline.size(); ++i) {
-		area.addPoint(_polyline[i]);
+		area.push_back(_polyline[i]);
 	}
 
 	return area;

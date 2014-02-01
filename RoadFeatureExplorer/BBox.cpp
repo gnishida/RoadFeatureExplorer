@@ -76,27 +76,6 @@ void BBox::translate(float x, float y) {
 	maxPt.setY(maxPt.y() + y);
 }
 
-void BBox::resize(const QVector2D& pt) {
-	switch (resizingType) {
-	case RESIZING_TOP_LEFT:
-		minPt.setX(pt.x());
-		maxPt.setY(pt.y());
-		break;
-	case RESIZING_TOP_RIGHT:
-		maxPt.setX(pt.x());
-		maxPt.setY(pt.y());
-		break;
-	case RESIZING_BOTTOM_LEFT:
-		minPt.setX(pt.x());
-		minPt.setY(pt.y());
-		break;
-	case RESIZING_BOTTOM_RIGHT:
-		maxPt.setX(pt.x());
-		minPt.setY(pt.y());
-		break;
-	}
-}
-
 std::vector<QVector2D> BBox::polyline() const {
 	std::vector<QVector2D> ret;
 
@@ -106,24 +85,6 @@ std::vector<QVector2D> BBox::polyline() const {
 	ret.push_back(QVector2D(minPt.x(), maxPt.y()));
 
 	return ret;
-}
-
-bool BBox::hitTest(const QVector2D& pt) const {
-	/*
-	if (pt.x() < minPt.x() - dx() * 0.1f) return false;
-	if (pt.y() < minPt.y() - dy() * 0.1f) return false;
-	if (pt.x() > maxPt.x() + dx() * 0.1f) return false;
-	if (pt.y() > maxPt.y() + dy() * 0.1f) return false;
-
-	return true;
-	*/
-
-	return contains(pt);
-}
-
-bool BBox::hitTestResizingPoint(const QVector2D& pt) const {
-	if (fabs(pt.x() - maxPt.x()) < dx() * 0.1f && fabs(pt.y() - minPt.y()) < dy() * 0.1f) return true;
-	else return false;
 }
 
 bool BBox::contains(const QVector2D &pt) const {

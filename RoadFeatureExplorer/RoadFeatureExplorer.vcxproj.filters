@@ -116,9 +116,6 @@
     <ClCompile Include="ConvexHull.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PolygonArea.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Polygon2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -205,9 +202,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConvexHull.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PolygonArea.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Polygon2D.h">

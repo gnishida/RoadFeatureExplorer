@@ -1,35 +1,14 @@
-/*********************************************************************
-This file is part of QtUrban.
-
-    QtUrban is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    QtUrban is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with QtUrban.  If not, see <http://www.gnu.org/licenses/>.
-***********************************************************************/
-
 #include "Polygon2D.h"
 #include "Util.h"
-#include <QGLWidget>
 #include <QVector2D>
 #include <QMatrix4x4>
-#include <QCoreApplication>
-#ifndef Q_MOC_RUN
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/ring.hpp>
 #include <boost/geometry/multi/multi.hpp>
-#endif
 #include <boost/polygon/polygon.hpp>
-#include <gl/GLU.h>
 
 void Loop2D::close() {
 	if (size() == 0) return;
@@ -133,9 +112,7 @@ Loop2D Loop2D::createRectangle(float width, float height) {
 }
 
 Polygon2D::Polygon2D() {
-	isNormalVecValid = false;
 	isCentroidValid = false;
-	//normalVec = QVector3D(0.0f, 0.0f, 0.0f);
 	//centroid = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
@@ -143,19 +120,28 @@ Polygon2D::~Polygon2D() {
 	contour.clear();
 }
 
+const QVector2D& Polygon2D::operator[](const int idx) const {	
+	return contour[idx];
+}
+
+QVector2D& Polygon2D::operator[](const int idx) {	
+	return contour[idx];
+}
+
+Loop2D& Polygon2D::getContour() {
+	return contour;
+}
+
 void Polygon2D::setContour(const Loop2D& contour) {
 	this->contour = contour;
 
 	// normalVec and centroid are to be updated later when they are requested
-	isNormalVecValid = false;
 	isCentroidValid = false;
 }
 
 void Polygon2D::clear() {
 	contour.clear();
-	isNormalVecValid = false;
 	isCentroidValid = false;
-	//normalVec = QVector3D(0.0f, 0.0f, 0.0f);
 	//centroid = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
@@ -163,7 +149,6 @@ void Polygon2D::push_back(const QVector2D& point) {
 	contour.push_back(point);
 
 	// normalVec and centroid are to be updated later when they are requested
-	isNormalVecValid = false;
 	isCentroidValid = false;
 }
 
@@ -191,90 +176,6 @@ QVector2D& Polygon2D::getCentroid() {
 		return centroid;
 	}
 }
-
-/*void Polygon2D::renderContour() {	
-	glBegin(GL_LINE_LOOP);
-	for (size_t i = 0; i < contour.size(); ++i) {
-		glVertex3f(contour[i].x(), contour[i].y(), contour[i].z());
-	}
-	glEnd();	
-}
-
-void Polygon2D::render() {		
-	glBegin(GL_POLYGON);
-	for (size_t i = 0; i < contour.size(); ++i) {
-		glVertex3f(contour[i].x(), contour[i].y(), contour[i].z());
-	}
-	glEnd();			
-}
-*/
-
-/*void Polygon2D::renderNonConvex(bool reComputeNormal, float nx, float ny, float nz) {
-	if (contour.size() < 3) return;
-
-	QVector3D myNormal;
-	if (reComputeNormal) {
-		myNormal = this->getNormalVector();
-	} else {
-		myNormal.setX(nx);
-		myNormal.setY(ny);
-		myNormal.setZ(nz);
-	}
-
-	//Render inside fill			
-	if (contour.size() == 3) {
-		glBegin(GL_TRIANGLES);	
-		for(size_t i=0; i<contour.size(); ++i){	
-			glNormal3f(myNormal.x(), myNormal.y(), myNormal.z());
-			glVertex3f(contour[i].x(), contour[i].y(), contour[i].z());			
-		}
-		glEnd();
-	} else if (contour.size() == 4) {
-		glBegin(GL_QUADS);	
-		for(int i=0; i<contour.size(); ++i){	
-			glNormal3f(myNormal.x(), myNormal.y(), myNormal.z());
-			glVertex3f(contour[i].x(), contour[i].y(), contour[i].z());			
-		}
-		glEnd();
-	} else {
-		// create tessellator
-		GLUtesselator *tess = gluNewTess();
-
-		double *vtxData = new double[3*contour.size()];
-		for (size_t i = 0; i < contour.size(); ++i) {
-			vtxData[3*i]=contour[i].x();
-			vtxData[3*i+1]=contour[i].y();
-			vtxData[3*i+2]=contour[i].z();
-		}
-
-		// register callback functions
-		gluTessCallback(tess, GLU_TESS_BEGIN, 
-			(void (__stdcall *)(void))glBegin);
-		gluTessCallback(tess, GLU_TESS_VERTEX,
-			(void (__stdcall *)(void))glVertex3dv);
-		gluTessCallback(tess, GLU_TESS_END, glEnd);
-
-		// describe non-convex polygon
-		gluTessBeginPolygon(tess, NULL);
-
-		// contour
-		gluTessBeginContour(tess);
-
-		for (size_t i = 0; i < contour.size(); ++i) {
-			//HACK
-			glNormal3f(myNormal.x(), myNormal.y(), fabs(myNormal.z()));
-			gluTessVertex(tess, &vtxData[3*i], &vtxData[3*i]);
-		}
-		gluTessEndContour(tess);
-
-		gluTessEndPolygon(tess);
-
-		// delete tessellator after processing
-		gluDeleteTess(tess);
-
-		delete [] vtxData;
-	}
-}*/
 
 /*bool Polygon2D::isSelfIntersecting() {
 	return isSelfIntersecting(this->contour);
@@ -632,12 +533,64 @@ bool Polygon2D::reorientFace(bool onlyCheck) {
 	*/
 }
 
-/*QVector3D Polygon2D::getLoopNormalVector(const Loop2D& pin) {
-	if (pin.size() >= 3) {
-		return Util::calculateNormal(pin[0], pin[1], pin[2]);
+bool Polygon2D::contains(const QVector2D& pt) const {
+	for (int i = 0; i < size(); ++i) {
+		QVector2D vec1 = contour[(i + 1) % size()] - contour[i];
+		QVector2D vec2 = pt - contour[i];
+		if (vec1.x() * vec2.y() - vec1.y() * vec2.x() > 0) return false;
 	}
-	return QVector3D(0, 0, 0);
-}*/
+
+	return true;
+}
+
+void Polygon2D::tessellate(std::vector<Loop2D>& trapezoids) const {
+	trapezoids.clear();
+
+	if (size() < 3) return;
+
+	// create 2D polygon data
+	std::vector<boost::polygon::point_data<double> > polygon;
+	polygon.resize(size());
+	for (int i = 0; i < size(); i++) {
+		polygon[i] = boost::polygon::construct<boost::polygon::point_data<double> >(contour[i].x(), contour[i].y());
+	}
+
+	// create 2D polygon with holes data
+	boost::polygon::polygon_with_holes_data<double> temp;
+	boost::polygon::set_points(temp, polygon.begin(), polygon.end());
+
+	// create 2D polygon set
+	boost::polygon::polygon_set_data<double> polygonSet;
+	polygonSet.insert(temp);
+
+	// tessellation
+	std::vector<boost::polygon::polygon_with_holes_data<double> > results;
+	polygonSet.get_trapezoids(results);
+
+	for (int i = 0; i < results.size(); i++) {
+		boost::polygon::polygon_with_holes_data<double>::iterator_type it = results[i].begin();
+		Loop2D trapezoid;
+		Loop2D tex_coord;
+		while (it != results[i].end()) {
+			float z = 0.0f;
+			bool done = false;
+
+			trapezoid.push_back(QVector2D((*it).x(), (*it).y()));
+			it++;
+		}
+
+		if (trapezoid.size() < 3) continue;
+
+		Polygon2D::reorientFace(trapezoid);
+
+		// The resulting polygon is usually closed, so remove the last point.
+		if ((trapezoid[trapezoid.size() - 1] - trapezoid[0]).lengthSquared() == 0) {
+			trapezoid.pop_back();
+		}
+
+		if (trapezoid.size() >= 3) trapezoids.push_back(trapezoid);
+	}
+}
 
 /**
  * Reorient polygon vertices so that they are ordered in CCW.
@@ -799,6 +752,16 @@ QVector2D Polygon2D::getLoopAABB(const Loop2D& pin, QVector2D& minCorner, QVecto
 		}
 	}
 	return maxCorner - minCorner;
+}
+
+BBox Polygon2D::getLoopAABB() const {
+	BBox bbox;
+
+	for (int i = 0; i < contour.size(); ++i) {
+		bbox.addPoint(contour[i]);
+	}
+
+	return bbox;
 }
 
 /**

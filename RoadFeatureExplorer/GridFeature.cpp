@@ -139,3 +139,10 @@ bool GridFeature::isClose(const QVector2D& dir, float threshold) {
 QColor GridFeature::color() {
 	return QColor(0, (int)(angle1 * 2.0f / M_PI * 255.0f), 0);
 }
+
+/**
+ * 領域を表すポリゴンを返却する。
+ */
+Polygon2D GridFeature::polygon() {
+	return _polygon;
+}

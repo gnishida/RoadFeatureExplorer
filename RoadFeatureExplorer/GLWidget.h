@@ -3,7 +3,6 @@
 #include "Camera.h"
 #include "RoadGraph.h"
 #include "RoadGraphRenderer.h"
-#include "PolygonArea.h"
 #include "PolygonAreaBuilder.h"
 #include "GridFeature.h"
 #include <QGLWidget>
@@ -23,7 +22,7 @@ public:
 	RoadGraph origRoads;
 	RoadGraphRenderer* renderer;
 	QPoint lastPos;
-	PolygonArea selectedArea;
+	Polygon2D selectedArea;
 	PolygonAreaBuilder selectedAreaBuilder;
 	std::vector<GridFeature> gridFeatures;
 

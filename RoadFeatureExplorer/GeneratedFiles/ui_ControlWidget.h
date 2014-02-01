@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Fri Jan 31 10:42:11 2014
+** Created: Sat Feb 1 17:30:20 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -73,6 +73,8 @@ public:
     QLabel *label_16;
     QLineEdit *lineEditRadialMaxIteration;
     QLabel *label_19;
+    QLineEdit *lineEditRadialMinSeedDirections;
+    QLabel *label_23;
     QGroupBox *groupBox_7;
     QPushButton *pushButtonDetectGridRadial;
     QCheckBox *checkBoxRoadTypeAvenue;
@@ -157,10 +159,10 @@ public:
         pushButtonDetectPlaza->setGeometry(QRect(40, 20, 121, 31));
         groupBox_6 = new QGroupBox(dockWidgetContents);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
-        groupBox_6->setGeometry(QRect(10, 380, 201, 291));
+        groupBox_6->setGeometry(QRect(10, 380, 201, 311));
         pushButtonDetectRadial = new QPushButton(groupBox_6);
         pushButtonDetectRadial->setObjectName(QString::fromUtf8("pushButtonDetectRadial"));
-        pushButtonDetectRadial->setGeometry(QRect(40, 250, 121, 31));
+        pushButtonDetectRadial->setGeometry(QRect(40, 270, 121, 31));
         lineEditScale1 = new QLineEdit(groupBox_6);
         lineEditScale1->setObjectName(QString::fromUtf8("lineEditScale1"));
         lineEditScale1->setGeometry(QRect(110, 40, 81, 20));
@@ -226,11 +228,11 @@ public:
         label_15->setGeometry(QRect(10, 200, 101, 21));
         lineEditRadialExtendingAngleThreshold = new QLineEdit(groupBox_6);
         lineEditRadialExtendingAngleThreshold->setObjectName(QString::fromUtf8("lineEditRadialExtendingAngleThreshold"));
-        lineEditRadialExtendingAngleThreshold->setGeometry(QRect(110, 220, 81, 20));
+        lineEditRadialExtendingAngleThreshold->setGeometry(QRect(110, 240, 81, 20));
         lineEditRadialExtendingAngleThreshold->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         label_16 = new QLabel(groupBox_6);
         label_16->setObjectName(QString::fromUtf8("label_16"));
-        label_16->setGeometry(QRect(10, 220, 101, 21));
+        label_16->setGeometry(QRect(10, 240, 101, 21));
         lineEditRadialMaxIteration = new QLineEdit(groupBox_6);
         lineEditRadialMaxIteration->setObjectName(QString::fromUtf8("lineEditRadialMaxIteration"));
         lineEditRadialMaxIteration->setGeometry(QRect(110, 20, 81, 20));
@@ -238,9 +240,16 @@ public:
         label_19 = new QLabel(groupBox_6);
         label_19->setObjectName(QString::fromUtf8("label_19"));
         label_19->setGeometry(QRect(10, 20, 81, 21));
+        lineEditRadialMinSeedDirections = new QLineEdit(groupBox_6);
+        lineEditRadialMinSeedDirections->setObjectName(QString::fromUtf8("lineEditRadialMinSeedDirections"));
+        lineEditRadialMinSeedDirections->setGeometry(QRect(110, 220, 81, 20));
+        lineEditRadialMinSeedDirections->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        label_23 = new QLabel(groupBox_6);
+        label_23->setObjectName(QString::fromUtf8("label_23"));
+        label_23->setGeometry(QRect(10, 220, 101, 21));
         groupBox_7 = new QGroupBox(dockWidgetContents);
         groupBox_7->setObjectName(QString::fromUtf8("groupBox_7"));
-        groupBox_7->setGeometry(QRect(10, 690, 201, 61));
+        groupBox_7->setGeometry(QRect(10, 710, 201, 61));
         pushButtonDetectGridRadial = new QPushButton(groupBox_7);
         pushButtonDetectGridRadial->setObjectName(QString::fromUtf8("pushButtonDetectGridRadial"));
         pushButtonDetectGridRadial->setGeometry(QRect(40, 20, 121, 31));
@@ -287,6 +296,8 @@ public:
         label_16->setText(QApplication::translate("ControlWidget", "Ext Angle Threshold", 0, QApplication::UnicodeUTF8));
         lineEditRadialMaxIteration->setText(QString());
         label_19->setText(QApplication::translate("ControlWidget", "Max Iteration", 0, QApplication::UnicodeUTF8));
+        lineEditRadialMinSeedDirections->setText(QString());
+        label_23->setText(QApplication::translate("ControlWidget", "Min Seed Directions", 0, QApplication::UnicodeUTF8));
         groupBox_7->setTitle(QApplication::translate("ControlWidget", "Grid / Radial Detection", 0, QApplication::UnicodeUTF8));
         pushButtonDetectGridRadial->setText(QApplication::translate("ControlWidget", "Detect Grid / Radial", 0, QApplication::UnicodeUTF8));
         checkBoxRoadTypeAvenue->setText(QApplication::translate("ControlWidget", "Avenues", 0, QApplication::UnicodeUTF8));

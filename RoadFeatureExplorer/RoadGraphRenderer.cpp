@@ -1,4 +1,4 @@
-#include "RoadGraphRenderer.h"
+﻿#include "RoadGraphRenderer.h"
 #include <QtOpenGL>
 
 RoadGraphRenderer::RoadGraphRenderer() {
@@ -40,7 +40,11 @@ void RoadGraphRenderer::renderOne(RenderablePtr renderable) {
 	glEnd();
 }
 
-void RoadGraphRenderer::renderArea(const AbstractArea& area, GLenum lineType, float height) {
+/**
+ * 与えられたポリゴンに基づいて、閉じた領域を描画する。
+ * ただし、ポリゴンデータ自体は、閉じていなくて良い。
+ */
+void RoadGraphRenderer::renderArea(const Polygon2D& area, GLenum lineType, float height) {
 	std::vector<RenderablePtr> renderables;
 	renderables.push_back(RenderablePtr(new Renderable(lineType, 3.0f)));
 	renderables.push_back(RenderablePtr(new Renderable(GL_POINTS, 10.0f)));
@@ -54,16 +58,16 @@ void RoadGraphRenderer::renderArea(const AbstractArea& area, GLenum lineType, fl
 	v.normal[1] = 0.0f;
 	v.normal[2] = 1.0f;
 
-	for (int i = 0; i < area.polyline().size(); i++) {
-		v.location[0] = area.polyline()[i].x();
-		v.location[1] = area.polyline()[i].y();
+	for (int i = 0; i < area.size(); i++) {
+		v.location[0] = area[i].x();
+		v.location[1] = area[i].y();
 		v.location[2] = height;
 		renderables[0]->vertices.push_back(v);
 		renderables[1]->vertices.push_back(v);
 	}
 
-	v.location[0] = area.polyline()[0].x();
-	v.location[1] = area.polyline()[0].y();
+	v.location[0] = area[0].x();
+	v.location[1] = area[0].y();
 	v.location[2] = height;
 	renderables[0]->vertices.push_back(v);
 
@@ -115,7 +119,7 @@ void RoadGraphRenderer::renderPoint(const QVector2D& pt, float height) {
 	renderOne(renderable);
 }
 
-void RoadGraphRenderer::renderPolyline(std::vector<QVector2D>& polyline, GLenum lineType, float height) {
+void RoadGraphRenderer::renderPolyline(const Polygon2D& polyline, GLenum lineType, float height) {
 	std::vector<RenderablePtr> renderables;
 	renderables.push_back(RenderablePtr(new Renderable(lineType, 3.0f)));
 	renderables.push_back(RenderablePtr(new Renderable(GL_POINTS, 10.0f)));
@@ -141,7 +145,7 @@ void RoadGraphRenderer::renderPolyline(std::vector<QVector2D>& polyline, GLenum 
 	render(renderables);
 }
 
-void RoadGraphRenderer::renderConcave(const Loop2D& polygon, const QColor& color, float height) {
+void RoadGraphRenderer::renderConcave(const Polygon2D& polygon, const QColor& color, float height) {
 	std::vector<RenderablePtr> renderables;
 	renderables.push_back(RenderablePtr(new Renderable(GL_TRIANGLES)));
 

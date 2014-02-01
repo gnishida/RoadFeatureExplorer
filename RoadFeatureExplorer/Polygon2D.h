@@ -1,21 +1,6 @@
-/*********************************************************************
-This file is part of QtUrban.
-
-    QtUrban is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    QtUrban is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with QtUrban.  If not, see <http://www.gnu.org/licenses/>.
-***********************************************************************/
-
 #pragma once
 
+#include "BBox.h"
 #include <vector>
 #include <QVector2D>
 #include <QVector3D>
@@ -40,7 +25,7 @@ protected:
 	QVector2D normalVec;
 	QVector2D centroid;
 
-	bool isNormalVecValid;
+	//bool isNormalVecValid;
 	bool isCentroidValid;
 
 public:
@@ -66,41 +51,17 @@ public:
 		return (*this);
 	}
 
-	/** Acessor to point at index idx */
-	inline QVector2D& operator[](const int idx) {	
-		return contour[idx];
-	}
-
-	/** getter/setter for contour */
-	Loop2D& getContour() { return contour; }
+	const QVector2D& operator[](const int idx) const;
+	QVector2D& operator[](const int idx);
+	Loop2D& getContour();
 	void setContour(const Loop2D& contour);
 
 	void clear();
 	void push_back(const QVector2D& point);
 	int size() const;
 
-	/** Get normal vector */
-	//QVector3D& getNormalVector();
-
 	/** Get center of vertices */
 	QVector2D& getCentroid();
-
-	/*inline float getMeanZValue() const {
-		float zVal = 0.0f;
-		if(this->contour.size() > 0){
-			for(size_t i=0; i<contour.size(); ++i){
-				zVal += (contour[i].z());
-			}
-			return (zVal/((float)contour.size()));
-		} else {
-			return zVal;
-		}
-	}*/
-
-	/** Render polygon */
-	//void renderContour();
-	//void render();
-	//void renderNonConvex(bool reComputeNormal = true, float nx = 0.0f, float ny = 0.0f, float nz = 1.0f);
 
 	/** Is self intersecting */
 	//bool isSelfIntersecting();
@@ -115,6 +76,8 @@ public:
 	//float computeInset(std::vector<float> offsetDistances, Loop2D &pgonInset, bool computeArea = true);
 	//float computeArea(bool parallelToXY = false);
 	bool reorientFace(bool onlyCheck = false);
+	bool contains(const QVector2D& pt) const;
+	void tessellate(std::vector<Loop2D>& trapezoids) const;
 
 	//static QVector3D getLoopNormalVector(const Loop2D &pin);
 	static bool reorientFace(Loop2D& pface, bool onlyCheck = false);
@@ -123,6 +86,7 @@ public:
 	//static float computeLoopArea(const Loop2D& pin, bool parallelToXY = false);
 	//static void sampleTriangularLoopInterior(const Loop2D& pin, std::vector<QVector3D>& pts, float density);
 	static QVector2D getLoopAABB(const Loop2D& pin, QVector2D& minCorner, QVector2D& maxCorner);
+	BBox getLoopAABB() const;
 	static void getLoopOBB(const Loop2D& pin, QVector2D& size, QMatrix4x4& xformMat);
 	//void getMyOBB(QVector3D& size, QMatrix4x4& xformMat);
 	//static void extrudePolygon(const Loop2D& basePgon, float height, std::vector<Polygon2D>& pgonExtrusion);

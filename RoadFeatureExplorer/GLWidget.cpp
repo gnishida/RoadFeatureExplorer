@@ -44,10 +44,10 @@ void GLWidget::drawScene() {
 		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, height);
 
 		for (int i = 0; i < mainWin->glWidget->gridFeatures.size(); ++i) {
-			renderer->renderConcave(mainWin->glWidget->gridFeatures[i].polyline, mainWin->glWidget->gridFeatures[i].color(), -10);
+			renderer->renderConcave(mainWin->glWidget->gridFeatures[i].polygon(), mainWin->glWidget->gridFeatures[i].color(), -10);
 		}
 	} else if (selectedAreaBuilder.selecting()) {
-		renderer->renderPolyline(selectedAreaBuilder.polyline(), GL_LINE_STIPPLE, height);
+		renderer->renderPolyline(selectedAreaBuilder.polygon(), GL_LINE_STIPPLE, height);
 	}
 }
 
@@ -158,7 +158,7 @@ void GLWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 	setMouseTracking(false);
 
 	selectedAreaBuilder.end();
-	selectedArea = selectedAreaBuilder.polygonArea();
+	selectedArea = selectedAreaBuilder.polygon();
 }
 
 void GLWidget::initializeGL() {

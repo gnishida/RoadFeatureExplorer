@@ -2,6 +2,7 @@
 
 #include "RoadGraph.h"
 #include "BBox.h"
+#include "AbstractArea.h"
 #include "AbstractForest.h"
 #include <vector>
 #include <opencv/cv.h>

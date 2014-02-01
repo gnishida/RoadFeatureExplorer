@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Polygon2D.h"
-#include "PolygonArea.h"
 
 class PolygonAreaBuilder {
 private:
@@ -19,7 +18,6 @@ public:
 
 	bool selected() const;
 	bool selecting() const;
-	Loop2D polyline() const;
-	PolygonArea polygonArea() const;
+	Polygon2D polygon() const;
 };
 

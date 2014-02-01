@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BBox.h"
 #include <QVector2D>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -23,6 +24,7 @@ public:
 	virtual QVector2D midPt() const = 0;
 	virtual float dx() const = 0;
 	virtual float dy() const = 0;
+	virtual BBox bbox() const = 0;
 	virtual void translate(float x, float y) = 0;
 	virtual void resize(const QVector2D& pt) = 0;
 	virtual bool hitTest(const QVector2D& pt) const = 0;

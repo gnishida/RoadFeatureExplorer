@@ -22,7 +22,7 @@ public:
 	int accmLenCount1;			// 横方向の累積長カウンタ
 	int accmLenCount2;			// 縦方向の累積長カウンタ
 
-	Loop2D polyline;	// 領域を表すポリゴン（時計回り）
+	Polygon2D _polygon;			// 領域を表すポリゴン（時計回り）
 
 public:
 	GridFeature(int group_id) : group_id(group_id) {}
@@ -33,5 +33,6 @@ public:
 	void computeFeature();
 	bool isClose(const QVector2D& dir, float threshold);
 	QColor color();
+	Polygon2D polygon();
 };
 
