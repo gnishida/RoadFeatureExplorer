@@ -3,6 +3,7 @@
 #include "Util.h"
 #include "BBox.h"
 #include "ConvexHull.h"
+#include "HoughTransform.h"
 #include <math.h>
 
 #ifndef Q_MOC_RUN
@@ -532,10 +533,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
  * Hough transformにより、円を検知する。
  */
 void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, RadialFeature& rf) {
-	BBox bbox = GraphUtil::getAABoundingBox(roads);
-	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
-
-	float sigma = bbox.dx() * scale * 0.05f;
+	HoughTransform ht(area, scale);
 
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -553,74 +551,11 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
-			QVector2D v2 = (roads.graph[*ei]->polyLine[i + 1] - bbox.minPt) * scale;
-			QVector2D v12 = (v1 + v2) * 0.5f;
-
-			QVector2D dir = v2 - v1;
-			float len = dir.length();
-
-			if (dir.x() > dir.y()) {
-				for (int x = 0; x < houghTransform.cols; x++) {
-					int y = dir.y() * ((float)x - v1.x()) / dir.x() + v1.y() + 0.5f;
-					if (y < 0 || y >= houghTransform.rows) continue;
-
-					float h = 0;
-					if (x >= std::min(v1.x(), v2.x()) && x <= std::max(v1.x(), v2.x())) {
-						h = len;
-					} else if (x < std::min(v1.x(), v2.x())) {
-						h = len * expf(-SQR(x - std::min(v1.x(), v2.x())) / 2.0f / SQR(sigma));
-					} else {
-						h = len * expf(-SQR(x - std::max(v1.x(), v2.x())) / 2.0f / SQR(sigma));
-					}
-
-					houghTransform.at<float>(y, x) += h;
-				}
-			} else {
-				for (int y = 0; y < houghTransform.rows; y++) {
-					int x = dir.x() * ((float)y - v1.y()) / dir.y() + v1.x() + 0.5f;
-					if (x < 0 || x >= houghTransform.cols) continue;
-
-					float h = 0;
-					if (y >= std::min(v1.y(), v2.y()) && y <= std::max(v1.y(), v2.y())) {
-						h = len;
-					} else if (y < std::min(v1.y(), v2.y())) {
-						h = len * expf(-SQR(y - std::min(v1.y(), v2.y())) / 2.0f / SQR(sigma));
-					} else {
-						h = len * expf(-SQR(y - std::max(v1.y(), v2.y())) / 2.0f / SQR(sigma));
-					}
-
-					houghTransform.at<float>(y, x) += h;
-				}
-			}
+			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1]);
 		}
 	}
 
-	// 最大値を取得する
-	QVector2D center;
-	float max_value = 0.0f;
-	for (int v = 0; v < houghTransform.rows; v++) {
-		for (int u = 0; u < houghTransform.cols; u++) {
-			if (houghTransform.at<float>(v, u) > max_value) {
-				max_value = houghTransform.at<float>(v, u);
-				center.setX(u + 0.5f);
-				center.setY(v + 0.5f);
-			}
-		}
-	}
-
-	// 投票結果を画像として保存する
-	cv::Mat m;
-	cv::flip(houghTransform, m, 0);
-	m /= (max_value / 255.0f);
-	m.convertTo(m, CV_8U);
-	cv::imwrite(QString("result%1.jpg").arg(scale).toUtf8().data(), m);
-
-	// radial の中心点を求める
-	center /= scale;
-	center += bbox.minPt;
-
-	rf.center = center;
+	rf.center = ht.maxPoint();
 }
 
 /**
@@ -630,12 +565,7 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, RadialFeature& rf, float distanceThreshold, float angleThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
 
-	BBox bbox = GraphUtil::getAABoundingBox(roads);
-	cv::Mat houghTransform = cv::Mat::zeros(bbox.dy() * scale, bbox.dx() * scale, CV_32F);
-
-	float sigma = bbox.dx() * scale * 0.05f;
-
-	QVector2D c = (rf.center - bbox.minPt) * scale;
+	HoughTransform ht(area, scale);
 
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
@@ -653,82 +583,26 @@ void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Po
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D v1 = (roads.graph[*ei]->polyLine[i] - bbox.minPt) * scale;
-			QVector2D v2 = (roads.graph[*ei]->polyLine[i + 1] - bbox.minPt) * scale;
+			QVector2D v1 = roads.graph[*ei]->polyLine[i];
+			QVector2D v2 = roads.graph[*ei]->polyLine[i + 1];
 
 			// だいたいの中心点から離れすぎたエッジは、スキップする
-			if ((v1 - c).lengthSquared() > distanceThreshold2 && (v2 - c).lengthSquared() > distanceThreshold2) continue;
-			//if (Util::pointSegmentDistanceXY(v1, v2, c, false) > distanceThreshold) continue;
+			if ((v1 - rf.center).lengthSquared() > distanceThreshold2 && (v2 - rf.center).lengthSquared() > distanceThreshold2) continue;
 
 			QVector2D dir = v2 - v1;
 
 			// だいたいの中心点への方向が大きくずれている場合は、スキップする
-			if (Util::diffAngle(v1 - c, dir) > angleThreshold && 
-				Util::diffAngle(v1 - c, -dir) > angleThreshold &&
-				Util::diffAngle(v2 - c, dir) > angleThreshold && 
-				Util::diffAngle(v2 - c, -dir) > angleThreshold) continue;
-			
-			float len = dir.length();
+			if (Util::diffAngle(v1 - rf.center, dir) > angleThreshold && 
+				Util::diffAngle(v1 - rf.center, -dir) > angleThreshold &&
+				Util::diffAngle(v2 - rf.center, dir) > angleThreshold && 
+				Util::diffAngle(v2 - rf.center, -dir) > angleThreshold) continue;
 
-			if (dir.x() > dir.y()) {
-				for (int x = 0; x < houghTransform.cols; x++) {
-					int y = dir.y() * ((float)x - v1.x()) / dir.x() + v1.y() + 0.5f;
-					if (y < 0 || y >= houghTransform.rows) continue;
-
-					float h = 0;
-					if (x >= std::min(v1.x(), v2.x()) && x <= std::max(v1.x(), v2.x())) {
-						h = len;
-					} else if (x < std::min(v1.x(), v2.x())) {
-						h = len * expf(-SQR(x - std::min(v1.x(), v2.x())) / 2.0f / SQR(sigma));
-					} else {
-						h = len * expf(-SQR(x - std::max(v1.x(), v2.x())) / 2.0f / SQR(sigma));
-					}
-
-					houghTransform.at<float>(y, x) += h;
-				}
-			} else {
-				for (int y = 0; y < houghTransform.rows; y++) {
-					int x = dir.x() * ((float)y - v1.y()) / dir.y() + v1.x() + 0.5f;
-					if (x < 0 || x >= houghTransform.cols) continue;
-
-					float h = 0;
-					if (y >= std::min(v1.y(), v2.y()) && y <= std::max(v1.y(), v2.y())) {
-						h = len;
-					} else if (y < std::min(v1.y(), v2.y())) {
-						h = len * expf(-SQR(y - std::min(v1.y(), v2.y())) / 2.0f / SQR(sigma));
-					} else {
-						h = len * expf(-SQR(y - std::max(v1.y(), v2.y())) / 2.0f / SQR(sigma));
-					}
-
-					houghTransform.at<float>(y, x) += h;
-				}
-			}
+			ht.line(v1, v2);
 		}
 	}
 
 	// 最大値を取得する
-	QVector2D center;
-	float max_value = 0.0f;
-	for (int v = 0; v < houghTransform.rows; v++) {
-		for (int u = 0; u < houghTransform.cols; u++) {
-			if (houghTransform.at<float>(v, u) > max_value) {
-				max_value = houghTransform.at<float>(v, u);
-				center.setX(u + 0.5f);
-				center.setY(v + 0.5f);
-			}
-		}
-	}
-
-	// 投票結果を画像として保存する
-	cv::Mat m;
-	cv::flip(houghTransform, m, 0);
-	m /= (max_value / 255.0f);
-	m.convertTo(m, CV_8U);
-	cv::imwrite(QString("result%1.jpg").arg(scale).toUtf8().data(), m);
-
-	// radial の中心点を求める
-	center /= scale;
-	center += bbox.minPt;
+	QVector2D center = ht.maxPoint();
 
 	rf.center = center;
 }
