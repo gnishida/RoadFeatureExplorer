@@ -58,6 +58,7 @@ struct faceVisitorForPlazaDetection : public boost::planar_face_traversal_visito
  * @param votingRatioThreshold	各エッジについて、構成するラインが所定のグリッド方向に従っているかの投票率を計算し、この閾値未満なら、グリッドに従っていないと見なす
  */
 void RoadSegmentationUtil::detectGrid(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<GridFeature>& gridFeatures, int maxIteration, float numBins, float minTotalLength, float minMaxBinRatio, float angleThreshold, float votingRatioThreshold, float extendingDistanceThreshold, float minObbLength) {
+	gridFeatures.clear();
 	for (int i = 0; i < maxIteration; i++) {
 		GridFeature gf(i);
 		if (!detectOneGrid(roads, area, roadType, gf, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingRatioThreshold, extendingDistanceThreshold, minObbLength)) break;
@@ -422,10 +423,11 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, const Polygon2D& ar
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
+void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
+	radialFeatures.clear();
+
 	int count = 0;
 
-	/*
 	float stepSize = 1000;
 	BBox bbox = area.getLoopAABB();
 	for (int v = bbox.minPt.y(); v <= bbox.maxPt.y(); v += stepSize) {
@@ -438,16 +440,20 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
 
 			for (int i = 0; i < maxIteration; i++) {
 				RadialFeature rf(count);
-				if (!detectOneRadial(roads, small_area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold)) break;
-
-				count++;
+				if (detectOneRadial(roads, small_area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold)) {
+					radialFeatures.push_back(rf);
+					count++;
+				} else {
+					//break;
+				}
 			}
 		}
 	}
-	*/
 
+	/*
 	RadialFeature rf(count);
 	detectOneRadial(roads, area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold);
+	*/
 }
 
 /**
@@ -510,7 +516,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
 	reduceRadialGroup(roads, rf, edges, seedDistance);
 
 	// 中心から伸びるアームの方向を量子化してカウントする
-	if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
+	//if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、候補に登録していく
 	//extendRadialGroup(roads, area, roadType, rf, edges, extendingAngleThreshold, votingRatioThreshold);

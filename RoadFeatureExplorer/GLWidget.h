@@ -5,6 +5,7 @@
 #include "RoadGraphRenderer.h"
 #include "PolygonAreaBuilder.h"
 #include "GridFeature.h"
+#include "RadialFeature.h"
 #include <QGLWidget>
 #include <QString>
 
@@ -25,6 +26,7 @@ public:
 	Polygon2D selectedArea;
 	PolygonAreaBuilder selectedAreaBuilder;
 	std::vector<GridFeature> gridFeatures;
+	std::vector<RadialFeature> radialFeatures;
 
 	// key status
 	bool shiftPressed;

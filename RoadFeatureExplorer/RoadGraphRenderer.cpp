@@ -99,7 +99,7 @@ void RoadGraphRenderer::renderDenseArea(const AbstractArea& area, float height) 
 	renderOne(renderable);
 }
 
-void RoadGraphRenderer::renderPoint(const QVector2D& pt, float height) {
+void RoadGraphRenderer::renderPoint(const QVector2D& pt, const QColor& color, float height) {
 	RenderablePtr renderable = RenderablePtr(new Renderable(GL_POINTS, 10.0f));
 
 	Vertex v;
@@ -107,9 +107,10 @@ void RoadGraphRenderer::renderPoint(const QVector2D& pt, float height) {
 	v.location[0] = pt.x();
 	v.location[1] = pt.y();
 	v.location[2] = height;
-	v.color[0] = 0.0f;
-	v.color[1] = 0.0f;
-	v.color[2] = 1.0f;
+	v.color[0] = color.redF();
+	v.color[1] = color.greenF();
+	v.color[2] = color.blueF();
+	v.color[3] = color.alphaF();
 	v.normal[0] = 0.0f;
 	v.normal[1] = 0.0f;
 	v.normal[2] = 1.0f;

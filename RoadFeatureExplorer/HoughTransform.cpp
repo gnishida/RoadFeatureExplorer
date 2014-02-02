@@ -19,10 +19,30 @@ void HoughTransform::line(const QVector2D& p1, const QVector2D& p2) {
 	QVector2D v1 = (p1 - bbox.minPt) * scale;
 	QVector2D v2 = (p2 - bbox.minPt) * scale;
 
+	QVector2D vl, vr;
+	if (v1.x() < v2.x()) {
+		vl = v1;
+		vr = v2;
+	} else {
+		vl = v2;
+		vr = v1;
+	}
+
+	QVector2D vu, vd;
+	if (v1.y() < v2.y()) {
+		vd = v1;
+		vu = v2;
+	} else {
+		vd = v2;
+		vu = v1;
+	}
+
 	QVector2D dir = v2 - v1;
 	float len = dir.length();
 
-	float sigma = bbox.dx() * scale * 0.05f;
+	//float sigma = bbox.dx() * scale * 0.05f;
+	float sigma = bbox.dx() * scale * 0.2f;
+	float sigma2 = SQR(sigma);
 
 	if (fabs(dir.x()) > fabs(dir.y())) {
 		for (int x = 0; x < htSpace.cols; x++) {
@@ -30,16 +50,18 @@ void HoughTransform::line(const QVector2D& p1, const QVector2D& p2) {
 			if (y < 0 || y >= htSpace.rows) continue;
 
 			float h = 0;
-			if (x >= std::min(v1.x(), v2.x()) && x <= std::max(v1.x(), v2.x())) {
+			if (x >= vl.x() && x <= vr.x()) {
 				h = len;
 			} else if (x < std::min(v1.x(), v2.x())) {
-				h = len * expf(-SQR(x - std::min(v1.x(), v2.x())) / 2.0f / SQR(sigma));
+				//h = len * expf(-SQR(x - std::min(v1.x(), v2.x())) / 2.0f / SQR(sigma));
+				h = len * expf(-(SQR(x - vl.x()) + SQR(y - vl.y())) * 0.5f / sigma2);
 			} else {
-				h = len * expf(-SQR(x - std::max(v1.x(), v2.x())) / 2.0f / SQR(sigma));
+				//h = len * expf(-SQR(x - std::max(v1.x(), v2.x())) / 2.0f / SQR(sigma));
+				h = len * expf(-(SQR(x - vr.x()) + SQR(y - vr.y())) * 0.5f / sigma2);
 			}
 
-			//htSpace.at<float>(y, x) += h;
-			htSpace.at<float>(y, x) += len;
+			htSpace.at<float>(y, x) += h;
+			//htSpace.at<float>(y, x) += len;
 		}
 	} else {
 		for (int y = 0; y < htSpace.rows; y++) {
@@ -47,16 +69,18 @@ void HoughTransform::line(const QVector2D& p1, const QVector2D& p2) {
 			if (x < 0 || x >= htSpace.cols) continue;
 
 			float h = 0;
-			if (y >= std::min(v1.y(), v2.y()) && y <= std::max(v1.y(), v2.y())) {
+			if (y >= vd.y() && y <= vu.y()) {
 				h = len;
 			} else if (y < std::min(v1.y(), v2.y())) {
-				h = len * expf(-SQR(y - std::min(v1.y(), v2.y())) / 2.0f / SQR(sigma));
+				//h = len * expf(-SQR(y - std::min(v1.y(), v2.y())) / 2.0f / SQR(sigma));
+				h = len * expf(-(SQR(x - vd.x()) + SQR(y - vd.y())) * 0.5f / sigma2);
 			} else {
-				h = len * expf(-SQR(y - std::max(v1.y(), v2.y())) / 2.0f / SQR(sigma));
+				//h = len * expf(-SQR(y - std::max(v1.y(), v2.y())) / 2.0f / SQR(sigma));
+				h = len * expf(-(SQR(x - vu.x()) + SQR(y - vu.y())) * 0.5f / sigma2);
 			}
 
-			//htSpace.at<float>(y, x) += h;
-			htSpace.at<float>(y, x) += len;
+			htSpace.at<float>(y, x) += h;
+			//htSpace.at<float>(y, x) += len;
 		}
 	}
 }

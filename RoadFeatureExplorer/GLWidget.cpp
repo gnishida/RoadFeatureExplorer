@@ -1,4 +1,4 @@
-#include "GLWidget.h"
+﻿#include "GLWidget.h"
 #include "MainWindow.h"
 #include "GraphUtil.h"
 #include <gl/GLU.h>
@@ -43,8 +43,14 @@ void GLWidget::drawScene() {
 	if (selectedAreaBuilder.selected()) {
 		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, height);
 
+		// グリッドの領域を表示
 		for (int i = 0; i < mainWin->glWidget->gridFeatures.size(); ++i) {
 			renderer->renderConcave(mainWin->glWidget->gridFeatures[i].polygon(), mainWin->glWidget->gridFeatures[i].color(), -10);
+		}
+
+		// Radialの領域を表示
+		for (int i = 0; i < mainWin->glWidget->radialFeatures.size(); ++i) {
+			renderer->renderPoint(mainWin->glWidget->radialFeatures[i].center, QColor(255, 0, 0), height);
 		}
 	} else if (selectedAreaBuilder.selecting()) {
 		renderer->renderPolyline(selectedAreaBuilder.polygon(), GL_LINE_STIPPLE, height);

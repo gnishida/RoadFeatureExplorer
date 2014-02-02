@@ -21,7 +21,7 @@ public:
 
 	//static void detectPlaza(RoadGraph& roads, AbstractArea& area);
 
-	static void detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold);
+	static void detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold);
 	static bool detectOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold);
 	static void detectRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, RadialFeature& rf);
 	static void refineRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, RadialFeature& rf, float distanceThreshold, float angleThreshold);
