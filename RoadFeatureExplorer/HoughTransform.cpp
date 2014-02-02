@@ -38,7 +38,8 @@ void HoughTransform::line(const QVector2D& p1, const QVector2D& p2) {
 				h = len * expf(-SQR(x - std::max(v1.x(), v2.x())) / 2.0f / SQR(sigma));
 			}
 
-			htSpace.at<float>(y, x) += h;
+			//htSpace.at<float>(y, x) += h;
+			htSpace.at<float>(y, x) += len;
 		}
 	} else {
 		for (int y = 0; y < htSpace.rows; y++) {
@@ -54,7 +55,8 @@ void HoughTransform::line(const QVector2D& p1, const QVector2D& p2) {
 				h = len * expf(-SQR(y - std::max(v1.y(), v2.y())) / 2.0f / SQR(sigma));
 			}
 
-			htSpace.at<float>(y, x) += h;
+			//htSpace.at<float>(y, x) += h;
+			htSpace.at<float>(y, x) += len;
 		}
 	}
 }
