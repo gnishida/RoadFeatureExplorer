@@ -15,16 +15,16 @@ HoughTransform::HoughTransform(const Polygon2D& area, float scale) {
 /**
  * オリジナルの座標系での頂点座標v1とv2を通る直線を、縮尺された座標系のhtSpace上に描画する。
  */
-void HoughTransform::line(const QVector2D& v1, const QVector2D& v2) {
-	QVector2D vv1 = (v1 - bbox.minPt) * scale;
-	QVector2D vv2 = (v2 - bbox.minPt) * scale;
+void HoughTransform::line(const QVector2D& p1, const QVector2D& p2) {
+	QVector2D v1 = (p1 - bbox.minPt) * scale;
+	QVector2D v2 = (p2 - bbox.minPt) * scale;
 
-	QVector2D dir = vv2 - vv1;
+	QVector2D dir = v2 - v1;
 	float len = dir.length();
 
 	float sigma = bbox.dx() * scale * 0.05f;
 
-	if (dir.x() > dir.y()) {
+	if (fabs(dir.x()) > fabs(dir.y())) {
 		for (int x = 0; x < htSpace.cols; x++) {
 			int y = dir.y() * ((float)x - v1.x()) / dir.x() + v1.y() + 0.5f;
 			if (y < 0 || y >= htSpace.rows) continue;
@@ -73,6 +73,8 @@ QVector2D HoughTransform::maxPoint() const {
 			}
 		}
 	}
+
+	std::cout << "max_value: " << max_value << std::endl;
 
 	// 投票結果を画像として保存する
 	cv::Mat m;
