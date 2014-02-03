@@ -747,7 +747,7 @@ void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Po
  * OpenCVのHoughTransform関数で円を検知する。なければ、falseを返却する。
  */
 bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf) {
-	cv::Mat img(500, 500, CV_8U);
+	cv::Mat img = cv::Mat::zeros(500, 500, CV_8U);
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
@@ -765,14 +765,38 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 	cv::vector<cv::Vec3f> circles;
 	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 80);
 
+	cv::Mat img2 = cv::Mat::zeros(500, 500, CV_8UC3);
+	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
+			QVector2D p1 = roads.graph[*ei]->polyLine[i] - rf.center + QVector2D(250, 250);
+			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] - rf.center + QVector2D(250, 250);
+
+			if (p1.x() < 0 || p1.x() >= 500 || p2.x() < 0 || p2.x() >= 500) continue;
+
+			cv::line(img2, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(64, 64, 64), 3);
+		}
+	}
+
 	for (int i = 0; i < circles.size(); i++) {
 		QVector2D center(circles[i][0], circles[i][1]);
 		int r = circles[i][2];
 
 		std::cout << "Circle: (" << center.x() << "," << center.y() << ") R: " << r << std::endl;
 
+		cv::circle(img2, cv::Point(center.x(), center.y()), r, cv::Scalar(0, 255, 255), 3);
+
 		if ((rf.center - QVector2D(250, 250)).lengthSquared() < r * r) return true;
 	}
+
+	cv::flip(img2, img2, 0);
+	cv::imwrite("circle_detection.jpg", img2);
+
+	cv::namedWindow("circles", 1);
+	cv::imshow("circles", img2);
+	cv::waitKey(0);
+
 
 	std::cout << "No circle detected" << std::endl;
 
