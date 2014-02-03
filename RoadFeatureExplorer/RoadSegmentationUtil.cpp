@@ -451,9 +451,13 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
 	}
 	*/
 	
-	RadialFeature rf(count);
-	detectOneRadial(roads, area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, sigma, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold);
-	
+	for (int i = 0; i < maxIteration; ++i) {
+		RadialFeature rf(count);
+		if (detectOneRadial(roads, area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, sigma, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold)) {
+			radialFeatures.push_back(rf);
+			count++;
+		}
+	}
 
 	/*
 	std::vector<RadialFeature> rfs = detectRadialCentersInScaled(roads, area, roadType, scale1, sigma, 30.0f);
@@ -562,7 +566,7 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+			//ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			if (i > 0) {
 				ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			}
