@@ -147,16 +147,11 @@ void HoughTransform::circle(const QVector2D& p1, const QVector2D& p2, float sigm
 	sigma *= scale;
 	float sigma2 = SQR(sigma);
 	
-	cv::MatND htCircle = cv::MatND(bbox.dy() * scale, bbox.dx() * scale, (int)sigma, CV_32F);
-
-	// zero
-	for (int v = 0; v < htCircle.rows; ++v) {
-		for (int u = 0; u < htCircle.cols; ++u) {
-			for (int w = 0; w < (int)sigma; ++w) {
-				htCircle.at<float>(v, u, w) = 0.0f;
-			}
-		}
-	}
+	int size[3];
+	size[0] = bbox.dy() * scale;
+	size[1] = bbox.dx() * scale;
+	size[2] = (int)sigma;
+	cv::Mat htCircle = cv::Mat(3, size, CV_32F, cv::Scalar(0));
 
 	float len = (v2 - v1).length();
 	if (len > sigma) len = sigma;
@@ -174,12 +169,15 @@ void HoughTransform::circle(const QVector2D& p1, const QVector2D& p2, float sigm
 			htCircle.at<float>(y, x, (int)r) += 1;
 		}
 	}
+	std::cout << "voting ok" << std::endl;
 
 	// project the maximum voting for each (x, y)
-	for (int v = 0; v < htCircle.rows; ++v) {
-		for (int u = 0; u < htCircle.cols; ++u) {
+	//cv::reduce(htCircle, htCircle, 2, CV_REDUCE_MAX);
+	//htSpace += htCircle;
+	for (int v = 0; v < size[0]; ++v) {
+		for (int u = 0; u < size[1]; ++u) {
 			float max_value = 0.0f;
-			for (int w = 0; w < (int)sigma; ++w) {
+			for (int w = 0; w < size[2]; ++w) {
 				if (htCircle.at<float>(v, u, w) > max_value) {
 					max_value = htCircle.at<float>(v, u, w);
 				}

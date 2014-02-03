@@ -525,10 +525,10 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
 	reduceRadialGroup(roads, rf, edges, seedDistance);
 
 	// 中心から伸びるアームの方向を量子化してカウントする
-	//if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
+	if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
 
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、候補に登録していく
-	//extendRadialGroup(roads, area, roadType, rf, edges, extendingAngleThreshold, votingRatioThreshold);
+	extendRadialGroup(roads, area, roadType, rf, edges, extendingAngleThreshold, votingRatioThreshold);
 
 	// 最後に、候補エッジを、実際にグループに登録する
 	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
@@ -566,7 +566,7 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			//ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			if (i > 0) {
 				ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			}
