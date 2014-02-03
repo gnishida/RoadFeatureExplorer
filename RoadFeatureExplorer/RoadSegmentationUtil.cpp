@@ -660,6 +660,8 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
  * Hough transformにより、円を検知する。
  */
 std::vector<RadialFeature> RoadSegmentationUtil::detectRadialCentersInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, float candidateCenterThreshold, float detectCircleThreshold, float min_dist) {
+	float min_dist2 = min_dist * min_dist;
+
 	HoughTransform ht(area, scale);
 
 	RoadEdgeIter ei, eend;
@@ -683,25 +685,30 @@ std::vector<RadialFeature> RoadSegmentationUtil::detectRadialCentersInScaled(Roa
 		}
 	}
 
+	// しきい値以上の投票があった点を、円の中心の候補として取得する
 	std::vector<QVector2D> centers = ht.points(candidateCenterThreshold);
 	
+	// 円の候補について、HoughCircleにより、チェックする
+	int count = 0;
 	std::vector<RadialFeature> rfs;
 	for (int i = 0; i < centers.size(); ++i) {
-		RadialFeature rf(i);
-		rf.center = centers[i];
-
 		// 既に検知された円と近い場合は、スキップ
 		bool skip = false;
 		for (int j = 0; j < rfs.size(); j++) {
-			if ((rfs[j].center - rf.center).lengthSquared() < min_dist) {
+			if ((rfs[j].center - centers[i]).lengthSquared() < min_dist2) {
 				skip = true;
 				break;
 			}
 		}
 		if (skip) continue;
 
+		RadialFeature rf(count);
+		rf.center = centers[i];
+
+		// HoughCircleにより円が検知されるか？
 		if (detectCircle(roads, area, roadType, detectCircleThreshold, rf)) {
 			rfs.push_back(rf);
+			count++;
 		}
 	}
 
