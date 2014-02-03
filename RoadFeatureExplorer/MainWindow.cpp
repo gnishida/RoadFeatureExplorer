@@ -37,6 +37,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent* e) {
 
 void MainWindow::onNew() {
 	glWidget->roads.clear();
+
+	// clear the features
+	glWidget->gridFeatures.clear();
+	glWidget->radialFeatures.clear();
+
 	glWidget->updateGL();
 }
 
@@ -47,6 +52,10 @@ void MainWindow::onOpen() {
 		printf("Unable to open file\n");
 		return;
 	}
+
+	// clear the features
+	glWidget->gridFeatures.clear();
+	glWidget->radialFeatures.clear();
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 	GraphUtil::loadRoads(glWidget->roads, filename);

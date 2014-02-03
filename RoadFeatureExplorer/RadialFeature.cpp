@@ -1,7 +1,7 @@
 ﻿#include "RadialFeature.h"
 
 QColor RadialFeature::color() {
-	return QColor((int)(center.x() + center.y()) % 255, 0, 0);
+	return QColor((int)(fabs(center.x()) + fabs(center.y())) % 128 + 128, 0, 0);
 }
 
 /**

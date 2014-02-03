@@ -20,7 +20,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	ui.lineEditGridExtendingDistanceThreshold->setText("20");
 	ui.lineEditGridMinOBBLength->setText("300");
 
-	ui.lineEditRadialMaxIteration->setText("2");
+	ui.lineEditRadialMaxIteration->setText("3");
 	ui.lineEditScale1->setText("0.05");
 	ui.lineEditScale2->setText("0.1");
 	ui.lineEditCenterErrorTol2->setText("80");
@@ -31,7 +31,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	ui.lineEditRadialVotingThreshold->setText("0.7");
 	ui.lineEditRadialSeedDistance->setText("80");
 	ui.lineEditRadialMinSeedDirections->setText("6");
-	ui.lineEditRadialExtendingAngleThreshold->setText("0.2");
+	ui.lineEditRadialExtendingAngleThreshold->setText("0.1");
 
 	// register the event handlers
 	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showLocalStreet(int)));
