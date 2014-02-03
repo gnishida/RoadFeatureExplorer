@@ -29,10 +29,12 @@ public:
 
 	static void refineRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, RadialFeature& rf, float distanceThreshold, float angleThreshold);
 	static bool detectCircle(RoadGraph& roads, const Polygon2D& area, int roadType, float detectCircleThreshold, RadialFeature& rf);
+	static bool findOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, float angleThreshold, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges);
 
 	static void reduceRadialGroup(RoadGraph& roads, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float distanceThreshold);
 	static void extendRadialGroup(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio);
 	static int countNumDirections(RoadGraph& roads, const RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, int size);
+	static void buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, bool>& edges, RadialFeature& rf);
 
 	static void detectRoundabout(RoadGraph& roads, AbstractArea& area);
 };

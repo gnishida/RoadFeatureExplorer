@@ -523,7 +523,32 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
 	*/
 
 	std::vector<RadialFeature> rfs = detectRadialCentersInScaled(roads, area, roadType, scale1, sigma, 30.0f, 20.0f, 150.0f);
-	radialFeatures = rfs;
+	for (int i = 0; i < rfs.size(); ++i) {
+		QMap<RoadEdgeDesc, bool> edges;
+		if (findOneRadial(roads, area, roadType, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold, rfs[i], edges)) {
+			radialFeatures.push_back(rfs[i]);
+		}
+	}
+
+	for (int i = 0; i < radialFeatures.size(); ++i) {
+		QMap<RoadEdgeDesc, bool> edges;
+		findOneRadial(roads, area, roadType, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold, rfs[i], edges);
+
+		// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、候補に登録していく
+		extendRadialGroup(roads, area, roadType, radialFeatures[i], edges, extendingAngleThreshold, votingRatioThreshold);
+
+		buildRadialArea(roads, edges, radialFeatures[i]);
+
+		// 最後に、候補エッジを、実際にグループに登録する
+		for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
+			RoadEdgeDesc e = it.key();
+			roads.graph[e]->shapeType = RoadEdge::SHAPE_RADIAL;
+			roads.graph[e]->group = radialFeatures[i].group_id;
+			roads.graph[e]->gridness = 0;
+		}
+
+		roads.setModified();
+	}
 }
 
 /**
@@ -545,79 +570,8 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
 
 	std::cout << "Center: " << rf.center.x() << ", " << rf.center.y() << std::endl;
 
-	// 各エッジについて、radialの中心点に合うものを、グループに登録する
 	QMap<RoadEdgeDesc, bool> edges;
-	RoadEdgeIter ei, eend;
-	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-
-		// 指定されたタイプ以外は、スキップする。
-		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
-
-		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
-
-		// 範囲外のエッジはスキップ
-		RoadVertexDesc src = boost::source(*ei, roads.graph);
-		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
-
-		float length = 0.0f;
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D v1 = roads.graph[*ei]->polyLine[i];
-			QVector2D v2 = roads.graph[*ei]->polyLine[i + 1];
-			QVector2D dir = v2 - v1;
-
-			if (Util::diffAngle(v1 - rf.center, dir) <= angleThreshold3 ||
-				Util::diffAngle(v1 - rf.center, -dir) <= angleThreshold3 ||
-				Util::diffAngle(v2 - rf.center, dir) <= angleThreshold3 || 
-				Util::diffAngle(v2 - rf.center, -dir) <= angleThreshold3) {
-				length += dir.length();
-			}
-		}
-
-		// votingRatioThreshold%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
-		if (length >= roads.graph[*ei]->getLength() * votingRatioThreshold) {
-			edges[*ei] = true;
-			std::cout << "Edge (" << src << "," << tgt << ") OK" << std::endl;
-		} else {
-			std::cout << "Edge (" << src << "," << tgt << ") NG" << std::endl;
-		}
-	}
-
-	// 円の中心から一定距離以内のエッジのみを残す
-	reduceRadialGroup(roads, rf, edges, seedDistance);
-
-	// 中心から伸びるアームの方向を量子化してカウントする
-	if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
-
-	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、候補に登録していく
-	extendRadialGroup(roads, area, roadType, rf, edges, extendingAngleThreshold, votingRatioThreshold);
-
-	// 候補のエッジ群を囲むconvex hullを求める
-	ConvexHull ch;
-	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		for (int i = 0; i < roads.graph[it.key()]->polyLine.size(); i++) {
-			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
-		}
-	}
-	Loop2D hull;
-	ch.convexHull(hull);
-
-	// 領域を表すポリゴンを設定
-	for (int i = 0; i < hull.size(); ++i) {
-		rf._polygon.push_back(hull[i]);
-	}
-
-	// 最後に、候補エッジを、実際にグループに登録する
-	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		RoadEdgeDesc e = it.key();
-		roads.graph[e]->shapeType = RoadEdge::SHAPE_RADIAL;
-		roads.graph[e]->group = rf.group_id;
-		roads.graph[e]->gridness = 0;
-	}
-
-	roads.setModified();
+	if (!findOneRadial(roads, area, roadType, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold, rf, edges)) return false;
 
 	return true;
 }
@@ -831,6 +785,57 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 }
 
 /**
+ * 与えられた円の中心に基づき、Radialタイプの道路エッジを登録する。
+ */
+bool RoadSegmentationUtil::findOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, float angleThreshold, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges) {
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		// 指定されたタイプ以外は、スキップする。
+		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
+
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
+		// 範囲外のエッジはスキップ
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
+
+		float length = 0.0f;
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+			QVector2D v1 = roads.graph[*ei]->polyLine[i];
+			QVector2D v2 = roads.graph[*ei]->polyLine[i + 1];
+			QVector2D dir = v2 - v1;
+
+			if (Util::diffAngle(v1 - rf.center, dir) <= angleThreshold ||
+				Util::diffAngle(v1 - rf.center, -dir) <= angleThreshold ||
+				Util::diffAngle(v2 - rf.center, dir) <= angleThreshold || 
+				Util::diffAngle(v2 - rf.center, -dir) <= angleThreshold) {
+				length += dir.length();
+			}
+		}
+
+		// votingRatioThreshold%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
+		if (length >= roads.graph[*ei]->getLength() * votingRatioThreshold) {
+			edges[*ei] = true;
+			std::cout << "Edge (" << src << "," << tgt << ") OK" << std::endl;
+		} else {
+			std::cout << "Edge (" << src << "," << tgt << ") NG" << std::endl;
+		}
+	}
+
+	// 円の中心から一定距離以内のエッジのみを残す
+	reduceRadialGroup(roads, rf, edges, seedDistance);
+
+	// 中心から伸びるアームの方向を量子化してカウントする
+	if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
+
+	return true;
+}
+
+/**
  * 円の中心からdistanceThreshold以内のRadialグループのエッジのみを残し、それ以外はグループから外す。
  *
  * @param edges					radialエッジの候補
@@ -947,6 +952,23 @@ int RoadSegmentationUtil::countNumDirections(RoadGraph& roads, const RadialFeatu
 	}
 
 	return directions.size();
+}
+
+void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, bool>& edges, RadialFeature& rf) {
+	// 候補のエッジ群を囲むconvex hullを求める
+	ConvexHull ch;
+	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
+		for (int i = 0; i < roads.graph[it.key()]->polyLine.size(); i++) {
+			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
+		}
+	}
+	Loop2D hull;
+	ch.convexHull(hull);
+
+	// 領域を表すポリゴンを設定
+	for (int i = 0; i < hull.size(); ++i) {
+		rf._polygon.push_back(hull[i]);
+	}
 }
 
 /**
