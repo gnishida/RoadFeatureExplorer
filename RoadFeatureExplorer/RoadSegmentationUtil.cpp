@@ -426,6 +426,73 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, const Polygon2D& ar
 void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
 	radialFeatures.clear();
 
+
+	cv::Mat roadImg(2500, 2500, CV_8U);
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
+			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 0);
+			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 0);
+
+			if (p1.x() < 0 || p1.y() < 0 || p1.x() >= 2500 || p1.y() >= 2500) continue;
+			if (p2.x() < 0 || p2.y() < 0 || p2.x() >= 2500 || p2.y() >= 2500) continue;
+
+			cv::line(roadImg, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(255), 5);
+		}
+	}
+
+	cv::Mat roadResult(2500, 2500, CV_8UC3);
+	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
+			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 0);
+			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 0);
+
+			if (p1.x() < 0 || p1.y() < 0 || p1.x() >= 2500 || p1.y() >= 2500) continue;
+			if (p2.x() < 0 || p2.y() < 0 || p2.x() >= 2500 || p2.y() >= 2500) continue;
+
+			cv::line(roadResult, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(96, 96, 96), 5);
+		}
+	}
+
+	std::cout << "OK" << std::endl;
+
+	cv::vector<cv::Vec3f> circles;
+	cv::HoughCircles(roadImg, circles, CV_HOUGH_GRADIENT, 1, 150, 20, 10, 0, 80);
+
+	std::cout << "HoughCircles" << std::endl;
+
+	for (int i = 0; i < circles.size(); i++) {
+		cv::Point pt(circles[i][0], circles[i][1]);
+		int r = circles[i][2];
+		cv::circle(roadResult, pt, r, cv::Scalar(255, 255, 64), 10);
+	}
+
+	cv::flip(roadResult, roadResult, 0);
+	cv::imwrite("circle_detection_result.jpg", roadResult);
+
+	cv::namedWindow("circles", 1);
+	cv::imshow("circles", roadResult);
+	cv::waitKey(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	int count = 0;
 	/*
 	float stepSize = 1000;
