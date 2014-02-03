@@ -374,144 +374,12 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, const Polygon2D& ar
 
 /**
  * Plazaを検知する
- * グラフのfaceについて、そのサイズ、faceから出るスポークの数などから、プラザかどうか判断する。
- * ぜんぜん検知精度が良くない。
- */
-/*void RoadSegmentationUtil::detectPlaza(RoadGraph& roads, AbstractArea& area) {
-	plaza_list.clear();
-	roadGraphPtr = &roads;
-
-	//Make sure graph is planar
-	typedef std::vector<RoadEdgeDesc > tEdgeDescriptorVector;
-	std::vector<tEdgeDescriptorVector> embedding(boost::num_vertices(roads.graph));
-	if (!boost::boyer_myrvold_planarity_test(boost::boyer_myrvold_params::graph = roads.graph, boost::boyer_myrvold_params::embedding = &embedding[0])) {
-		std::cout << "The road graph is not a planar graph." << std::endl;
-	}
-
-	//Create edge index property map
-	typedef std::map<RoadEdgeDesc, size_t> EdgeIndexMap;
-	EdgeIndexMap mapEdgeIdx;
-	boost::associative_property_map<EdgeIndexMap> pmEdgeIndex(mapEdgeIdx);		
-	RoadEdgeIter ei, eend;	
-	int edge_count = 0;
-	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
-		mapEdgeIdx.insert(std::make_pair(*ei, edge_count++));
-	}
-
-	//Extract blocks from road graph using boost graph planar_face_traversal
-	faceVisitorForPlazaDetection vis;	
-	boost::planar_face_traversal(roads.graph, &embedding[0], vis, pmEdgeIndex);
-
-	for (int i = 0; i < plaza_list.size(); i++) {
-		for (int j = 0; j < plaza_list[i].size(); j++) {
-			RoadEdgeDesc e = plaza_list[i][j];
-
-			RoadVertexDesc src = boost::source(e, roads.graph);
-			RoadVertexDesc tgt = boost::target(e, roads.graph);
-			if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
-
-			roads.graph[e]->shapeType = RoadEdge::SHAPE_PLAZA;
-			roads.graph[e]->group = 8;
-		}
-	}
-
-	roads.setModified();
-}
-*/
-
-/**
- * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
 void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
 	radialFeatures.clear();
 
-	/*
-	cv::Mat roadImg(10000, 10000, CV_8U);
-	RoadEdgeIter ei, eend;
-	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
-			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 5000);
-			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 5000);
-
-			cv::line(roadImg, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(255), 3);
-		}
-	}
-
-	cv::Mat roadResult(10000, 10000, CV_8UC3);
-	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
-			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 5000);
-			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 5000);
-
-			cv::line(roadResult, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(96, 96, 96), 3);
-		}
-	}
-
-	std::cout << "OK" << std::endl;
-
-	cv::vector<cv::Vec3f> circles;
-	cv::HoughCircles(roadImg, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 25, 0, 80);
-
-	std::cout << "HoughCircles" << std::endl;
-
-	for (int i = 0; i < circles.size(); i++) {
-		cv::Point pt(circles[i][0], circles[i][1]);
-		int r = circles[i][2];
-		cv::circle(roadResult, pt, r, cv::Scalar(255, 255, 64), 10);
-	}
-
-	cv::flip(roadResult, roadResult, 0);
-	cv::imwrite("circle_detection_result.jpg", roadResult);
-
-	cv::namedWindow("circles", 1);
-	cv::imshow("circles", roadResult);
-	cv::waitKey(0);
-	*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	int count = 0;
-	/*
-	float stepSize = 1000;
-	BBox bbox = area.getLoopAABB();
-	for (int v = bbox.minPt.y(); v <= bbox.maxPt.y(); v += stepSize) {
-		for (int u = bbox.minPt.x(); u <= bbox.maxPt.x(); u += stepSize) {
-			Polygon2D small_area;
-			small_area.push_back(QVector2D(u, v));
-			small_area.push_back(QVector2D(u, v + stepSize));
-			small_area.push_back(QVector2D(u + stepSize, v + stepSize));
-			small_area.push_back(QVector2D(u + stepSize, v));
-
-			for (int i = 0; i < maxIteration; i++) {
-				RadialFeature rf(count);
-				if (detectOneRadial(roads, small_area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, sigma, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold)) {
-					radialFeatures.push_back(rf);
-					count++;
-				} else {
-					//break;
-				}
-			}
-		}
-	}
-	*/
-	
 	/*
 	for (int i = 0; i < maxIteration; ++i) {
 		RadialFeature rf(count);
@@ -742,26 +610,9 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 	cv::vector<cv::Vec3f> circles;
 	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 80);
 
-	cv::Mat img2 = cv::Mat::zeros(500, 500, CV_8UC3);
-	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
-		if (!roads.graph[*ei]->valid) continue;
-
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
-			QVector2D p1 = roads.graph[*ei]->polyLine[i] - rf.center + QVector2D(250, 250);
-			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] - rf.center + QVector2D(250, 250);
-
-			if (p1.x() < 0 || p1.x() >= 500 || p2.x() < 0 || p2.x() >= 500) continue;
-
-			cv::line(img2, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(64, 64, 64), 3);
-		}
-	}
-
 	for (int i = 0; i < circles.size(); i++) {
 		QVector2D center(circles[i][0], circles[i][1]);
 		int r = circles[i][2];
-
-
-		cv::circle(img2, cv::Point(center.x(), center.y()), r, cv::Scalar(0, 255, 255), 3);
 
 		if ((center - QVector2D(250, 250)).lengthSquared() < detectCircleThreshold2) {
 			std::cout << "Circle detected: (" << center.x() << "," << center.y() << ") R: " << r << std::endl;
@@ -771,15 +622,6 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 			return true;
 		}
 	}
-
-	/*
-	cv::flip(img2, img2, 0);
-	cv::imwrite("circle_detection.jpg", img2);
-
-	cv::namedWindow("circles", 1);
-	cv::imshow("circles", img2);
-	cv::waitKey(0);
-	*/
 
 	return false;
 }
@@ -820,9 +662,6 @@ bool RoadSegmentationUtil::findOneRadial(RoadGraph& roads, const Polygon2D& area
 		// votingRatioThreshold%以上、このradialと同じ方向なら、そのエッジを当該グループに入れる
 		if (length >= roads.graph[*ei]->getLength() * votingRatioThreshold) {
 			edges[*ei] = true;
-			std::cout << "Edge (" << src << "," << tgt << ") OK" << std::endl;
-		} else {
-			std::cout << "Edge (" << src << "," << tgt << ") NG" << std::endl;
 		}
 	}
 
@@ -906,11 +745,6 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, const Polygon2D& 
 
 			// 候補に追加する
 			edges[*ei] = true;
-			/*
-			roads.graph[*ei]->shapeType = RoadEdge::SHAPE_RADIAL;
-			roads.graph[*ei]->group = group_id;
-			roads.graph[*ei]->gridness = 0.0f;
-			*/
 
 			RoadVertexDesc u = boost::target(*ei, roads.graph);
 			if (!roads.graph[u]->valid) continue;
