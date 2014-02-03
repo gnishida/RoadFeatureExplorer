@@ -22,13 +22,13 @@ public:
 	//static void detectPlaza(RoadGraph& roads, AbstractArea& area);
 
 	static void detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold);
-	static bool detectOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold);
+	static bool detectOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float detectCircleThreshold, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold);
 
 	static void detectRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, RadialFeature& rf);
-	static std::vector<RadialFeature> detectRadialCentersInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, float candidateCenterThreshold);
+	static std::vector<RadialFeature> detectRadialCentersInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, float candidateCenterThreshold, float detectCircleThreshold, float min_dist);
 
 	static void refineRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, RadialFeature& rf, float distanceThreshold, float angleThreshold);
-	static bool detectCircle(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf);
+	static bool detectCircle(RoadGraph& roads, const Polygon2D& area, int roadType, float detectCircleThreshold, RadialFeature& rf);
 
 	static void reduceRadialGroup(RoadGraph& roads, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float distanceThreshold);
 	static void extendRadialGroup(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio);

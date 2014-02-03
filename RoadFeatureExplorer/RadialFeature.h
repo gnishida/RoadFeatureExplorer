@@ -8,6 +8,7 @@ class RadialFeature {
 public:
 	int group_id;
 	QVector2D center;
+	float radius;
 	
 	Polygon2D _polygon;			// 領域を表すポリゴン（時計回り）
 
