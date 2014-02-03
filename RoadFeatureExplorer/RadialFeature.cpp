@@ -1,7 +1,7 @@
 ﻿#include "RadialFeature.h"
 
 QColor RadialFeature::color() {
-	return QColor(255 - group_id * 30 % 255, 0, 0);
+	return QColor(255 - group_id * 64 % 255, 0, 0);
 }
 
 /**
