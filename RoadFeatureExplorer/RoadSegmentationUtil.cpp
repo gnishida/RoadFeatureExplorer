@@ -426,42 +426,36 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, const Polygon2D& ar
 void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
 	radialFeatures.clear();
 
-
-	cv::Mat roadImg(2500, 2500, CV_8U);
+	/*
+	cv::Mat roadImg(10000, 10000, CV_8U);
 	RoadEdgeIter ei, eend;
 	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
-			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 0);
-			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 0);
+			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 5000);
+			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 5000);
 
-			if (p1.x() < 0 || p1.y() < 0 || p1.x() >= 2500 || p1.y() >= 2500) continue;
-			if (p2.x() < 0 || p2.y() < 0 || p2.x() >= 2500 || p2.y() >= 2500) continue;
-
-			cv::line(roadImg, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(255), 5);
+			cv::line(roadImg, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(255), 3);
 		}
 	}
 
-	cv::Mat roadResult(2500, 2500, CV_8UC3);
+	cv::Mat roadResult(10000, 10000, CV_8UC3);
 	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
-			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 0);
-			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 0);
+			QVector2D p1 = roads.graph[*ei]->polyLine[i] + QVector2D(5000, 5000);
+			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] + QVector2D(5000, 5000);
 
-			if (p1.x() < 0 || p1.y() < 0 || p1.x() >= 2500 || p1.y() >= 2500) continue;
-			if (p2.x() < 0 || p2.y() < 0 || p2.x() >= 2500 || p2.y() >= 2500) continue;
-
-			cv::line(roadResult, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(96, 96, 96), 5);
+			cv::line(roadResult, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(96, 96, 96), 3);
 		}
 	}
 
 	std::cout << "OK" << std::endl;
 
 	cv::vector<cv::Vec3f> circles;
-	cv::HoughCircles(roadImg, circles, CV_HOUGH_GRADIENT, 1, 150, 20, 10, 0, 80);
+	cv::HoughCircles(roadImg, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 25, 0, 80);
 
 	std::cout << "HoughCircles" << std::endl;
 
@@ -477,7 +471,7 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
 	cv::namedWindow("circles", 1);
 	cv::imshow("circles", roadResult);
 	cv::waitKey(0);
-
+	*/
 
 
 
@@ -544,7 +538,10 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
 	refineRadialCenterInScaled(roads, area, roadType, scale2, sigma, rf, centerErrorTol2, angleThreshold2);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	refineRadialCenterInScaled(roads, area, roadType, scale3, sigma, rf, centerErrorTol3, angleThreshold3);
+	//refineRadialCenterInScaled(roads, area, roadType, scale3, sigma, rf, centerErrorTol3, angleThreshold3);
+
+	// HoughTransformで円を検知
+	if (!detectCircle(roads, area, roadType, rf)) return false;
 
 	std::cout << "Center: " << rf.center.x() << ", " << rf.center.y() << std::endl;
 
@@ -650,7 +647,7 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			if (i > 0) {
-				ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+				//ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			}
 		}
 	}
@@ -682,7 +679,7 @@ std::vector<RadialFeature> RoadSegmentationUtil::detectRadialCentersInScaled(Roa
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
-			ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+			//ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 		}
 	}
 
@@ -744,6 +741,42 @@ void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Po
 	QVector2D center = ht.maxPoint();
 
 	rf.center = center;
+}
+
+/**
+ * OpenCVのHoughTransform関数で円を検知する。なければ、falseを返却する。
+ */
+bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf) {
+	cv::Mat img(500, 500, CV_8U);
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
+			QVector2D p1 = roads.graph[*ei]->polyLine[i] - rf.center + QVector2D(250, 250);
+			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] - rf.center + QVector2D(250, 250);
+
+			if (p1.x() < 0 || p1.x() >= 500 || p2.x() < 0 || p2.x() >= 500) continue;
+
+			cv::line(img, cv::Point(p1.x(), p1.y()), cv::Point(p2.x(), p2.y()), cv::Scalar(255), 3);
+		}
+	}
+
+	cv::vector<cv::Vec3f> circles;
+	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 80);
+
+	for (int i = 0; i < circles.size(); i++) {
+		QVector2D center(circles[i][0], circles[i][1]);
+		int r = circles[i][2];
+
+		std::cout << "Circle: (" << center.x() << "," << center.y() << ") R: " << r << std::endl;
+
+		if ((rf.center - QVector2D(250, 250)).lengthSquared() < r * r) return true;
+	}
+
+	std::cout << "No circle detected" << std::endl;
+
+	return false;
 }
 
 /**
