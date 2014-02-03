@@ -530,6 +530,21 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
 	// 残したエッジから周辺のエッジを辿り、方向がほぼ同じなら、候補に登録していく
 	extendRadialGroup(roads, area, roadType, rf, edges, extendingAngleThreshold, votingRatioThreshold);
 
+	// 候補のエッジ群を囲むconvex hullを求める
+	ConvexHull ch;
+	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
+		for (int i = 0; i < roads.graph[it.key()]->polyLine.size(); i++) {
+			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
+		}
+	}
+	Loop2D hull;
+	ch.convexHull(hull);
+
+	// 領域を表すポリゴンを設定
+	for (int i = 0; i < hull.size(); ++i) {
+		rf._polygon.push_back(hull[i]);
+	}
+
 	// 最後に、候補エッジを、実際にグループに登録する
 	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
 		RoadEdgeDesc e = it.key();

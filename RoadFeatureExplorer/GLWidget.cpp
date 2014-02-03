@@ -50,7 +50,8 @@ void GLWidget::drawScene() {
 
 		// Radialの領域を表示
 		for (int i = 0; i < mainWin->glWidget->radialFeatures.size(); ++i) {
-			renderer->renderPoint(mainWin->glWidget->radialFeatures[i].center, QColor(255, 0, 0), height);
+			renderer->renderPoint(mainWin->glWidget->radialFeatures[i].center, QColor(0, 0, 0), height);
+			renderer->renderConcave(mainWin->glWidget->radialFeatures[i].polygon(), mainWin->glWidget->radialFeatures[i].color(), -10);
 		}
 	} else if (selectedAreaBuilder.selecting()) {
 		renderer->renderPolyline(selectedAreaBuilder.polygon(), GL_LINE_STIPPLE, height);
