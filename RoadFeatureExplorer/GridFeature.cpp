@@ -137,7 +137,7 @@ bool GridFeature::isClose(const QVector2D& dir, float threshold) {
 }
 
 QColor GridFeature::color() {
-	return QColor(0, (int)(angle1 * 2.0f / M_PI * 255.0f), 0);
+	return QColor(0, 0, 255 - group_id * 30 % 255);
 }
 
 /**
