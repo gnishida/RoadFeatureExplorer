@@ -423,11 +423,11 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, const Polygon2D& ar
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
+void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<RadialFeature>& radialFeatures, int maxIteration, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
 	radialFeatures.clear();
 
 	int count = 0;
-
+	/*
 	float stepSize = 1000;
 	BBox bbox = area.getLoopAABB();
 	for (int v = bbox.minPt.y(); v <= bbox.maxPt.y(); v += stepSize) {
@@ -440,7 +440,7 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
 
 			for (int i = 0; i < maxIteration; i++) {
 				RadialFeature rf(count);
-				if (detectOneRadial(roads, small_area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold)) {
+				if (detectOneRadial(roads, small_area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, sigma, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold)) {
 					radialFeatures.push_back(rf);
 					count++;
 				} else {
@@ -449,10 +449,15 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
 			}
 		}
 	}
+	*/
+	
+	RadialFeature rf(count);
+	detectOneRadial(roads, area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, sigma, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold);
+	
 
 	/*
-	RadialFeature rf(count);
-	detectOneRadial(roads, area, roadType, rf, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, votingRatioThreshold, seedDistance, minSeedDirections, extendingAngleThreshold);
+	std::vector<RadialFeature> rfs = detectRadialCentersInScaled(roads, area, roadType, scale1, sigma, 30.0f);
+	radialFeatures = rfs;
 	*/
 }
 
@@ -460,15 +465,15 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, const Polygon2D& area,
  * Plazaを検知する
  * Hough transformにより、円を検知する。
  */
-bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
+bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& area, int roadType, RadialFeature& rf, float scale1, float scale2, float centerErrorTol2, float angleThreshold2, float scale3, float centerErrorTol3, float angleThreshold3, float sigma, float votingRatioThreshold, float seedDistance, float minSeedDirections, float extendingAngleThreshold) {
 	// 0.01スケールで、円の中心を求める
-	detectRadialCenterInScaled(roads, area, roadType, scale1, rf);
+	detectRadialCenterInScaled(roads, area, roadType, scale1, sigma, rf);
 
 	// 0.1スケールで、より正確な円の中心を求める
-	refineRadialCenterInScaled(roads, area, roadType, scale2, rf, centerErrorTol2, angleThreshold2);
+	refineRadialCenterInScaled(roads, area, roadType, scale2, sigma, rf, centerErrorTol2, angleThreshold2);
 
 	// 0.2スケールで、より正確な円の中心を求める
-	refineRadialCenterInScaled(roads, area, roadType, scale3, rf, centerErrorTol3, angleThreshold3);
+	refineRadialCenterInScaled(roads, area, roadType, scale3, sigma, rf, centerErrorTol3, angleThreshold3);
 
 	std::cout << "Center: " << rf.center.x() << ", " << rf.center.y() << std::endl;
 
@@ -538,7 +543,7 @@ bool RoadSegmentationUtil::detectOneRadial(RoadGraph& roads, const Polygon2D& ar
  * Plazaを１つ検知し、円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, RadialFeature& rf) {
+void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, RadialFeature& rf) {
 	HoughTransform ht(area, scale);
 
 	RoadEdgeIter ei, eend;
@@ -557,7 +562,10 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1]);
+			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+			if (i > 0) {
+				ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+			}
 		}
 	}
 
@@ -565,10 +573,49 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, const Po
 }
 
 /**
+ * 円の中心候補のリストを返却する
+ * Hough transformにより、円を検知する。
+ */
+std::vector<RadialFeature> RoadSegmentationUtil::detectRadialCentersInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, float candidateCenterThreshold) {
+	HoughTransform ht(area, scale);
+
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+		
+		// 指定されたタイプ以外は、スキップする。
+		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
+
+		// 既にshapeTypeが確定しているエッジは、スキップする
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
+		// 範囲の外のエッジはスキップする
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
+
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+			ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+		}
+	}
+
+	std::vector<QVector2D> centers = ht.points(candidateCenterThreshold);
+	
+	std::vector<RadialFeature> rfs;
+	for (int i = 0; i < centers.size(); ++i) {
+		RadialFeature rf(i);
+		rf.center = centers[i];
+	}
+
+	return rfs;
+}
+
+/**
  * 円のだいたいの中心点を使って、より正確な円の中心を返却する
  * Hough transformにより、円を検知する。
  */
-void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, RadialFeature& rf, float distanceThreshold, float angleThreshold) {
+void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Polygon2D& area, int roadType, float scale, float sigma, RadialFeature& rf, float distanceThreshold, float angleThreshold) {
 	float distanceThreshold2 = distanceThreshold * distanceThreshold;
 
 	HoughTransform ht(area, scale);
@@ -603,7 +650,7 @@ void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Po
 				Util::diffAngle(v2 - rf.center, dir) > angleThreshold && 
 				Util::diffAngle(v2 - rf.center, -dir) > angleThreshold) continue;
 
-			ht.line(v1, v2);
+			ht.line(v1, v2, sigma);
 		}
 	}
 

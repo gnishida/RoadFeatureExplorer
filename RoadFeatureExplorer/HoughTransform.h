@@ -16,7 +16,9 @@ public:
 	HoughTransform(const Polygon2D& area, float scale);
 	~HoughTransform() {}
 
-	void line(const QVector2D& p1, const QVector2D& p2);
+	void line(const QVector2D& p1, const QVector2D& p2, float sigma);
+	void circle(const QVector2D& p1, const QVector2D& p2, float sigma);
 	QVector2D maxPoint() const;
+	std::vector<QVector2D> points(float threshold) const;
 };
 
