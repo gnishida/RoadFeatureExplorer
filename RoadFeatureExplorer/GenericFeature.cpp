@@ -7,6 +7,22 @@
 #define M_PI	3.141592653589793238
 #endif
 
+GenericFeature::GenericFeature() {
+	accmAvenueLenCount = 0;
+	accmStreetLenCount = 0;
+	accmAvenueDirCount = 0;
+	accmStreetDirCount = 0;
+}
+
+GenericFeature::GenericFeature(int group_id) {
+	this->group_id = group_id;
+
+	accmAvenueLenCount = 0;
+	accmStreetLenCount = 0;
+	accmAvenueDirCount = 0;
+	accmStreetDirCount = 0;
+}
+
 void GenericFeature::addEdge(float length, int roadType) {
 	if (roadType == 1) {
 		streetLengths[(int)(length / 20) * 20 + 10] += 1;
@@ -72,8 +88,10 @@ void GenericFeature::computeFeature() {
 	}
 
 	// 累積カウンタをリセットする
-	accmStreetLenCount = 0;
 	accmAvenueLenCount = 0;
+	accmStreetLenCount = 0;
+	accmAvenueDirCount = 0;
+	accmStreetDirCount = 0;
 }
 
 std::vector<float> GenericFeature::getAngles(int num) const {

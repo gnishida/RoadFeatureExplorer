@@ -36,8 +36,8 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	// register the event handlers
 	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showLocalStreet(int)));
 	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
-	connect(ui.pushButtonDetectPlaza, SIGNAL(clicked()), this, SLOT(detectPlaza()));
 	connect(ui.pushButtonDetectRadial, SIGNAL(clicked()), this, SLOT(detectRadial()));
+	connect(ui.pushButtonExtractGenericFeature, SIGNAL(clicked()), this, SLOT(extractGenericFeature()));
 	connect(ui.pushButtonDetectGridRadial, SIGNAL(clicked()), this, SLOT(detectGridRadial()));
 
 	hide();
@@ -79,16 +79,6 @@ void ControlWidget::detectGrid() {
 }
 
 /**
- * Event handler for button [Detect Plaza]
- */
-void ControlWidget::detectPlaza() {
-	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
-	//RoadSegmentationUtil::detectPlaza(mainWin->glWidget->roads, mainWin->glWidget->selectedArea);
-
-	mainWin->glWidget->updateGL();
-}
-
-/**
  * Event handler for button [Detect Radial]
  */
 void ControlWidget::detectRadial() {
@@ -115,6 +105,16 @@ void ControlWidget::detectRadial() {
 	}
 
 	mainWin->glWidget->updateGL();
+}
+
+void ControlWidget::extractGenericFeature() {
+	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
+
+	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->genericFeatures);
+
+	for (int i = 0; i < mainWin->glWidget->genericFeatures.size(); ++i) {
+		mainWin->glWidget->genericFeatures[i].save(QString("generic_feature%1.xml").arg(i + 1));
+	}
 }
 
 void ControlWidget::detectGridRadial() {
@@ -146,11 +146,6 @@ void ControlWidget::detectGridRadial() {
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
 	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->radialFeatures, radialMaxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, 150.0f, radialVotingThreshold, seedDistance, minSeedDirection, radialExtendingAngleThreshold);
 	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->gridFeatures, gridMaxIteration, numBins, minTotalLength, minMaxBinRatio, gridAngleThreshold, gridVotingThreshold, gridExtendingDistanceThreshold, gridMinOBBLength);
-	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->genericFeatures);
-
-	for (int i = 0; i < mainWin->glWidget->genericFeatures.size(); ++i) {
-		mainWin->glWidget->genericFeatures[i].save(QString("generic_feature%1.xml").arg(i + 1));
-	}
 
 	mainWin->glWidget->updateGL();
 }

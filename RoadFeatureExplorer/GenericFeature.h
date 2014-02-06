@@ -19,8 +19,8 @@ public:
 	int accmStreetDirCount;		// Avenue交差点のdegree累積カウンタ
 
 public:
-	GenericFeature() {}
-	GenericFeature(int group_id) : group_id(group_id) {}
+	GenericFeature();
+	GenericFeature(int group_id);
 	~GenericFeature() {}
 
 	void addEdge(float length, int roadType);

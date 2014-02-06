@@ -829,11 +829,19 @@ void RoadSegmentationUtil::extractGenericFeature(RoadGraph& roads, const Polygon
 		// GridまたはRadialのエッジは、スキップ
 		if (roads.graph[*ei]->shapeType > 0) continue;
 
+		RoadVertexDesc src = boost::source(*ei, roads.graph);
+		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+
+		// エリア外ならスキップ
+		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
+
 		int roadType = roads.graph[*ei]->type;
 		float length = roads.graph[*ei]->getLength();
 
 		gf.addEdge(length, roadType);
 	}
+
+	gf.computeFeature();
 
 	genericFeatures.push_back(gf);
 }

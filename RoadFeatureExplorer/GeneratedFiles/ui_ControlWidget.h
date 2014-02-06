@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Sat Feb 1 17:30:20 2014
+** Created: Thu Feb 6 12:35:30 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -47,8 +47,6 @@ public:
     QLabel *label_21;
     QLineEdit *lineEditGridMinOBBLength;
     QLabel *label_22;
-    QGroupBox *groupBox_4;
-    QPushButton *pushButtonDetectPlaza;
     QGroupBox *groupBox_6;
     QPushButton *pushButtonDetectRadial;
     QLineEdit *lineEditScale1;
@@ -79,6 +77,8 @@ public:
     QPushButton *pushButtonDetectGridRadial;
     QCheckBox *checkBoxRoadTypeAvenue;
     QCheckBox *checkBoxRoadTypeLocalStreet;
+    QGroupBox *groupBox_8;
+    QPushButton *pushButtonExtractGenericFeature;
 
     void setupUi(QDockWidget *ControlWidget)
     {
@@ -91,10 +91,10 @@ public:
         dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
         groupBox_3 = new QGroupBox(dockWidgetContents);
         groupBox_3->setObjectName(QString::fromUtf8("groupBox_3"));
-        groupBox_3->setGeometry(QRect(10, 60, 201, 231));
+        groupBox_3->setGeometry(QRect(10, 40, 201, 231));
         pushButtonDetectGrid = new QPushButton(groupBox_3);
         pushButtonDetectGrid->setObjectName(QString::fromUtf8("pushButtonDetectGrid"));
-        pushButtonDetectGrid->setGeometry(QRect(40, 190, 121, 31));
+        pushButtonDetectGrid->setGeometry(QRect(30, 190, 141, 31));
         label_4 = new QLabel(groupBox_3);
         label_4->setObjectName(QString::fromUtf8("label_4"));
         label_4->setGeometry(QRect(10, 40, 46, 21));
@@ -151,18 +151,12 @@ public:
         label_22 = new QLabel(groupBox_3);
         label_22->setObjectName(QString::fromUtf8("label_22"));
         label_22->setGeometry(QRect(10, 160, 101, 21));
-        groupBox_4 = new QGroupBox(dockWidgetContents);
-        groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
-        groupBox_4->setGeometry(QRect(10, 300, 201, 61));
-        pushButtonDetectPlaza = new QPushButton(groupBox_4);
-        pushButtonDetectPlaza->setObjectName(QString::fromUtf8("pushButtonDetectPlaza"));
-        pushButtonDetectPlaza->setGeometry(QRect(40, 20, 121, 31));
         groupBox_6 = new QGroupBox(dockWidgetContents);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
-        groupBox_6->setGeometry(QRect(10, 380, 201, 311));
+        groupBox_6->setGeometry(QRect(10, 290, 201, 311));
         pushButtonDetectRadial = new QPushButton(groupBox_6);
         pushButtonDetectRadial->setObjectName(QString::fromUtf8("pushButtonDetectRadial"));
-        pushButtonDetectRadial->setGeometry(QRect(40, 270, 121, 31));
+        pushButtonDetectRadial->setGeometry(QRect(30, 270, 141, 31));
         lineEditScale1 = new QLineEdit(groupBox_6);
         lineEditScale1->setObjectName(QString::fromUtf8("lineEditScale1"));
         lineEditScale1->setGeometry(QRect(110, 40, 81, 20));
@@ -252,13 +246,19 @@ public:
         groupBox_7->setGeometry(QRect(10, 710, 201, 61));
         pushButtonDetectGridRadial = new QPushButton(groupBox_7);
         pushButtonDetectGridRadial->setObjectName(QString::fromUtf8("pushButtonDetectGridRadial"));
-        pushButtonDetectGridRadial->setGeometry(QRect(40, 20, 121, 31));
+        pushButtonDetectGridRadial->setGeometry(QRect(30, 20, 141, 31));
         checkBoxRoadTypeAvenue = new QCheckBox(dockWidgetContents);
         checkBoxRoadTypeAvenue->setObjectName(QString::fromUtf8("checkBoxRoadTypeAvenue"));
         checkBoxRoadTypeAvenue->setGeometry(QRect(20, 10, 70, 17));
         checkBoxRoadTypeLocalStreet = new QCheckBox(dockWidgetContents);
         checkBoxRoadTypeLocalStreet->setObjectName(QString::fromUtf8("checkBoxRoadTypeLocalStreet"));
         checkBoxRoadTypeLocalStreet->setGeometry(QRect(100, 10, 91, 17));
+        groupBox_8 = new QGroupBox(dockWidgetContents);
+        groupBox_8->setObjectName(QString::fromUtf8("groupBox_8"));
+        groupBox_8->setGeometry(QRect(10, 620, 201, 61));
+        pushButtonExtractGenericFeature = new QPushButton(groupBox_8);
+        pushButtonExtractGenericFeature->setObjectName(QString::fromUtf8("pushButtonExtractGenericFeature"));
+        pushButtonExtractGenericFeature->setGeometry(QRect(30, 20, 141, 31));
         ControlWidget->setWidget(dockWidgetContents);
 
         retranslateUi(ControlWidget);
@@ -278,8 +278,6 @@ public:
         label_20->setText(QApplication::translate("ControlWidget", "Angle Threshold", 0, QApplication::UnicodeUTF8));
         label_21->setText(QApplication::translate("ControlWidget", "Ext Dist Threshold", 0, QApplication::UnicodeUTF8));
         label_22->setText(QApplication::translate("ControlWidget", "Min OBB Length", 0, QApplication::UnicodeUTF8));
-        groupBox_4->setTitle(QApplication::translate("ControlWidget", "Plaza Detection", 0, QApplication::UnicodeUTF8));
-        pushButtonDetectPlaza->setText(QApplication::translate("ControlWidget", "Detect Plaza", 0, QApplication::UnicodeUTF8));
         groupBox_6->setTitle(QApplication::translate("ControlWidget", "Radial Detection", 0, QApplication::UnicodeUTF8));
         pushButtonDetectRadial->setText(QApplication::translate("ControlWidget", "Detect Radial", 0, QApplication::UnicodeUTF8));
         label_7->setText(QApplication::translate("ControlWidget", "Scale 1", 0, QApplication::UnicodeUTF8));
@@ -302,6 +300,8 @@ public:
         pushButtonDetectGridRadial->setText(QApplication::translate("ControlWidget", "Detect Grid / Radial", 0, QApplication::UnicodeUTF8));
         checkBoxRoadTypeAvenue->setText(QApplication::translate("ControlWidget", "Avenues", 0, QApplication::UnicodeUTF8));
         checkBoxRoadTypeLocalStreet->setText(QApplication::translate("ControlWidget", "Local Streets", 0, QApplication::UnicodeUTF8));
+        groupBox_8->setTitle(QApplication::translate("ControlWidget", "Extract Generic Feature", 0, QApplication::UnicodeUTF8));
+        pushButtonExtractGenericFeature->setText(QApplication::translate("ControlWidget", "Extract Generic Feature", 0, QApplication::UnicodeUTF8));
         Q_UNUSED(ControlWidget);
     } // retranslateUi
 
