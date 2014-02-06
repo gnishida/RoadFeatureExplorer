@@ -1,6 +1,6 @@
 <features>
     <feature type="radial">
-        <radius>13</radius>
+        <radius>18</radius>
         <numDirections>7</numDirections>
     </feature>
 </features>

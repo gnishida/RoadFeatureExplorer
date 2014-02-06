@@ -110,7 +110,7 @@ void ControlWidget::detectRadial() {
 void ControlWidget::extractGenericFeature() {
 	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
 
-	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->genericFeatures);
+	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->genericFeatures);
 
 	for (int i = 0; i < mainWin->glWidget->genericFeatures.size(); ++i) {
 		mainWin->glWidget->genericFeatures[i].save(QString("generic_feature%1.xml").arg(i + 1));

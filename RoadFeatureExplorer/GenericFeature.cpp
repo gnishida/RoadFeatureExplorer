@@ -305,16 +305,13 @@ void GenericFeature::save(QString filename) {
 
 	// write avenue node
 	QDomElement node_avenue = doc.createElement("avenue");
-	root.appendChild(node_avenue);
+	node_feature.appendChild(node_avenue);
 	saveAvenue(doc, node_avenue);
 
 	// write street node
 	QDomElement node_street = doc.createElement("street");
-	root.appendChild(node_street);
+	node_feature.appendChild(node_street);
 	saveStreet(doc, node_street);
-
-
-
 
 	// write the dom to the file
 	QFile file(filename);
@@ -334,11 +331,27 @@ void GenericFeature::saveAvenue(QDomDocument& doc, QDomNode& node) {
 		QString str;
 		str.setNum(it.key());
 		node_length_data.setAttribute("key", str);
-		node_length_data.appendChild(node_length_data);
+		node_length.appendChild(node_length_data);
 
 		str.setNum(it.value());
 		QDomText node_length_value = doc.createTextNode(str);
 		node_length_data.appendChild(node_length_value);
+	}
+
+	// write numDirections node
+	QDomElement node_numDirections = doc.createElement("numDirections");
+	node.appendChild(node_numDirections);
+
+	for (QMap<int, float>::iterator it = avenueNumDirections.begin(); it != avenueNumDirections.end(); ++it) {
+		QDomElement node_numDirections_data = doc.createElement("data");
+		QString str;
+		str.setNum(it.key());
+		node_numDirections_data.setAttribute("key", str);
+		node_numDirections.appendChild(node_numDirections_data);
+
+		str.setNum(it.value());
+		QDomText node_numDirections_value = doc.createTextNode(str);
+		node_numDirections_data.appendChild(node_numDirections_value);
 	}
 }
 
@@ -352,10 +365,26 @@ void GenericFeature::saveStreet(QDomDocument& doc, QDomNode& node) {
 		QString str;
 		str.setNum(it.key());
 		node_length_data.setAttribute("key", str);
-		node_length_data.appendChild(node_length_data);
+		node_length.appendChild(node_length_data);
 
 		str.setNum(it.value());
 		QDomText node_length_value = doc.createTextNode(str);
 		node_length_data.appendChild(node_length_value);
+	}
+
+	// write numDirections node
+	QDomElement node_numDirections = doc.createElement("numDirections");
+	node.appendChild(node_numDirections);
+
+	for (QMap<int, float>::iterator it = streetNumDirections.begin(); it != streetNumDirections.end(); ++it) {
+		QDomElement node_numDirections_data = doc.createElement("data");
+		QString str;
+		str.setNum(it.key());
+		node_numDirections_data.setAttribute("key", str);
+		node_numDirections.appendChild(node_numDirections_data);
+
+		str.setNum(it.value());
+		QDomText node_numDirections_value = doc.createTextNode(str);
+		node_numDirections_data.appendChild(node_numDirections_value);
 	}
 }

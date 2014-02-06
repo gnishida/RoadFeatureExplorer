@@ -5,15 +5,10 @@
 #include "ConvexHull.h"
 #include "HoughTransform.h"
 #include <math.h>
-
-#ifndef Q_MOC_RUN
 #include <boost/graph/planar_face_traversal.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
-#endif
 
-#ifndef SQR(x)
 #define SQR(x)	((x) * (x))
-#endif
 
 RoadGraph* roadGraphPtr;
 std::vector<RoadEdgeDesc> plaza;
@@ -819,7 +814,7 @@ void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, 
 /**
  * GridでもRadialでもないエッジについて、一般的な特徴量を抽出する。
  */
-void RoadSegmentationUtil::extractGenericFeature(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<GenericFeature>& genericFeatures) {
+void RoadSegmentationUtil::extractGenericFeature(RoadGraph& roads, const Polygon2D& area, std::vector<GenericFeature>& genericFeatures) {
 	GenericFeature gf(0);
 
 	RoadEdgeIter ei, eend;
@@ -841,7 +836,36 @@ void RoadSegmentationUtil::extractGenericFeature(RoadGraph& roads, const Polygon
 		gf.addEdge(length, roadType);
 	}
 
+	RoadVertexIter vi, vend;
+	for (boost::tie(vi, vend) = boost::vertices(roads.graph); vi != vend; ++vi) {
+		if (!roads.graph[*vi]->valid) continue;
+
+		if (getNumEdges(roads, *vi, 2, 0) > 0) {
+			gf.addNumDiretions(GraphUtil::getNumEdges(roads, *vi, 2), 2);
+		}
+
+		if (getNumEdges(roads, *vi, 1, 0) > 0) {
+			gf.addNumDiretions(GraphUtil::getNumEdges(roads, *vi, 3), 1);
+		}
+	}
+
 	gf.computeFeature();
 
 	genericFeatures.push_back(gf);
+}
+
+int RoadSegmentationUtil::getNumEdges(RoadGraph &roads, RoadVertexDesc v, int roadType, int shapeType) {
+	int count = 0;
+	RoadOutEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = out_edges(v, roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+		
+		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
+
+		if (roads.graph[*ei]->shapeType != shapeType) continue;
+
+		count++;
+	}
+
+	return count;
 }

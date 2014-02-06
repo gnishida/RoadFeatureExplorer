@@ -35,6 +35,7 @@ public:
 	static int countNumDirections(RoadGraph& roads, const RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, int size);
 	static void buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, bool>& edges, RadialFeature& rf);
 
-	static void extractGenericFeature(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<GenericFeature>& genericFeatures);
+	static void extractGenericFeature(RoadGraph& roads, const Polygon2D& area, std::vector<GenericFeature>& genericFeatures);
+	static int getNumEdges(RoadGraph &roads, RoadVertexDesc v, int roadType, int shapeType);
 };
 
