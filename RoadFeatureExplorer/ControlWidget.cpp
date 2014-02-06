@@ -71,6 +71,7 @@ void ControlWidget::detectGrid() {
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
 	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->roadFeature, maxIteration, numBins, minTotalLength, minMaxBinRatio, angleThreshold, votingThreshold, extendingDistanceThreshold, minOBBLength);
 
+	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("feature.xml");
 
 	mainWin->glWidget->updateGL();
@@ -98,6 +99,7 @@ void ControlWidget::detectRadial() {
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
 	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->roadFeature, maxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, 150.0f, votingThreshold, seedDistance, minSeedDirection, extendingAngleThreshold);
 
+	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("feature.xml");
 
 	mainWin->glWidget->updateGL();
@@ -108,6 +110,7 @@ void ControlWidget::extractGenericFeature() {
 
 	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
 
+	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("feature.xml");
 }
 
@@ -142,6 +145,7 @@ void ControlWidget::detectGridRadial() {
 	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->roadFeature, gridMaxIteration, numBins, minTotalLength, minMaxBinRatio, gridAngleThreshold, gridVotingThreshold, gridExtendingDistanceThreshold, gridMinOBBLength);
 	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
 
+	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("feature.xml");
 
 	mainWin->glWidget->updateGL();

@@ -1,66 +1,63 @@
 <features>
-    <feature type="grid">
+    <feature weight="0.764887" type="grid">
         <center>
-            <x>645.541</x>
-            <y>422.135</y>
+            <x>-181.412</x>
+            <y>423.177</y>
         </center>
-        <angle1>0.154935</angle1>
-        <angle2>1.72573</angle2>
+        <angle1>0.155657</angle1>
+        <angle2>1.72645</angle2>
         <length1>
-            <data key="10">0.273256</data>
-            <data key="30">0.476744</data>
-            <data key="50">0.569767</data>
-            <data key="70">0.726744</data>
-            <data key="90">0.761628</data>
-            <data key="110">0.802326</data>
-            <data key="130">0.831395</data>
+            <data key="10">0.24424</data>
+            <data key="30">0.479263</data>
+            <data key="50">0.589862</data>
+            <data key="70">0.737327</data>
+            <data key="90">0.774194</data>
+            <data key="110">0.820277</data>
+            <data key="130">0.847926</data>
             <data key="150">1</data>
         </length1>
         <length2>
-            <data key="10">0.213235</data>
-            <data key="30">0.404412</data>
-            <data key="50">0.639706</data>
-            <data key="70">0.720588</data>
-            <data key="90">0.757353</data>
-            <data key="110">0.992647</data>
+            <data key="10">0.196429</data>
+            <data key="30">0.380952</data>
+            <data key="50">0.648809</data>
+            <data key="70">0.714286</data>
+            <data key="90">0.755952</data>
+            <data key="110">0.994048</data>
             <data key="270">1</data>
         </length2>
     </feature>
-    <feature type="grid">
+    <feature weight="0.223069" type="grid">
         <center>
-            <x>835.701</x>
-            <y>-372.508</y>
+            <x>131.476</x>
+            <y>-351.791</y>
         </center>
-        <angle1>0.781212</angle1>
-        <angle2>2.35201</angle2>
+        <angle1>0.781505</angle1>
+        <angle2>2.3523</angle2>
         <length1>
-            <data key="10">0.193548</data>
-            <data key="30">0.322581</data>
-            <data key="50">0.467742</data>
-            <data key="70">0.66129</data>
-            <data key="90">0.758065</data>
-            <data key="110">0.774194</data>
-            <data key="130">0.790323</data>
-            <data key="150">0.870968</data>
-            <data key="170">0.903226</data>
-            <data key="190">0.919355</data>
-            <data key="210">0.935484</data>
-            <data key="230">0.951613</data>
+            <data key="10">0.236364</data>
+            <data key="30">0.363636</data>
+            <data key="50">0.509091</data>
+            <data key="70">0.690909</data>
+            <data key="90">0.781818</data>
+            <data key="110">0.818182</data>
+            <data key="150">0.872727</data>
+            <data key="170">0.909091</data>
+            <data key="190">0.927273</data>
+            <data key="210">0.945455</data>
             <data key="270">1</data>
         </length1>
         <length2>
-            <data key="10">0.266667</data>
-            <data key="30">0.366667</data>
-            <data key="50">0.6</data>
-            <data key="70">0.95</data>
-            <data key="90">0.983333</data>
-            <data key="190">1</data>
+            <data key="10">0.270833</data>
+            <data key="30">0.375</data>
+            <data key="50">0.625</data>
+            <data key="70">0.958333</data>
+            <data key="90">1</data>
         </length2>
     </feature>
-    <feature type="generic">
+    <feature weight="0.0120437" type="generic">
         <center>
-            <x>824.076</x>
-            <y>-8.71679</y>
+            <x>49.9366</x>
+            <y>-71.386</y>
         </center>
         <avenue>
             <length>
@@ -70,11 +67,11 @@
                 <data key="110">1</data>
             </length>
             <numDirections>
-                <data key="1">0.0317749</data>
-                <data key="2">0.712665</data>
-                <data key="3">0.841126</data>
-                <data key="4">0.991375</data>
-                <data key="5">0.999546</data>
+                <data key="1">0.0318761</data>
+                <data key="2">0.713115</data>
+                <data key="3">0.840619</data>
+                <data key="4">0.991348</data>
+                <data key="5">0.999545</data>
                 <data key="6">1</data>
             </numDirections>
         </avenue>
@@ -83,12 +80,12 @@
                 <data key="10">1</data>
             </length>
             <numDirections>
-                <data key="1">0.113115</data>
-                <data key="2">0.130679</data>
-                <data key="3">0.545902</data>
-                <data key="4">0.982436</data>
-                <data key="5">0.998126</data>
-                <data key="6">0.999766</data>
+                <data key="1">0.113615</data>
+                <data key="2">0.131221</data>
+                <data key="3">0.548122</data>
+                <data key="4">0.982394</data>
+                <data key="5">0.998122</data>
+                <data key="6">0.999765</data>
                 <data key="7">1</data>
             </numDirections>
         </street>

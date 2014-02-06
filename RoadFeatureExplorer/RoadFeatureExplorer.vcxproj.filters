@@ -33,6 +33,12 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Feature">
+      <UniqueIdentifier>{b1106cb1-2d39-4d97-b8d0-e6f7d75b3a4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RoadGraph">
+      <UniqueIdentifier>{1a05e5bd-6bfa-4917-9449-a1b99b24f79b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -83,16 +89,7 @@
     <ClCompile Include="Renderable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RoadEdge.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RoadGraph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RoadGraphRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RoadVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
@@ -105,12 +102,6 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="RoadSegmentationUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GridFeature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RadialFeature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConvexHull.cpp">
@@ -126,10 +117,25 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GenericFeature.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="GridFeature.cpp">
+      <Filter>Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="RadialFeature.cpp">
+      <Filter>Feature</Filter>
     </ClCompile>
     <ClCompile Include="RoadFeature.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadGraph.cpp">
+      <Filter>RoadGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadVertex.cpp">
+      <Filter>RoadGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadEdge.cpp">
+      <Filter>RoadGraph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -183,16 +189,7 @@
     <ClInclude Include="Renderable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoadEdge.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RoadGraph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RoadGraphRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RoadVertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Util.h">
@@ -202,12 +199,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="RoadSegmentationUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GridFeature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RadialFeature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConvexHull.h">
@@ -223,10 +214,25 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GenericFeature.h">
-      <Filter>Header Files</Filter>
+      <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="GridFeature.h">
+      <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="RadialFeature.h">
+      <Filter>Feature</Filter>
     </ClInclude>
     <ClInclude Include="RoadFeature.h">
-      <Filter>Header Files</Filter>
+      <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadVertex.h">
+      <Filter>RoadGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadEdge.h">
+      <Filter>RoadGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadGraph.h">
+      <Filter>RoadGraph</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
