@@ -1,0 +1,29 @@
+<features>
+    <feature type="grid">
+        <angle1>1.0638</angle1>
+        <angle2>2.63459</angle2>
+        <length1>
+            <data key="10">0.0454545</data>
+            <data key="30">0.136364</data>
+            <data key="50">0.159091</data>
+            <data key="70">0.840909</data>
+            <data key="90">1</data>
+        </length1>
+        <length2>
+            <data key="10">0.125</data>
+            <data key="30">0.1625</data>
+            <data key="70">0.225</data>
+            <data key="90">0.3625</data>
+            <data key="110">0.45</data>
+            <data key="130">0.4625</data>
+            <data key="150">0.7125</data>
+            <data key="170">0.8</data>
+            <data key="190">0.8875</data>
+            <data key="210">0.9125</data>
+            <data key="230">0.9375</data>
+            <data key="250">0.95</data>
+            <data key="270">0.9625</data>
+            <data key="310">1</data>
+        </length2>
+    </feature>
+</features>

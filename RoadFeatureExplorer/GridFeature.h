@@ -2,6 +2,7 @@
 
 #include "Polygon2D.h"
 #include <QMap>
+#include <QDomNode>
 #include <QVector2D>
 #include <QColor>
 #include <opencv/cv.h>
@@ -32,6 +33,11 @@ public:
 	void addEdge(const QVector2D& edge_vec, float threshold);
 	void computeFeature();
 	bool isClose(const QVector2D& dir, float threshold);
+
+	void load(QString filename);
+	void load(QDomNode& node);
+	void save(QString filename);
+
 	QColor color();
 	Polygon2D polygon();
 };

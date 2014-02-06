@@ -1,8 +1,11 @@
 ﻿#include "GridFeature.h"
 #include "Util.h"
+#include <QFile>
+#include <QDomDocument>
+#include <random>
 
 #ifndef M_PI
-#define M_PI	3.141592653
+#define M_PI	3.141592653589793238
 #endif
 
 /**
@@ -47,22 +50,22 @@ void GridFeature::addEdge(const QVector2D& edge_vec, float threshold) {
 	if (diff1 == min_diff) {
 		accmDir1 += dir;
 		accmDir2 += QVector2D(-dir.y(), dir.x());
-		length1[(int)(edge_vec.length() / 20) * 20] += 1;
+		length1[(int)(edge_vec.length() / 20) * 20 + 10] += 1;
 		accmLenCount1++;
 	} else if (diff2 == min_diff) {
 		accmDir1 -= dir;
 		accmDir2 -= QVector2D(-dir.y(), dir.x());
-		length1[(int)(edge_vec.length() / 20) * 20] += 1;
+		length1[(int)(edge_vec.length() / 20) * 20 + 10] += 1;
 		accmLenCount1++;
 	} else if (diff3 == min_diff) {
 		accmDir1 += QVector2D(dir.y(), -dir.x());
 		accmDir2 += dir;
-		length2[(int)(edge_vec.length() / 20) * 20] += 1;
+		length2[(int)(edge_vec.length() / 20) * 20 + 10] += 1;
 		accmLenCount2++;
 	} else {
 		accmDir1 -= QVector2D(dir.y(), -dir.x());
 		accmDir2 -= dir;
-		length2[(int)(edge_vec.length() / 20) * 20] += 1;
+		length2[(int)(edge_vec.length() / 20) * 20 + 10] += 1;
 		accmLenCount2++;
 	}
 
@@ -134,6 +137,136 @@ bool GridFeature::isClose(const QVector2D& dir, float threshold) {
 
 	if (Util::diffAngle(angle1, a1) <= threshold || Util::diffAngle(angle1, a2) <= threshold || Util::diffAngle(angle2, a1) <= threshold || Util::diffAngle(angle2, a2) <= threshold) return true;
 	else return false;
+}
+
+/**
+ * ファイルから、グリッドの特徴量を読込む。
+ */
+void GridFeature::load(QString filename) {
+	QFile file(filename);
+
+	QDomDocument doc;
+	doc.setContent(&file, true);
+	QDomElement root = doc.documentElement();
+
+	QDomNode node = root.firstChild();
+	while (!node.isNull()) {
+		if (node.toElement().tagName() == "feature") {
+			if (node.toElement().attribute("type") == "grid") {
+				load(node);
+				break;
+			}
+		}
+
+		node = node.nextSibling();
+	}
+}
+
+/**
+ * 与えられたfeatureノード配下のXML情報に基づいて、グリッド特徴量を設定する。
+ */
+void GridFeature::load(QDomNode& node) {
+	length1.clear();
+	length2.clear();
+
+	QDomNode child = node.firstChild();
+	while (!child.isNull()) {
+		if (child.toElement().tagName() == "angle1") {
+			angle1 = child.firstChild().nodeValue().toFloat();
+		} else if (child.toElement().tagName() == "angle2") {
+			angle2 = child.firstChild().nodeValue().toFloat();
+		} else if (child.toElement().tagName() == "length1") {
+			QDomNode child2 = child.firstChild();
+			while (!child2.isNull()) {
+				float len = child2.toElement().attribute("key").toFloat();
+				float accm = child2.firstChild().nodeValue().toFloat();
+				length1[len] = accm;
+
+				child2 = child2.nextSibling();
+			}
+		} else if (child.toElement().tagName() == "length2") {
+			QDomNode child2 = child.firstChild();
+			while (!child2.isNull()) {
+				float len = child2.toElement().attribute("key").toFloat();
+				float accm = child2.firstChild().nodeValue().toFloat();
+				length2[len] = accm;
+
+				child2 = child2.nextSibling();
+			}
+		}
+
+		child = child.nextSibling();
+	}
+}
+
+/**
+ * 特徴量をxmlファイルに保存する。
+ */
+void GridFeature::save(QString filename) {
+	QDomDocument doc;
+
+	QDomElement root = doc.createElement("features");
+	doc.appendChild(root);
+
+	QDomElement node_feature = doc.createElement("feature");
+	node_feature.setAttribute("type", "grid");
+	root.appendChild(node_feature);
+
+	// write angle1 node
+	QDomElement node_angle1 = doc.createElement("angle1");
+	node_feature.appendChild(node_angle1);
+
+	QString str;
+	str.setNum(angle1);
+	QDomText node_angle1_data = doc.createTextNode(str);
+	node_angle1.appendChild(node_angle1_data);
+
+	// write angle2 node
+	QDomElement node_angle2 = doc.createElement("angle2");
+	node_feature.appendChild(node_angle2);
+
+	str.setNum(angle2);
+	QDomText node_angle2_data = doc.createTextNode(str);
+	node_angle2.appendChild(node_angle2_data);
+
+	// write length1 node
+	QDomElement node_length1 = doc.createElement("length1");
+	node_feature.appendChild(node_length1);
+
+	for (QMap<float, float>::iterator it = length1.begin(); it != length1.end(); ++it) {
+		QDomElement node_length1_data = doc.createElement("data");
+		QString str;
+		str.setNum(it.key());
+		node_length1_data.setAttribute("key", str);
+		node_length1.appendChild(node_length1_data);
+
+		str.setNum(it.value());
+		QDomText node_length1_value = doc.createTextNode(str);
+		node_length1_data.appendChild(node_length1_value);
+	}
+
+	// write length2 node
+	QDomElement node_length2 = doc.createElement("length2");
+	node_feature.appendChild(node_length2);
+
+	for (QMap<float, float>::iterator it = length2.begin(); it != length2.end(); ++it) {
+		QDomElement node_length2_data = doc.createElement("data");
+		QString str;
+		str.setNum(it.key());
+		node_length2_data.setAttribute("key", str);
+		node_length2.appendChild(node_length2_data);
+
+		str.setNum(it.value());
+		QDomText node_length2_value = doc.createTextNode(str);
+		node_length2_data.appendChild(node_length2_value);
+	}
+
+	// write the dom to the file
+	QFile file(filename);
+	file.open(QIODevice::WriteOnly);
+
+	QTextStream out(&file);
+	doc.save(out, 4);
 }
 
 QColor GridFeature::color() {

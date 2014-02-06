@@ -1,0 +1,6 @@
+<features>
+    <feature type="radial">
+        <radius>14</radius>
+        <numDirections>8</numDirections>
+    </feature>
+</features>

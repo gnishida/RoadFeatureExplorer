@@ -608,22 +608,29 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 	}
 
 	cv::vector<cv::Vec3f> circles;
-	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 80);
+	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 120);
 
 	for (int i = 0; i < circles.size(); i++) {
 		QVector2D center(circles[i][0], circles[i][1]);
 		int r = circles[i][2];
 
+		bool duplicated = false;
+		for (int j = 0; j < rf.radii.size(); ++j) {
+			if (fabs(rf.radii[j] - r) < 3.0f) duplicated = true;
+		}
+		if (duplicated) continue;
+
 		if ((center - QVector2D(250, 250)).lengthSquared() < detectCircleThreshold2) {
 			std::cout << "Circle detected: (" << center.x() << "," << center.y() << ") R: " << r << std::endl;
 			rf.center += center - QVector2D(250, 250);
-			rf.radius = r;
+			rf.radii.push_back(r);
 
-			return true;
+			//return true;
 		}
 	}
 
-	return false;
+	if (rf.radii.size() > 0) return true;
+	else return false;
 }
 
 /**
@@ -669,7 +676,8 @@ bool RoadSegmentationUtil::findOneRadial(RoadGraph& roads, const Polygon2D& area
 	reduceRadialGroup(roads, rf, edges, seedDistance);
 
 	// 中心から伸びるアームの方向を量子化してカウントする
-	if (countNumDirections(roads, rf, edges, 12) < minSeedDirections) return false;
+	rf.numDirections = countNumDirections(roads, rf, edges, 12);
+	if (rf.numDirections < minSeedDirections) return false;
 
 	return true;
 }
