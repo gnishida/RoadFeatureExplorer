@@ -41,7 +41,7 @@ void GLWidget::drawScene() {
 
 	// draw the selected area
 	if (selectedAreaBuilder.selected()) {
-		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, height);
+		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, QColor(0, 0, 255), height);
 
 		// グリッドの領域を表示
 		for (int i = 0; i < mainWin->glWidget->gridFeatures.size(); ++i) {

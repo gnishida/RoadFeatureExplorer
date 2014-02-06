@@ -1,4 +1,4 @@
-#include "Polygon2D.h"
+﻿#include "Polygon2D.h"
 #include "Util.h"
 #include <QVector2D>
 #include <QMatrix4x4>
@@ -9,6 +9,10 @@
 #include <boost/geometry/geometries/register/ring.hpp>
 #include <boost/geometry/multi/multi.hpp>
 #include <boost/polygon/polygon.hpp>
+
+#ifndef M_PI
+#define M_PI		3.141592653589793238
+#endif
 
 void Loop2D::close() {
 	if (size() == 0) return;
@@ -113,11 +117,11 @@ Loop2D Loop2D::createRectangle(float width, float height) {
 
 Polygon2D::Polygon2D() {
 	isCentroidValid = false;
+	tessellated = false;
 	//centroid = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
 Polygon2D::~Polygon2D() {
-	contour.clear();
 }
 
 const QVector2D& Polygon2D::operator[](const int idx) const {	
@@ -137,11 +141,13 @@ void Polygon2D::setContour(const Loop2D& contour) {
 
 	// normalVec and centroid are to be updated later when they are requested
 	isCentroidValid = false;
+	tessellated = false;
 }
 
 void Polygon2D::clear() {
 	contour.clear();
 	isCentroidValid = false;
+	tessellated = false;
 	//centroid = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
@@ -150,6 +156,7 @@ void Polygon2D::push_back(const QVector2D& point) {
 
 	// normalVec and centroid are to be updated later when they are requested
 	isCentroidValid = false;
+	tessellated = false;
 }
 
 int Polygon2D::size() const {
@@ -533,20 +540,43 @@ bool Polygon2D::reorientFace(bool onlyCheck) {
 	*/
 }
 
-bool Polygon2D::contains(const QVector2D& pt) const {
+bool Polygon2D::contains(const QVector2D& pt) {
+	tessellate();
+
+	for (int i = 0; i < trapezoids.size(); ++i) {
+		bool outside = false;
+
+		int sz = trapezoids[i].size();
+		for (int j = 0; j < sz; ++j) {
+			QVector2D vec1 = trapezoids[i][(j + 1) % sz] - trapezoids[i][j];
+			QVector2D vec2 = pt - trapezoids[i][j];
+			if (vec1.x() * vec2.y() - vec1.y() * vec2.x() < 0) outside = true;
+		}
+
+		if (!outside) return true;
+	}
+
+	/*
 	for (int i = 0; i < size(); ++i) {
 		QVector2D vec1 = contour[(i + 1) % size()] - contour[i];
 		QVector2D vec2 = pt - contour[i];
 		if (vec1.x() * vec2.y() - vec1.y() * vec2.x() > 0) return false;
 	}
-
 	return true;
+	*/
+	return false;
 }
 
-void Polygon2D::tessellate(std::vector<Loop2D>& trapezoids) const {
+/**
+ * このポリゴンを三角形または凸四角形の集合に分割する。
+ * 各図形の頂点は、openでCCWオーダである。
+ */
+std::vector<Loop2D>& Polygon2D::tessellate() {
+	if (tessellated) return trapezoids;
+
 	trapezoids.clear();
 
-	if (size() < 3) return;
+	if (size() < 3) return trapezoids;
 
 	// create 2D polygon data
 	std::vector<boost::polygon::point_data<double> > polygon;
@@ -590,6 +620,26 @@ void Polygon2D::tessellate(std::vector<Loop2D>& trapezoids) const {
 
 		if (trapezoid.size() >= 3) trapezoids.push_back(trapezoid);
 	}
+
+	tessellated = true;
+
+	return trapezoids;
+}
+
+/**
+ * このポリゴンと、与えられた線（または線分）との交点を求める
+ */
+bool Polygon2D::intersect(const QVector2D& a, const QVector2D& b, float *tab, float *tcd, QVector2D &intPoint) const {
+	for (int i = 0; i < size(); ++i) {
+		QVector2D c = contour[i];
+		QVector2D d = contour[(i + 1) % size()];
+
+		if (Util::segmentSegmentIntersectXY(a, b, c, d, tab, tcd, true, intPoint)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -807,6 +857,32 @@ void Polygon2D::getLoopOBB(const Loop2D& pin, QVector2D& size, QMatrix4x4& xform
 	xformMat.rotate(Util::rad2deg(bestAlpha), 0.0f, 0.0f, 1.0f);
 	xformMat.setRow(3, QVector4D(origMidPt.x(), origMidPt.y(), 0.0f, 1.0f));
 	size = bestBoxSz;
+}
+
+/**
+* Get polygon oriented bounding box
+**/
+void Polygon2D::getLoopOBB(const QVector2D& dir, Loop2D& bboxRotLoop) const {
+	Loop2D rotLoop;
+	QMatrix4x4 rotMat;
+
+	float alpha = atan2f(dir.y(), dir.x());
+	rotMat.setToIdentity();
+	rotMat.rotate(Util::rad2deg(-alpha), 0.0f, 0.0f, 1.0f);
+	transformLoop(contour, rotLoop, rotMat);
+
+	QVector2D minPt, maxPt;
+	QVector2D size = Polygon2D::getLoopAABB(rotLoop, minPt, maxPt);
+
+	Loop2D bboxLoop;
+	bboxLoop.push_back(minPt);
+	bboxLoop.push_back(QVector2D(minPt.x(), maxPt.y()));
+	bboxLoop.push_back(maxPt);
+	bboxLoop.push_back(QVector2D(maxPt.x(), minPt.y()));
+
+	rotMat.setToIdentity();
+	rotMat.rotate(Util::rad2deg(alpha), 0.0f, 0.0f, 1.0f);
+	transformLoop(bboxLoop, bboxRotLoop, rotMat);
 }
 
 /*void Polygon2D::getMyOBB(QVector3D& size, QMatrix4x4& xformMat) {

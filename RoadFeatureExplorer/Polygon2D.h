@@ -5,8 +5,6 @@
 #include <QVector2D>
 #include <QVector3D>
 #include "float.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 class Loop2D : public std::vector<QVector2D> {
 public:
@@ -21,35 +19,16 @@ class Polygon2D {
 protected:
 	/** Vector containing 3D points of polygon contour */
 	Loop2D contour;
+	std::vector<Loop2D> trapezoids;
 
-	QVector2D normalVec;
 	QVector2D centroid;
 
-	//bool isNormalVecValid;
 	bool isCentroidValid;
+	bool tessellated;
 
 public:
 	Polygon2D();
 	~Polygon2D();
-
-	/**
-	 * Copy constructor.
-	 */
-	inline Polygon2D::Polygon2D(const Polygon2D &ref) {	
-		contour = ref.contour;
-		normalVec = ref.normalVec;
-		centroid = ref.centroid;
-	}
-
-	/**
-	 * Assignment operator.
-	 */
-	inline Polygon2D& operator=(const Polygon2D &ref) {				
-		contour = ref.contour;
-		normalVec = ref.normalVec;
-		centroid = ref.centroid;
-		return (*this);
-	}
 
 	const QVector2D& operator[](const int idx) const;
 	QVector2D& operator[](const int idx);
@@ -76,10 +55,12 @@ public:
 	//float computeInset(std::vector<float> offsetDistances, Loop2D &pgonInset, bool computeArea = true);
 	//float computeArea(bool parallelToXY = false);
 	bool reorientFace(bool onlyCheck = false);
-	bool contains(const QVector2D& pt) const;
-	void tessellate(std::vector<Loop2D>& trapezoids) const;
+	bool contains(const QVector2D& pt);
+	//void tessellate(std::vector<Loop2D>& trapezoids) const;
+	std::vector<Loop2D>& tessellate();
 
-	//static QVector3D getLoopNormalVector(const Loop2D &pin);
+	bool intersect(const QVector2D& a, const QVector2D& b, float *tab, float *tcd, QVector2D &intPoint) const;
+
 	static bool reorientFace(Loop2D& pface, bool onlyCheck = false);
 	//static int cleanLoop(const Loop2D& pin, Loop2D &pout, float threshold);
 	static void transformLoop(const Loop2D& pin, Loop2D& pout, QMatrix4x4& transformMat);
@@ -88,6 +69,7 @@ public:
 	static QVector2D getLoopAABB(const Loop2D& pin, QVector2D& minCorner, QVector2D& maxCorner);
 	BBox getLoopAABB() const;
 	static void getLoopOBB(const Loop2D& pin, QVector2D& size, QMatrix4x4& xformMat);
+	void getLoopOBB(const QVector2D& dir,  Loop2D& bboxRotLoop) const;
 	//void getMyOBB(QVector3D& size, QMatrix4x4& xformMat);
 	//static void extrudePolygon(const Loop2D& basePgon, float height, std::vector<Polygon2D>& pgonExtrusion);
 
