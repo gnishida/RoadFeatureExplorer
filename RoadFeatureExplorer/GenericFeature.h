@@ -8,6 +8,7 @@
 class GenericFeature {
 public:
 	int group_id;
+	QVector2D center;
 	QMap<float, float> avenueLengths;
 	QMap<int, float> avenueNumDirections;
 	QMap<float, float> streetLengths;
@@ -38,7 +39,7 @@ public:
 	void load(QDomNode& node);
 	void loadAvenue(QDomNode& node);
 	void loadStreet(QDomNode& node);
-
+	
 	void save(QString filename);
 	void saveAvenue(QDomDocument& doc, QDomNode& node);
 	void saveStreet(QDomDocument& doc, QDomNode& node);
