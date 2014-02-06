@@ -108,7 +108,7 @@ void GridFeature::computeFeature() {
 	accmDir1 = QVector2D(0, 0);
 	accmDir2 = QVector2D(0, 0);
 
-	// 累積カウンタをリセットする
+	// 累積長カウンタをリセットする
 	accmLenCount1 = 0;
 	accmLenCount2 = 0;
 
@@ -137,6 +137,45 @@ bool GridFeature::isClose(const QVector2D& dir, float threshold) {
 
 	if (Util::diffAngle(angle1, a1) <= threshold || Util::diffAngle(angle1, a2) <= threshold || Util::diffAngle(angle2, a1) <= threshold || Util::diffAngle(angle2, a2) <= threshold) return true;
 	else return false;
+}
+
+std::vector<float> GridFeature::getAngles() const {
+	std::vector<float> ret;
+	ret.push_back(angle1);
+	ret.push_back(angle2);
+	ret.push_back(angle1 + M_PI);
+	ret.push_back(angle2 + M_PI);
+
+	return ret;
+}
+
+std::vector<float> GridFeature::getLengths() const {
+	std::vector<float> ret;
+	ret.push_back(generateLength(0, Util::uniform_rand()));
+	ret.push_back(generateLength(1, Util::uniform_rand()));
+	ret.push_back(generateLength(2, Util::uniform_rand()));
+	ret.push_back(generateLength(3, Util::uniform_rand()));
+
+	return ret;
+}
+
+/** 
+ * 与えられたuniform random numberに基づいて、エッジの長さを生成する。
+ *
+ * @param dir		0 - 第１象限 / 1 - 第２象限 / 2 - 第３象限 / 3 - 第４象限
+ */
+float GridFeature::generateLength(int dir, float uniform_random_number) const {
+	if (dir == 0 || dir == 2) {
+		for (QMap<float, float>::iterator it = length1.begin(); it != length1.end(); ++it) {
+			if (uniform_random_number <= length1[it.key()]) return it.key();
+		}
+	} else {
+		for (QMap<float, float>::iterator it = length2.begin(); it != length2.end(); ++it) {
+			if (uniform_random_number <= length2[it.key()]) return it.key();
+		}
+	}
+
+	return 0.0f;
 }
 
 /**
@@ -171,7 +210,16 @@ void GridFeature::load(QDomNode& node) {
 
 	QDomNode child = node.firstChild();
 	while (!child.isNull()) {
-		if (child.toElement().tagName() == "angle1") {
+		if (child.toElement().tagName() == "center") {
+			QDomNode child2 = child.firstChild();
+			while (!child2.isNull()) {
+				if (child2.toElement().tagName() == "x") {
+					center.setX(child2.firstChild().nodeValue().toFloat());
+				} else if (child2.toElement().tagName() == "y") {
+					center.setY(child2.firstChild().nodeValue().toFloat());
+				}
+			}
+		} else if (child.toElement().tagName() == "angle1") {
 			angle1 = child.firstChild().nodeValue().toFloat();
 		} else if (child.toElement().tagName() == "angle2") {
 			angle2 = child.firstChild().nodeValue().toFloat();
@@ -212,22 +260,40 @@ void GridFeature::save(QString filename) {
 	node_feature.setAttribute("type", "grid");
 	root.appendChild(node_feature);
 
+	// write center node
+	QDomElement node_center = doc.createElement("center");
+	node_feature.appendChild(node_center);
+
+	QDomElement node_center_x = doc.createElement("x");
+	node_center.appendChild(node_center_x);
+
+	QString str;
+	str.setNum(center.x());
+	QDomText node_center_x_value = doc.createTextNode(str);
+	node_center_x.appendChild(node_center_x_value);
+
+	QDomElement node_center_y = doc.createElement("y");
+	node_center.appendChild(node_center_y);
+
+	str.setNum(center.y());
+	QDomText node_center_y_value = doc.createTextNode(str);
+	node_center_y.appendChild(node_center_y_value);
+	
 	// write angle1 node
 	QDomElement node_angle1 = doc.createElement("angle1");
 	node_feature.appendChild(node_angle1);
 
-	QString str;
 	str.setNum(angle1);
-	QDomText node_angle1_data = doc.createTextNode(str);
-	node_angle1.appendChild(node_angle1_data);
+	QDomText node_angle1_value = doc.createTextNode(str);
+	node_angle1.appendChild(node_angle1_value);
 
 	// write angle2 node
 	QDomElement node_angle2 = doc.createElement("angle2");
 	node_feature.appendChild(node_angle2);
 
 	str.setNum(angle2);
-	QDomText node_angle2_data = doc.createTextNode(str);
-	node_angle2.appendChild(node_angle2_data);
+	QDomText node_angle2_value = doc.createTextNode(str);
+	node_angle2.appendChild(node_angle2_value);
 
 	// write length1 node
 	QDomElement node_length1 = doc.createElement("length1");
@@ -269,6 +335,9 @@ void GridFeature::save(QString filename) {
 	doc.save(out, 4);
 }
 
+/**
+ * 領域を塗りつぶすための色を自動で生成する。
+ */
 QColor GridFeature::color() {
 	return QColor(0, 0, 255 - group_id * 64 % 255);
 }
@@ -279,3 +348,4 @@ QColor GridFeature::color() {
 Polygon2D GridFeature::polygon() {
 	return _polygon;
 }
+

@@ -21,8 +21,8 @@ public:
 	QVector2D accmDir1;			// 横方向の累積ベクトル
 	QVector2D accmDir2;			// 縦方向の累積ベクトル
 
-	int accmLenCount1;			// 横方向のエッジ長の累積カウンタ
-	int accmLenCount2;			// 縦方向のエッジ長の累積カウンタ
+	int accmLenCount1;			// 横方向の累積長カウンタ
+	int accmLenCount2;			// 縦方向の累積長カウンタ
 
 	Polygon2D _polygon;			// 領域を表すポリゴン（時計回り）
 
@@ -34,6 +34,10 @@ public:
 	void addEdge(const QVector2D& edge_vec, float threshold);
 	void computeFeature();
 	bool isClose(const QVector2D& dir, float threshold);
+	
+	std::vector<float> getAngles() const;
+	std::vector<float> getLengths() const;
+	float generateLength(int dir, float uniform_random_number) const;
 
 	void load(QString filename);
 	void load(QDomNode& node);
