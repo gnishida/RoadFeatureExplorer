@@ -2,7 +2,6 @@
 #include <QFile>
 #include <QDomDocument>
 #include <QTextStream>
-#include <random>
 
 /**
  * ファイルから、Radialパターンの特徴量を読込む。
