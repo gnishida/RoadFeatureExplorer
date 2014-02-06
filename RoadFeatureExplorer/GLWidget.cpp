@@ -1,6 +1,7 @@
 ﻿#include "GLWidget.h"
 #include "MainWindow.h"
 #include "GraphUtil.h"
+#include "RoadFeature.h"
 #include <gl/GLU.h>
 #include <vector>
 
@@ -44,14 +45,14 @@ void GLWidget::drawScene() {
 		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, QColor(0, 0, 255), height);
 
 		// グリッドの領域を表示
-		for (int i = 0; i < mainWin->glWidget->gridFeatures.size(); ++i) {
-			renderer->renderConcave(mainWin->glWidget->gridFeatures[i].polygon(), mainWin->glWidget->gridFeatures[i].color(), -10);
+		for (int i = 0; i < mainWin->glWidget->roadFeature.gridFeatures.size(); ++i) {
+			renderer->renderConcave(mainWin->glWidget->roadFeature.gridFeatures[i].polygon(), mainWin->glWidget->roadFeature.gridFeatures[i].color(), -10);
 		}
 
 		// Radialの領域を表示
-		for (int i = 0; i < mainWin->glWidget->radialFeatures.size(); ++i) {
-			renderer->renderPoint(mainWin->glWidget->radialFeatures[i].center, QColor(0, 0, 0), height);
-			renderer->renderConcave(mainWin->glWidget->radialFeatures[i].polygon(), mainWin->glWidget->radialFeatures[i].color(), -10);
+		for (int i = 0; i < mainWin->glWidget->roadFeature.radialFeatures.size(); ++i) {
+			renderer->renderPoint(mainWin->glWidget->roadFeature.radialFeatures[i].center, QColor(0, 0, 0), height);
+			renderer->renderConcave(mainWin->glWidget->roadFeature.radialFeatures[i].polygon(), mainWin->glWidget->roadFeature.radialFeatures[i].color(), -10);
 		}
 	} else if (selectedAreaBuilder.selecting()) {
 		renderer->renderPolyline(selectedAreaBuilder.polygon(), GL_LINE_STIPPLE, height);
@@ -166,6 +167,8 @@ void GLWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 
 	selectedAreaBuilder.end();
 	selectedArea = selectedAreaBuilder.polygon();
+
+	roadFeature.clear();
 }
 
 void GLWidget::initializeGL() {

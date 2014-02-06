@@ -39,8 +39,7 @@ void MainWindow::onNew() {
 	glWidget->roads.clear();
 
 	// clear the features
-	glWidget->gridFeatures.clear();
-	glWidget->radialFeatures.clear();
+	glWidget->roadFeature.clear();
 
 	glWidget->updateGL();
 }
@@ -54,8 +53,7 @@ void MainWindow::onOpen() {
 	}
 
 	// clear the features
-	glWidget->gridFeatures.clear();
-	glWidget->radialFeatures.clear();
+	glWidget->roadFeature.clear();
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 	GraphUtil::loadRoads(glWidget->roads, filename);

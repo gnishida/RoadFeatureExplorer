@@ -4,6 +4,7 @@
 #include "RoadGraph.h"
 #include "RoadGraphRenderer.h"
 #include "PolygonAreaBuilder.h"
+#include "RoadFeature.h"
 #include "GridFeature.h"
 #include "RadialFeature.h"
 #include "GenericFeature.h"
@@ -26,9 +27,13 @@ public:
 	QPoint lastPos;
 	Polygon2D selectedArea;
 	PolygonAreaBuilder selectedAreaBuilder;
+
+	RoadFeature roadFeature;
+	/*
 	std::vector<GridFeature> gridFeatures;
 	std::vector<RadialFeature> radialFeatures;
 	std::vector<GenericFeature> genericFeatures;
+	*/
 
 	// key status
 	bool shiftPressed;
