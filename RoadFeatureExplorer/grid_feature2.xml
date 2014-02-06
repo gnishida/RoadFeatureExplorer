@@ -1,28 +1,32 @@
 <features>
     <feature type="grid">
-        <angle1>0.780914</angle1>
-        <angle2>2.35171</angle2>
+        <center>
+            <x>906.506</x>
+            <y>-352.203</y>
+        </center>
+        <angle1>0.781577</angle1>
+        <angle2>2.35237</angle2>
         <length1>
-            <data key="10">0.181818</data>
-            <data key="30">0.272727</data>
-            <data key="50">0.381818</data>
-            <data key="70">0.636364</data>
-            <data key="90">0.727273</data>
-            <data key="110">0.745455</data>
-            <data key="130">0.763636</data>
-            <data key="150">0.854545</data>
-            <data key="170">0.890909</data>
-            <data key="190">0.909091</data>
-            <data key="210">0.927273</data>
-            <data key="230">0.945455</data>
+            <data key="10">0.2</data>
+            <data key="30">0.3</data>
+            <data key="50">0.42</data>
+            <data key="70">0.64</data>
+            <data key="90">0.74</data>
+            <data key="110">0.76</data>
+            <data key="130">0.78</data>
+            <data key="150">0.86</data>
+            <data key="170">0.9</data>
+            <data key="190">0.92</data>
+            <data key="210">0.94</data>
+            <data key="230">0.96</data>
             <data key="270">1</data>
         </length1>
         <length2>
-            <data key="10">0.277778</data>
-            <data key="30">0.37037</data>
-            <data key="50">0.574074</data>
-            <data key="70">0.944444</data>
-            <data key="90">0.962963</data>
+            <data key="10">0.25</data>
+            <data key="30">0.354167</data>
+            <data key="50">0.583333</data>
+            <data key="70">0.958333</data>
+            <data key="90">0.979167</data>
             <data key="190">1</data>
         </length2>
     </feature>

@@ -21,6 +21,7 @@ public:
 	void load(QString filename);
 	void load(QDomNode& node);
 	void save(QString filename);
+	void save(QDomDocument& doc, QDomNode& node);
 
 	QColor color();
 	Polygon2D polygon();
