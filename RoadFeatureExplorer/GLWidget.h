@@ -6,6 +6,7 @@
 #include "PolygonAreaBuilder.h"
 #include "GridFeature.h"
 #include "RadialFeature.h"
+#include "GenericFeature.h"
 #include <QGLWidget>
 #include <QString>
 
@@ -27,6 +28,7 @@ public:
 	PolygonAreaBuilder selectedAreaBuilder;
 	std::vector<GridFeature> gridFeatures;
 	std::vector<RadialFeature> radialFeatures;
+	std::vector<GenericFeature> genericFeatures;
 
 	// key status
 	bool shiftPressed;

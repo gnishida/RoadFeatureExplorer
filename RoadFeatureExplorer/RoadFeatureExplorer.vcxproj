@@ -162,6 +162,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GenericFeature.cpp" />
     <ClCompile Include="GLWidget.cpp" />
     <ClCompile Include="GraphUtil.cpp" />
     <ClCompile Include="GridFeature.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="CircleArea.h" />
     <ClInclude Include="ConvexHull.h" />
     <ClInclude Include="GeneratedFiles\ui_ControlWidget.h" />
+    <ClInclude Include="GenericFeature.h" />
     <ClInclude Include="GLWidget.h" />
     <ClInclude Include="GraphUtil.h" />
     <ClInclude Include="GridFeature.h" />

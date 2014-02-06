@@ -20,8 +20,8 @@ public:
 	QVector2D accmDir1;			// 横方向の累積ベクトル
 	QVector2D accmDir2;			// 縦方向の累積ベクトル
 
-	int accmLenCount1;			// 横方向の累積長カウンタ
-	int accmLenCount2;			// 縦方向の累積長カウンタ
+	int accmLenCount1;			// 横方向のエッジ長の累積カウンタ
+	int accmLenCount2;			// 縦方向のエッジ長の累積カウンタ
 
 	Polygon2D _polygon;			// 領域を表すポリゴン（時計回り）
 

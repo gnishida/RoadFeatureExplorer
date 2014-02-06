@@ -108,7 +108,7 @@ void GridFeature::computeFeature() {
 	accmDir1 = QVector2D(0, 0);
 	accmDir2 = QVector2D(0, 0);
 
-	// 累積長カウンタをリセットする
+	// 累積カウンタをリセットする
 	accmLenCount1 = 0;
 	accmLenCount2 = 0;
 

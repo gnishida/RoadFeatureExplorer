@@ -146,6 +146,11 @@ void ControlWidget::detectGridRadial() {
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
 	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->radialFeatures, radialMaxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, 150.0f, radialVotingThreshold, seedDistance, minSeedDirection, radialExtendingAngleThreshold);
 	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->gridFeatures, gridMaxIteration, numBins, minTotalLength, minMaxBinRatio, gridAngleThreshold, gridVotingThreshold, gridExtendingDistanceThreshold, gridMinOBBLength);
+	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->genericFeatures);
+
+	for (int i = 0; i < mainWin->glWidget->genericFeatures.size(); ++i) {
+		mainWin->glWidget->genericFeatures[i].save(QString("generic_feature%1.xml").arg(i + 1));
+	}
 
 	mainWin->glWidget->updateGL();
 }

@@ -588,6 +588,11 @@ void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, const Po
 
 /**
  * OpenCVのHoughTransform関数で円を検知する。なければ、falseを返却する。
+ * 予め予測された円の中心を中心とする500m x 500mの正方形の範囲の中で、HoughTransformで円を検知し、
+ * 検知された円に基づいて、円の中心と半径情報を更新する。
+ *
+ * @param detectCircleThreshold		HoughTransformで見つけた円の中心が、予測された円の中心からこのしきい値よりも大きくずれている場合は、スキップ
+ * @param rf						およその円の中心を保持している特徴量
  */
 bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area, int roadType, float detectCircleThreshold, RadialFeature& rf) {
 	float detectCircleThreshold2 = detectCircleThreshold * detectCircleThreshold;
@@ -608,7 +613,7 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 	}
 
 	cv::vector<cv::Vec3f> circles;
-	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 120);
+	cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 150, 200, 22, 0, 80);
 
 	for (int i = 0; i < circles.size(); i++) {
 		QVector2D center(circles[i][0], circles[i][1]);
@@ -624,8 +629,6 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, const Polygon2D& area,
 			std::cout << "Circle detected: (" << center.x() << "," << center.y() << ") R: " << r << std::endl;
 			rf.center += center - QVector2D(250, 250);
 			rf.radii.push_back(r);
-
-			//return true;
 		}
 	}
 
@@ -814,7 +817,23 @@ void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, 
 }
 
 /**
- * ラウンドアバウトを検知する。
+ * GridでもRadialでもないエッジについて、一般的な特徴量を抽出する。
  */
-void RoadSegmentationUtil::detectRoundabout(RoadGraph& roads, AbstractArea& area) {
+void RoadSegmentationUtil::extractGenericFeature(RoadGraph& roads, const Polygon2D& area, int roadType, std::vector<GenericFeature>& genericFeatures) {
+	GenericFeature gf(0);
+
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		if (!roads.graph[*ei]->valid) continue;
+
+		// GridまたはRadialのエッジは、スキップ
+		if (roads.graph[*ei]->shapeType > 0) continue;
+
+		int roadType = roads.graph[*ei]->type;
+		float length = roads.graph[*ei]->getLength();
+
+		gf.addEdge(length, roadType);
+	}
+
+	genericFeatures.push_back(gf);
 }
