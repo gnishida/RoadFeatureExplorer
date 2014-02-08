@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Polygon2D.h"
 #include <QMap>
 #include <QDomNode>
 #include <QVector2D>
 #include <QColor>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <Polygon2D.h>
 
 class GridFeature {
 public:

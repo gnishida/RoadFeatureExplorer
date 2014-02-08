@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Camera.h"
-#include "RoadGraph.h"
-#include "RoadGraphRenderer.h"
+#include <RoadGraph.h>
+#include <RoadGraphRenderer.h>
 #include "PolygonAreaBuilder.h"
 #include "RoadFeature.h"
 #include "GridFeature.h"
@@ -62,8 +62,5 @@ protected:
 
 private:
 	void mouseTo2D(int x, int y, QVector2D &result);
-	bool hitTest(const AbstractArea& area, const QVector2D& pt);
-	bool hitTestDistortionPoint(const AbstractArea& area, const QVector2D& pt);
-	bool hitTestResizingPoint(const AbstractArea& area, const QVector2D& pt);
 };
 

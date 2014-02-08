@@ -1,13 +1,12 @@
 #pragma once
 
-#include "RoadGraph.h"
-#include "AbstractArea.h"
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <RoadGraph.h>
 #include "RoadFeature.h"
 #include "GridFeature.h"
 #include "RadialFeature.h"
 #include "GenericFeature.h"
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
 
 class RoadSegmentationUtil {
 protected:

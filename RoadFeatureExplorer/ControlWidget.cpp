@@ -1,7 +1,7 @@
 #include "ControlWidget.h"
 #include "MainWindow.h"
 #include "GLWidget.h"
-#include "GraphUtil.h"
+#include <GraphUtil.h>
 #include "RoadSegmentationUtil.h"
 
 ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget", (QWidget*)mainWin) {
