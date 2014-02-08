@@ -1,11 +1,12 @@
 #pragma once
 
 #include <Polygon2D.h>
+#include "common.h"
 
 class PolygonAreaBuilder {
 private:
 	bool _selecting;
-	Loop2D _polyline;
+	Polyline2D _polyline;
 
 public:
 	PolygonAreaBuilder();

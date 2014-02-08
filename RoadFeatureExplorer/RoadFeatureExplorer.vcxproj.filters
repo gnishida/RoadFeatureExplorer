@@ -210,5 +210,8 @@
     <ClInclude Include="..\..\common\RoadGraphRenderer.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\common.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

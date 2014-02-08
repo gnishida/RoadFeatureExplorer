@@ -220,6 +220,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\BBox.h" />
+    <ClInclude Include="..\..\common\common.h" />
     <ClInclude Include="..\..\common\GraphUtil.h" />
     <ClInclude Include="..\..\common\Polygon2D.h" />
     <ClInclude Include="..\..\common\Renderable.h" />

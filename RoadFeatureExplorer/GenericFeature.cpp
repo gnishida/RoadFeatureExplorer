@@ -2,10 +2,7 @@
 #include "Util.h"
 #include <QFile>
 #include <QDomDocument>
-
-#ifndef M_PI
-#define M_PI	3.141592653589793238
-#endif
+#include "common.h"
 
 GenericFeature::GenericFeature() {
 	weight = 0.0f;

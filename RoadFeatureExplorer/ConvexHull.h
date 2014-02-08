@@ -20,6 +20,6 @@ public:
 	~ConvexHull() {}
 
 	void addPoint(const QVector2D& p);
-	void convexHull(Loop2D& hull);
+	void convexHull(Polygon2D& hull);
 };
 

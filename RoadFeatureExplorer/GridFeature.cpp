@@ -1,12 +1,9 @@
-﻿#include "GridFeature.h"
-#include "Util.h"
+﻿#include "Util.h"
 #include <QFile>
 #include <QDomDocument>
 #include <random>
-
-#ifndef M_PI
-#define M_PI	3.141592653589793238
-#endif
+#include "common.h"
+#include "GridFeature.h"
 
 GridFeature::GridFeature(int group_id) {
 	this->group_id = group_id;
