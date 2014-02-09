@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include <QtGui/QApplication>
 #include "ConvexHull.h"
-#include "Util.h"
+#include <common/Util.h>
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);

@@ -1,7 +1,9 @@
 ﻿#include "GLWidget.h"
 #include "MainWindow.h"
-#include "GraphUtil.h"
-#include "RoadFeature.h"
+#include <common/GraphUtil.h>
+#include <road/feature/RoadFeature.h>
+#include <road/feature/GridFeature.h>
+#include <road/feature/RadialFeature.h>
 #include <gl/GLU.h>
 #include <vector>
 
@@ -44,15 +46,16 @@ void GLWidget::drawScene() {
 	if (selectedAreaBuilder.selected()) {
 		renderer->renderArea(selectedArea, GL_LINE_STIPPLE, QColor(0, 0, 255), height);
 
-		// グリッドの領域を表示
-		for (int i = 0; i < mainWin->glWidget->roadFeature.gridFeatures.size(); ++i) {
-			renderer->renderConcave(mainWin->glWidget->roadFeature.gridFeatures[i].polygon(), mainWin->glWidget->roadFeature.gridFeatures[i].color(), -10);
-		}
-
-		// Radialの領域を表示
-		for (int i = 0; i < mainWin->glWidget->roadFeature.radialFeatures.size(); ++i) {
-			renderer->renderPoint(mainWin->glWidget->roadFeature.radialFeatures[i].center, QColor(0, 0, 0), height);
-			renderer->renderConcave(mainWin->glWidget->roadFeature.radialFeatures[i].polygon(), mainWin->glWidget->roadFeature.radialFeatures[i].color(), -10);
+		// 領域を表示
+		for (int i = 0; i < mainWin->glWidget->roadFeature.features.size(); ++i) {
+			if (mainWin->glWidget->roadFeature.features[i]->type() == AbstractFeature::TYPE_GRID) {
+				GridFeature gf = dynamic_cast<GridFeature&>(*mainWin->glWidget->roadFeature.features[i]);
+				renderer->renderConcave(gf.polygon(), gf.color(), -10);
+			} else if (mainWin->glWidget->roadFeature.features[i]->type() == AbstractFeature::TYPE_RADIAL) {
+				RadialFeature rf = dynamic_cast<RadialFeature&>(*mainWin->glWidget->roadFeature.features[i]);
+				renderer->renderPoint(rf.center(), QColor(0, 0, 0), height);
+				renderer->renderConcave(rf.polygon(), rf.color(), -10);
+			}
 		}
 	} else if (selectedAreaBuilder.selecting()) {
 		renderer->renderPolyline(selectedAreaBuilder.polygon(), GL_LINE_STIPPLE, height);

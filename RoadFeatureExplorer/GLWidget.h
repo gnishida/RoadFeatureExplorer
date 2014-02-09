@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Camera.h"
-#include <RoadGraph.h>
-#include <RoadGraphRenderer.h>
+#include <common/RoadGraph.h>
+#include <common/RoadGraphRenderer.h>
 #include "PolygonAreaBuilder.h"
-#include "RoadFeature.h"
-#include "GridFeature.h"
-#include "RadialFeature.h"
-#include "GenericFeature.h"
+#include <road/feature/RoadFeature.h>
+#include <road/feature/GridFeature.h>
+#include <road/feature/RadialFeature.h>
+#include <road/feature/GenericFeature.h>
 #include <QGLWidget>
 #include <QString>
 

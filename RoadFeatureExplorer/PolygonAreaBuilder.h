@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Polygon2D.h>
-#include "common.h"
+#include <common/common.h>
+#include <common/Polygon2D.h>
 
 class PolygonAreaBuilder {
 private:

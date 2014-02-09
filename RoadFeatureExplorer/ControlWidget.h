@@ -2,7 +2,7 @@
 
 #include <qdockwidget.h>
 #include "ui_ControlWidget.h"
-#include <RoadGraph.h>
+#include <common/RoadGraph.h>
 
 class MainWindow;
 class GLWidget;
