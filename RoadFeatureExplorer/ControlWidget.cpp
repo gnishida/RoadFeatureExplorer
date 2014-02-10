@@ -9,6 +9,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 	// set up the UI
 	ui.setupUi(this);
+	ui.checkBoxRoadTypeHighway->setChecked(true);
 	ui.checkBoxRoadTypeAvenue->setChecked(true);
 	ui.checkBoxRoadTypeLocalStreet->setChecked(true);
 	ui.lineEditGridMaxIteration->setText("2");
@@ -34,7 +35,9 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	ui.lineEditRadialExtendingAngleThreshold->setText("0.1");
 
 	// register the event handlers
-	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showLocalStreet(int)));
+	connect(ui.checkBoxRoadTypeHighway, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
+	connect(ui.checkBoxRoadTypeAvenue, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
+	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
 	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
 	connect(ui.pushButtonDetectRadial, SIGNAL(clicked()), this, SLOT(detectRadial()));
 	connect(ui.pushButtonExtractKDEFeature, SIGNAL(clicked()), this, SLOT(extractKDEFeature()));
@@ -47,7 +50,9 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event handlers
 
-void ControlWidget::showLocalStreet(int flag) {
+void ControlWidget::showRoad(int flag) {
+	mainWin->glWidget->roads.showHighways = ui.checkBoxRoadTypeHighway->isChecked();
+	mainWin->glWidget->roads.showAvenues = ui.checkBoxRoadTypeAvenue->isChecked();
 	mainWin->glWidget->roads.showLocalStreets = ui.checkBoxRoadTypeLocalStreet->isChecked();
 	mainWin->glWidget->roads.setModified();
 

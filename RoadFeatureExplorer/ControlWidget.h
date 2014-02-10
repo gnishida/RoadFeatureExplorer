@@ -22,7 +22,7 @@ public:
 	void setRoadEdge(RoadEdgePtr selectedEdge);
 
 public slots:
-	void showLocalStreet(int flag);
+	void showRoad(int flag);
 	void detectGrid();
 	void detectRadial();
 	void extractKDEFeature();
