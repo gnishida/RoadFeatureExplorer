@@ -4,17 +4,13 @@
             <x>0</x>
             <y>0</y>
         </center>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
-        <item/>
+        <item>
+            <edge length="136.241" angle="0.621549"/>
+        </item>
+        <item>
+            <edge length="136.241" angle="-2.52004"/>
+            <edge length="150.907" angle="-0.617422"/>
+            <edge length="91.4914" angle="0.938523"/>
+        </item>
     </feature>
 </features>

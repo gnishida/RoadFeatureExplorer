@@ -837,12 +837,15 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 		// エリア外ならスキップ
 		if (!area.contains(roads.graph[*vi]->pt)) continue;
 
+		// エッジの数が１以下なら、スキップ
+		if (GraphUtil::getNumEdges(roads, *vi) <= 1) continue;
+
 		KDEFeatureItem item;
 
 		RoadOutEdgeIter ei, eend;
 		for (boost::tie(ei, eend) = boost::out_edges(*vi, roads.graph); ei != eend; ++ei) {
 			if (!roads.graph[*ei]->valid) continue;
-			
+		
 			RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 
 			QVector2D dir = roads.graph[tgt]->pt - roads.graph[*vi]->pt;
@@ -854,6 +857,9 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 		kf->addItem(item);
 	}
+
+	kf->setWeight(1.0f);
+	kf->setCenter(area.centroid());
 
 	roadFeature.addFeature(kf);
 }
