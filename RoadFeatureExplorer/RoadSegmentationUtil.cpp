@@ -847,12 +847,9 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 			if (!roads.graph[*ei]->valid) continue;
 		
 			RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-
 			QVector2D dir = roads.graph[tgt]->pt - roads.graph[*vi]->pt;
-			float angle = atan2f(dir.y(), dir.x());
-			float length = roads.graph[*ei]->getLength();
 
-			item.addEdge(angle, length);
+			item.addEdge(dir);
 		}
 
 		kf->addItem(item);
