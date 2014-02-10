@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Sat Feb 8 12:04:11 2014
+** Created: Sun Feb 9 19:15:20 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -79,6 +79,8 @@ public:
     QCheckBox *checkBoxRoadTypeLocalStreet;
     QGroupBox *groupBox_8;
     QPushButton *pushButtonExtractGenericFeature;
+    QGroupBox *groupBox_9;
+    QPushButton *pushButtonExtractKDEFeature;
 
     void setupUi(QDockWidget *ControlWidget)
     {
@@ -243,7 +245,7 @@ public:
         label_23->setGeometry(QRect(10, 220, 101, 21));
         groupBox_7 = new QGroupBox(dockWidgetContents);
         groupBox_7->setObjectName(QString::fromUtf8("groupBox_7"));
-        groupBox_7->setGeometry(QRect(10, 710, 201, 61));
+        groupBox_7->setGeometry(QRect(10, 750, 201, 61));
         pushButtonDetectGridRadial = new QPushButton(groupBox_7);
         pushButtonDetectGridRadial->setObjectName(QString::fromUtf8("pushButtonDetectGridRadial"));
         pushButtonDetectGridRadial->setGeometry(QRect(30, 20, 141, 31));
@@ -255,10 +257,16 @@ public:
         checkBoxRoadTypeLocalStreet->setGeometry(QRect(100, 10, 91, 17));
         groupBox_8 = new QGroupBox(dockWidgetContents);
         groupBox_8->setObjectName(QString::fromUtf8("groupBox_8"));
-        groupBox_8->setGeometry(QRect(10, 620, 201, 61));
+        groupBox_8->setGeometry(QRect(10, 680, 201, 61));
         pushButtonExtractGenericFeature = new QPushButton(groupBox_8);
         pushButtonExtractGenericFeature->setObjectName(QString::fromUtf8("pushButtonExtractGenericFeature"));
         pushButtonExtractGenericFeature->setGeometry(QRect(30, 20, 141, 31));
+        groupBox_9 = new QGroupBox(dockWidgetContents);
+        groupBox_9->setObjectName(QString::fromUtf8("groupBox_9"));
+        groupBox_9->setGeometry(QRect(10, 610, 201, 61));
+        pushButtonExtractKDEFeature = new QPushButton(groupBox_9);
+        pushButtonExtractKDEFeature->setObjectName(QString::fromUtf8("pushButtonExtractKDEFeature"));
+        pushButtonExtractKDEFeature->setGeometry(QRect(30, 20, 141, 31));
         ControlWidget->setWidget(dockWidgetContents);
 
         retranslateUi(ControlWidget);
@@ -302,6 +310,8 @@ public:
         checkBoxRoadTypeLocalStreet->setText(QApplication::translate("ControlWidget", "Local Streets", 0, QApplication::UnicodeUTF8));
         groupBox_8->setTitle(QApplication::translate("ControlWidget", "Extract Generic Feature", 0, QApplication::UnicodeUTF8));
         pushButtonExtractGenericFeature->setText(QApplication::translate("ControlWidget", "Extract Generic Feature", 0, QApplication::UnicodeUTF8));
+        groupBox_9->setTitle(QApplication::translate("ControlWidget", "Extract KDE Feature", 0, QApplication::UnicodeUTF8));
+        pushButtonExtractKDEFeature->setText(QApplication::translate("ControlWidget", "Extract KDE Feature", 0, QApplication::UnicodeUTF8));
         Q_UNUSED(ControlWidget);
     } // retranslateUi
 

@@ -6,6 +6,7 @@
 #include <road/feature/RoadFeature.h>
 #include <road/feature/GridFeature.h>
 #include <road/feature/RadialFeature.h>
+#include <road/feature/KDEFeature.h>
 #include <road/feature/GenericFeature.h>
 
 class RoadSegmentationUtil {
@@ -34,6 +35,8 @@ public:
 	static void extendRadialGroup(RoadGraph& roads, Polygon2D& area, int roadType, RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, float angleThreshold, float dirCheckRatio);
 	static int countNumDirections(RoadGraph& roads, const RadialFeature& rf, QMap<RoadEdgeDesc, bool>& edges, int size);
 	static void buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, bool>& edges, RadialFeature& rf);
+
+	static void extractKDEFeature(RoadGraph& roads, Polygon2D& area, RoadFeature& roadFeature);
 
 	static void extractGenericFeature(RoadGraph& roads, Polygon2D& area, RoadFeature& roadFeature);
 	static int getNumEdges(RoadGraph &roads, RoadVertexDesc v, int roadType, int shapeType);

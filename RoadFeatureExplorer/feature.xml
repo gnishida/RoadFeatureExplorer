@@ -1,1 +1,20 @@
-<features/>
+<features>
+    <feature weight="nan" type="generic">
+        <center>
+            <x>0</x>
+            <y>0</y>
+        </center>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+    </feature>
+</features>

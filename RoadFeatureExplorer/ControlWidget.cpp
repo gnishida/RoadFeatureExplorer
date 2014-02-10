@@ -37,6 +37,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showLocalStreet(int)));
 	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
 	connect(ui.pushButtonDetectRadial, SIGNAL(clicked()), this, SLOT(detectRadial()));
+	connect(ui.pushButtonExtractKDEFeature, SIGNAL(clicked()), this, SLOT(extractKDEFeature()));
 	connect(ui.pushButtonExtractGenericFeature, SIGNAL(clicked()), this, SLOT(extractGenericFeature()));
 	connect(ui.pushButtonDetectGridRadial, SIGNAL(clicked()), this, SLOT(detectGridRadial()));
 
@@ -103,6 +104,15 @@ void ControlWidget::detectRadial() {
 	mainWin->glWidget->roadFeature.save("feature.xml");
 
 	mainWin->glWidget->updateGL();
+}
+
+void ControlWidget::extractKDEFeature() {
+	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
+
+	RoadSegmentationUtil::extractKDEFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
+
+	mainWin->glWidget->roadFeature.normalize();
+	mainWin->glWidget->roadFeature.save("feature.xml");
 }
 
 void ControlWidget::extractGenericFeature() {

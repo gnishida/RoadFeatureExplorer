@@ -608,7 +608,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>710</y>
+      <y>750</y>
       <width>201</width>
       <height>61</height>
      </rect>
@@ -660,7 +660,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>620</y>
+      <y>680</y>
       <width>201</width>
       <height>61</height>
      </rect>
@@ -679,6 +679,32 @@
      </property>
      <property name="text">
       <string>Extract Generic Feature</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_9">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>610</y>
+      <width>201</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Extract KDE Feature</string>
+    </property>
+    <widget class="QPushButton" name="pushButtonExtractKDEFeature">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>20</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Extract KDE Feature</string>
      </property>
     </widget>
    </widget>

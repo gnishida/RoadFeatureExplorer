@@ -823,6 +823,42 @@ void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, 
 }
 
 /**
+ * KDEベースでの特徴量を抽出する。
+ */
+void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, RoadFeature& roadFeature) {
+	KDEFeaturePtr kf = KDEFeaturePtr(new KDEFeature(0));
+
+	BBox box;
+
+	RoadVertexIter vi, vend;
+	for (boost::tie(vi, vend) = boost::vertices(roads.graph); vi != vend; ++vi) {
+		if (!roads.graph[*vi]->valid) continue;
+
+		// エリア外ならスキップ
+		if (!area.contains(roads.graph[*vi]->pt)) continue;
+
+		KDEFeatureItem item;
+
+		RoadOutEdgeIter ei, eend;
+		for (boost::tie(ei, eend) = boost::out_edges(*vi, roads.graph); ei != eend; ++ei) {
+			if (!roads.graph[*ei]->valid) continue;
+			
+			RoadVertexDesc tgt = boost::target(*ei, roads.graph);
+
+			QVector2D dir = roads.graph[tgt]->pt - roads.graph[*vi]->pt;
+			float angle = atan2f(dir.y(), dir.x());
+			float length = roads.graph[*ei]->getLength();
+
+			item.addEdge(angle, length);
+		}
+
+		kf->addItem(item);
+	}
+
+	roadFeature.addFeature(kf);
+}
+
+/**
  * GridでもRadialでもないエッジについて、一般的な特徴量を抽出する。
  */
 void RoadSegmentationUtil::extractGenericFeature(RoadGraph& roads, Polygon2D& area, RoadFeature& roadFeature) {
