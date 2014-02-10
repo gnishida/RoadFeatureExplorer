@@ -58,7 +58,7 @@ void GLWidget::drawScene() {
 			}
 		}
 	} else if (selectedAreaBuilder.selecting()) {
-		renderer->renderPolyline(selectedAreaBuilder.polygon(), GL_LINE_STIPPLE, height);
+		renderer->renderPolyline(selectedAreaBuilder.polyline(), GL_LINE_STIPPLE, height);
 	}
 }
 

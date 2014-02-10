@@ -10,6 +10,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 	// set up the UI
 	ui.setupUi(this);
 	ui.checkBoxRoadTypeHighway->setChecked(true);
+	ui.checkBoxRoadTypeBoulevard->setChecked(true);
 	ui.checkBoxRoadTypeAvenue->setChecked(true);
 	ui.checkBoxRoadTypeLocalStreet->setChecked(true);
 	ui.lineEditGridMaxIteration->setText("2");
@@ -52,6 +53,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 void ControlWidget::showRoad(int flag) {
 	mainWin->glWidget->roads.showHighways = ui.checkBoxRoadTypeHighway->isChecked();
+	mainWin->glWidget->roads.showBoulevard = ui.checkBoxRoadTypeBoulevard->isChecked();
 	mainWin->glWidget->roads.showAvenues = ui.checkBoxRoadTypeAvenue->isChecked();
 	mainWin->glWidget->roads.showLocalStreets = ui.checkBoxRoadTypeLocalStreet->isChecked();
 	mainWin->glWidget->roads.setModified();

@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include <common/RoadGraph.h>
 #include <common/RoadGraphRenderer.h>
-#include "PolygonAreaBuilder.h"
+#include <common/PolygonAreaBuilder.h>
 #include <road/feature/RoadFeature.h>
 #include <road/feature/GridFeature.h>
 #include <road/feature/RadialFeature.h>

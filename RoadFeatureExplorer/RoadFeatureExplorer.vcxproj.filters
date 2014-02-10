@@ -83,9 +83,6 @@
     <ClCompile Include="ConvexHull.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PolygonAreaBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HoughTransform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -140,6 +137,9 @@
     <ClCompile Include="..\..\mylib\road\feature\KDEFeature.cpp">
       <Filter>mylib\road\feature</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mylib\common\PolygonAreaBuilder.cpp">
+      <Filter>mylib\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -175,9 +175,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConvexHull.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PolygonAreaBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HoughTransform.h">
@@ -236,6 +233,9 @@
     </ClInclude>
     <ClInclude Include="..\..\mylib\road\feature\KDEFeature.h">
       <Filter>mylib\road\feature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\common\PolygonAreaBuilder.h">
+      <Filter>mylib\common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Mon Feb 10 14:56:03 2014
+** Created: Mon Feb 10 18:56:04 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -82,6 +82,7 @@ public:
     QGroupBox *groupBox_9;
     QPushButton *pushButtonExtractKDEFeature;
     QCheckBox *checkBoxRoadTypeHighway;
+    QCheckBox *checkBoxRoadTypeBoulevard;
 
     void setupUi(QDockWidget *ControlWidget)
     {
@@ -252,10 +253,10 @@ public:
         pushButtonDetectGridRadial->setGeometry(QRect(30, 20, 141, 31));
         checkBoxRoadTypeAvenue = new QCheckBox(dockWidgetContents);
         checkBoxRoadTypeAvenue->setObjectName(QString::fromUtf8("checkBoxRoadTypeAvenue"));
-        checkBoxRoadTypeAvenue->setGeometry(QRect(20, 20, 70, 17));
+        checkBoxRoadTypeAvenue->setGeometry(QRect(20, 40, 70, 17));
         checkBoxRoadTypeLocalStreet = new QCheckBox(dockWidgetContents);
         checkBoxRoadTypeLocalStreet->setObjectName(QString::fromUtf8("checkBoxRoadTypeLocalStreet"));
-        checkBoxRoadTypeLocalStreet->setGeometry(QRect(20, 40, 91, 17));
+        checkBoxRoadTypeLocalStreet->setGeometry(QRect(100, 40, 91, 17));
         groupBox_8 = new QGroupBox(dockWidgetContents);
         groupBox_8->setObjectName(QString::fromUtf8("groupBox_8"));
         groupBox_8->setGeometry(QRect(10, 700, 201, 61));
@@ -270,7 +271,10 @@ public:
         pushButtonExtractKDEFeature->setGeometry(QRect(30, 20, 141, 31));
         checkBoxRoadTypeHighway = new QCheckBox(dockWidgetContents);
         checkBoxRoadTypeHighway->setObjectName(QString::fromUtf8("checkBoxRoadTypeHighway"));
-        checkBoxRoadTypeHighway->setGeometry(QRect(20, 0, 70, 17));
+        checkBoxRoadTypeHighway->setGeometry(QRect(20, 10, 70, 17));
+        checkBoxRoadTypeBoulevard = new QCheckBox(dockWidgetContents);
+        checkBoxRoadTypeBoulevard->setObjectName(QString::fromUtf8("checkBoxRoadTypeBoulevard"));
+        checkBoxRoadTypeBoulevard->setGeometry(QRect(100, 10, 70, 17));
         ControlWidget->setWidget(dockWidgetContents);
 
         retranslateUi(ControlWidget);
@@ -317,6 +321,7 @@ public:
         groupBox_9->setTitle(QApplication::translate("ControlWidget", "Extract KDE Feature", 0, QApplication::UnicodeUTF8));
         pushButtonExtractKDEFeature->setText(QApplication::translate("ControlWidget", "Extract KDE Feature", 0, QApplication::UnicodeUTF8));
         checkBoxRoadTypeHighway->setText(QApplication::translate("ControlWidget", "Highways", 0, QApplication::UnicodeUTF8));
+        checkBoxRoadTypeBoulevard->setText(QApplication::translate("ControlWidget", "Boulvard", 0, QApplication::UnicodeUTF8));
         Q_UNUSED(ControlWidget);
     } // retranslateUi
 
