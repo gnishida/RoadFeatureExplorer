@@ -830,12 +830,16 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	BBox box;
 
+	int num_vertices = 0;
+
 	RoadVertexIter vi, vend;
 	for (boost::tie(vi, vend) = boost::vertices(roads.graph); vi != vend; ++vi) {
 		if (!roads.graph[*vi]->valid) continue;
 
 		// エリア外ならスキップ
 		if (!area.contains(roads.graph[*vi]->pt)) continue;
+
+		num_vertices++;
 
 		// エッジの数が１以下なら、スキップ
 		if (GraphUtil::getNumEdges(roads, *vi) <= 1) continue;
@@ -848,8 +852,9 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 		
 			RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 			QVector2D dir = roads.graph[tgt]->pt - roads.graph[*vi]->pt;
+			int degree = GraphUtil::getNumEdges(roads, tgt);
 
-			item.addEdge(dir);
+			item.addEdge(dir, degree == 1);
 		}
 
 		kf->addItem(item);
@@ -857,6 +862,7 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	kf->setWeight(1.0f);
 	kf->setCenter(area.centroid());
+	kf->setDensity(num_vertices / area.area() * 1000.0f * 1000.0f);
 
 	roadFeature.addFeature(kf);
 }
