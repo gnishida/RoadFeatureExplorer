@@ -828,36 +828,74 @@ void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, 
 void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, RoadFeature& roadFeature) {
 	KDEFeaturePtr kf = KDEFeaturePtr(new KDEFeature(0));
 
-	BBox box;
+	// Avenueのみを抽出する
+	RoadGraph temp_roads;
+	GraphUtil::copyRoads(roads, temp_roads);
+	GraphUtil::extractRoads(temp_roads, area, false, RoadEdge::TYPE_AVENUE);
+	GraphUtil::clean(temp_roads);
+	GraphUtil::reduce(temp_roads);
+	GraphUtil::clean(temp_roads);
 
 	int num_vertices = 0;
 
 	RoadVertexIter vi, vend;
-	for (boost::tie(vi, vend) = boost::vertices(roads.graph); vi != vend; ++vi) {
-		if (!roads.graph[*vi]->valid) continue;
-
-		// エリア外ならスキップ
-		if (!area.contains(roads.graph[*vi]->pt)) continue;
-
+	for (boost::tie(vi, vend) = boost::vertices(temp_roads.graph); vi != vend; ++vi) {
 		num_vertices++;
 
 		// エッジの数が１以下なら、スキップ
-		if (GraphUtil::getNumEdges(roads, *vi) <= 1) continue;
+		if (GraphUtil::getNumEdges(temp_roads, *vi) <= 1) continue;
 
 		KDEFeatureItem item;
 
 		RoadOutEdgeIter ei, eend;
-		for (boost::tie(ei, eend) = boost::out_edges(*vi, roads.graph); ei != eend; ++ei) {
-			if (!roads.graph[*ei]->valid) continue;
-		
-			RoadVertexDesc tgt = boost::target(*ei, roads.graph);
-			QVector2D dir = roads.graph[tgt]->pt - roads.graph[*vi]->pt;
-			int degree = GraphUtil::getNumEdges(roads, tgt);
+		for (boost::tie(ei, eend) = boost::out_edges(*vi, temp_roads.graph); ei != eend; ++ei) {
+			RoadVertexDesc tgt = boost::target(*ei, temp_roads.graph);
+			int degree = GraphUtil::getNumEdges(temp_roads, tgt);
 
-			item.addEdge(dir, degree == 1);
+			Polyline2D polyline;
+			if ((temp_roads.graph[*ei]->polyLine[0] - temp_roads.graph[*vi]->pt).lengthSquared() > (temp_roads.graph[*ei]->polyLine[0] - temp_roads.graph[tgt]->pt).lengthSquared()) {
+				std::reverse(temp_roads.graph[*ei]->polyLine.begin(), temp_roads.graph[*ei]->polyLine.end());
+			}
+			for (int i = 1; i < temp_roads.graph[*ei]->polyLine.size(); ++i) {
+				polyline.push_back(temp_roads.graph[*ei]->polyLine[i] - temp_roads.graph[*vi]->pt);
+			}
+			item.addEdge(polyline, degree == 1);
 		}
 
-		kf->addItem(item);
+		kf->addItem(RoadEdge::TYPE_AVENUE, item);
+	}
+
+	// streetのみを抽出する
+	GraphUtil::copyRoads(roads, temp_roads);
+	GraphUtil::extractRoads(temp_roads, area, false, RoadEdge::TYPE_STREET);
+	GraphUtil::clean(temp_roads);
+	GraphUtil::reduce(temp_roads);
+	GraphUtil::clean(temp_roads);
+
+	for (boost::tie(vi, vend) = boost::vertices(temp_roads.graph); vi != vend; ++vi) {
+		num_vertices++;
+
+		// エッジの数が１以下なら、スキップ
+		if (GraphUtil::getNumEdges(temp_roads, *vi) <= 1) continue;
+
+		KDEFeatureItem item;
+
+		RoadOutEdgeIter ei, eend;
+		for (boost::tie(ei, eend) = boost::out_edges(*vi, temp_roads.graph); ei != eend; ++ei) {
+			RoadVertexDesc tgt = boost::target(*ei, temp_roads.graph);
+			int degree = GraphUtil::getNumEdges(temp_roads, tgt);
+
+			Polyline2D polyline;
+			if ((temp_roads.graph[*ei]->polyLine[0] - temp_roads.graph[*vi]->pt).lengthSquared() > (temp_roads.graph[*ei]->polyLine[0] - temp_roads.graph[tgt]->pt).lengthSquared()) {
+				std::reverse(temp_roads.graph[*ei]->polyLine.begin(), temp_roads.graph[*ei]->polyLine.end());
+			}
+			for (int i = 1; i < temp_roads.graph[*ei]->polyLine.size(); ++i) {
+				polyline.push_back(temp_roads.graph[*ei]->polyLine[i] - temp_roads.graph[*vi]->pt);
+			}
+			item.addEdge(polyline, degree == 1);
+		}
+
+		kf->addItem(RoadEdge::TYPE_STREET, item);
 	}
 
 	kf->setWeight(1.0f);
