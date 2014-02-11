@@ -5,43 +5,43 @@
             <y>0</y>
         </center>
         <avenue density="0"/>
-        <street density="146.367">
+        <street density="140.142">
             <item>
-                <edge deadend="0">
+                <edge deadend="false">
                     <point x="-22.1473" y="69.8865"/>
                 </edge>
-                <edge deadend="1">
+                <edge deadend="true">
                     <point x="19.7259" y="-68.6729"/>
                 </edge>
-                <edge deadend="1">
+                <edge deadend="true">
                     <point x="66.1235" y="21.5068"/>
                 </edge>
-                <edge deadend="0">
+                <edge deadend="false">
                     <point x="-52.1209" y="-16.9429"/>
                 </edge>
             </item>
             <item>
-                <edge deadend="0">
+                <edge deadend="false">
                     <point x="22.1473" y="-69.8865"/>
                 </edge>
-                <edge deadend="1">
+                <edge deadend="true">
                     <point x="-23.6582" y="74.6621"/>
                 </edge>
-                <edge deadend="1">
+                <edge deadend="true">
                     <point x="-12.7277" y="-1.20239"/>
                     <point x="-92.0421" y="39.0283"/>
                     <point x="-109.857" y="1.66968"/>
                 </edge>
             </item>
             <item>
-                <edge deadend="0">
+                <edge deadend="false">
                     <point x="52.1209" y="16.9429"/>
                 </edge>
-                <edge deadend="1">
+                <edge deadend="true">
                     <point x="-39.0803" y="-77.022"/>
                     <point x="-108.045" y="-40.8096"/>
                 </edge>
-                <edge deadend="1">
+                <edge deadend="true">
                     <point x="-154.022" y="81.6084"/>
                     <point x="-160.353" y="71.2556"/>
                     <point x="-102.289" y="-109.204"/>
