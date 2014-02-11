@@ -226,6 +226,7 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 		roads.graph[e]->shapeType = RoadEdge::SHAPE_GRID;
 		roads.graph[e]->group = gf.group_id;
 		roads.graph[e]->gridness = it.value();
+		roads.graph[e]->color = QColor(255 * (1.0f - it.value()), 255 * (1.0f - it.value()), 255);
 	}
 	
 	roads.setModified();
@@ -360,9 +361,7 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, Polygon2D& area, in
 				(roads.graph[src]->pt - roads.graph[tgt2]->pt).lengthSquared() < distanceThreshold2 || 
 				(roads.graph[tgt]->pt - roads.graph[src2]->pt).lengthSquared() < distanceThreshold2 || 
 				(roads.graph[tgt]->pt - roads.graph[tgt2]->pt).lengthSquared() < distanceThreshold2) {
-				roads.graph[*ei]->shapeType = RoadEdge::SHAPE_GRID;
-				roads.graph[*ei]->group = gf.group_id;
-				roads.graph[*ei]->gridness = length / roads.graph[*ei]->getLength();
+				edges.insert(*ei, length / roads.graph[*ei]->getLength());
 				break;
 			}
 		}
@@ -412,6 +411,7 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, Polygon2D& area, int r
 			roads.graph[e]->shapeType = RoadEdge::SHAPE_RADIAL;
 			roads.graph[e]->group = rfs2[i]->group_id;
 			roads.graph[e]->gridness = 0;
+			roads.graph[e]->color = QColor(0, 255, 0);
 		}
 
 		roads.setModified();
