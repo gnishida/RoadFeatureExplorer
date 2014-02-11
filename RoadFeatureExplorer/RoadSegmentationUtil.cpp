@@ -865,6 +865,8 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 		kf->addItem(RoadEdge::TYPE_AVENUE, item);
 	}
 
+	kf->setDensity(RoadEdge::TYPE_AVENUE, num_vertices / area.area() * 1000.0f * 1000.0f);
+
 	// streetのみを抽出する
 	GraphUtil::copyRoads(roads, temp_roads);
 	GraphUtil::extractRoads(temp_roads, area, false, RoadEdge::TYPE_STREET);
@@ -898,9 +900,10 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 		kf->addItem(RoadEdge::TYPE_STREET, item);
 	}
 
+	kf->setDensity(RoadEdge::TYPE_STREET, num_vertices / area.area() * 1000.0f * 1000.0f);
+
 	kf->setWeight(1.0f);
 	kf->setCenter(area.centroid());
-	kf->setDensity(num_vertices / area.area() * 1000.0f * 1000.0f);
 
 	roadFeature.addFeature(kf);
 }

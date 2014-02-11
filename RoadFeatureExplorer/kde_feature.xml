@@ -4,9 +4,8 @@
             <x>0</x>
             <y>0</y>
         </center>
-        <density>135.646</density>
-        <avenue/>
-        <street>
+        <avenue density="0"/>
+        <street density="146.367">
             <item>
                 <edge deadend="0">
                     <point x="-22.1473" y="69.8865"/>
