@@ -826,6 +826,8 @@ void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, 
  * KDEベースでの特徴量を抽出する。
  */
 void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, RoadFeature& roadFeature) {
+	roadFeature.clear();
+
 	KDEFeaturePtr kf = KDEFeaturePtr(new KDEFeature(0));
 
 	// Avenueのみを抽出する
