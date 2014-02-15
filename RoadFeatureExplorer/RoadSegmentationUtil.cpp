@@ -833,9 +833,11 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 	// Avenueのみを抽出する
 	RoadGraph temp_roads;
 	GraphUtil::copyRoads(roads, temp_roads);
-	GraphUtil::extractRoads(temp_roads, area, false, RoadEdge::TYPE_AVENUE);
+	GraphUtil::extractRoads(temp_roads, RoadEdge::TYPE_AVENUE);
 	GraphUtil::clean(temp_roads);
 	GraphUtil::reduce(temp_roads);
+	GraphUtil::clean(temp_roads);
+	GraphUtil::extractRoads(temp_roads, area, false);
 	GraphUtil::clean(temp_roads);
 
 	int num_vertices = 0;
