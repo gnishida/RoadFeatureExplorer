@@ -830,16 +830,24 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	KDEFeaturePtr kf = KDEFeaturePtr(new KDEFeature(0));
 
+	QVector2D center = area.centroid();
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Avenueのみを抽出する
 	RoadGraph temp_roads;
 	GraphUtil::copyRoads(roads, temp_roads);
 	GraphUtil::extractRoads(temp_roads, RoadEdge::TYPE_AVENUE);
 	GraphUtil::clean(temp_roads);
 	GraphUtil::reduce(temp_roads);
+
+	// roundaboutを削除する
+	//GraphUtil::removeRoundabout(temp_roads);
+
+	// linkを削除する
+	GraphUtil::removeLinkEdges(temp_roads);
 	GraphUtil::clean(temp_roads);
 
 	int num_vertices = 0;
-
 	RoadVertexIter vi, vend;
 	for (boost::tie(vi, vend) = boost::vertices(temp_roads.graph); vi != vend; ++vi) {
 		if (!temp_roads.graph[*vi]->valid) continue;
@@ -849,11 +857,14 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 		num_vertices++;
 
-		// エッジの数が１以下なら、スキップ
-		if (GraphUtil::getNumEdges(temp_roads, *vi) <= 1) continue;
+		// エッジの数が2以下なら、スキップ
+		if (GraphUtil::getNumEdges(temp_roads, *vi) <= 2) continue;
 
+		// 頂点の座標の、エリア中心からのオフセットを登録
 		KDEFeatureItem item;
+		item.pt = temp_roads.graph[*vi]->pt - center;
 
+		// 各outing edgeを登録
 		RoadOutEdgeIter ei, eend;
 		for (boost::tie(ei, eend) = boost::out_edges(*vi, temp_roads.graph); ei != eend; ++ei) {
 			RoadVertexDesc tgt = boost::target(*ei, temp_roads.graph);
@@ -880,21 +891,34 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	kf->setDensity(RoadEdge::TYPE_AVENUE, num_vertices / area.area());
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// streetのみを抽出する
 	GraphUtil::copyRoads(roads, temp_roads);
-	GraphUtil::extractRoads(temp_roads, area, false, RoadEdge::TYPE_STREET);
+	GraphUtil::extractRoads(temp_roads, RoadEdge::TYPE_STREET);
 	GraphUtil::clean(temp_roads);
-	GraphUtil::reduce(temp_roads);
+	//GraphUtil::reduce(temp_roads);  <- わざとreduceしない
+
+	// linkを削除する
+	GraphUtil::removeLinkEdges(temp_roads);
 	GraphUtil::clean(temp_roads);
 
+	num_vertices = 0;
 	for (boost::tie(vi, vend) = boost::vertices(temp_roads.graph); vi != vend; ++vi) {
+		if (!temp_roads.graph[*vi]->valid) continue;
+
+		// エリア外の頂点はスキップ
+		if (!area.contains(temp_roads.graph[*vi]->pt)) continue;
+
 		num_vertices++;
 
-		// エッジの数が１以下なら、スキップ
-		//if (GraphUtil::getNumEdges(temp_roads, *vi) <= 1) continue;
+		// エッジの数が2以下なら、スキップ
+		if (GraphUtil::getNumEdges(temp_roads, *vi) <= 2) continue;
 
+		// 頂点の座標の、エリア中心からのオフセットを登録
 		KDEFeatureItem item;
+		item.pt = temp_roads.graph[*vi]->pt - center;
 
+		// 各outing edgeを登録
 		RoadOutEdgeIter ei, eend;
 		for (boost::tie(ei, eend) = boost::out_edges(*vi, temp_roads.graph); ei != eend; ++ei) {
 			RoadVertexDesc tgt = boost::target(*ei, temp_roads.graph);
