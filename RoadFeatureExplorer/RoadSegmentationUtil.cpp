@@ -941,6 +941,7 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	kf->setWeight(1.0f);
 	kf->setCenter(area.centroid());
+	kf->setArea(area);
 
 	roadFeature.addFeature(kf);
 }
