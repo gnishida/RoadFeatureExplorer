@@ -845,6 +845,7 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	// linkを削除する
 	GraphUtil::removeLinkEdges(temp_roads);
+	GraphUtil::reduce(temp_roads);
 	GraphUtil::clean(temp_roads);
 
 	int num_vertices = 0;
@@ -900,6 +901,7 @@ void RoadSegmentationUtil::extractKDEFeature(RoadGraph& roads, Polygon2D& area, 
 
 	// linkを削除する
 	GraphUtil::removeLinkEdges(temp_roads);
+	GraphUtil::reduce(temp_roads);
 	GraphUtil::clean(temp_roads);
 
 	num_vertices = 0;
