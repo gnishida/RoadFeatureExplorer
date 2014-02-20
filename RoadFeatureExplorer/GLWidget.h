@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Camera.h"
-#include <common/RoadGraph.h>
-#include <common/RoadGraphRenderer.h>
 #include <common/PolygonAreaBuilder.h>
+#include <road/RoadGraph.h>
+#include <road/RoadGraphRenderer.h>
 #include <road/feature/RoadFeature.h>
 #include <road/feature/GridFeature.h>
 #include <road/feature/RadialFeature.h>

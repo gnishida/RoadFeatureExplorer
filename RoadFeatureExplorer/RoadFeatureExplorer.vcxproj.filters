@@ -45,6 +45,9 @@
     <Filter Include="mylib\road\feature">
       <UniqueIdentifier>{3d993ea4-2c52-4573-bba5-7524c0243c13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mylib\road\generator">
+      <UniqueIdentifier>{7c178cde-8f3c-4b16-90b8-dd7582e7876f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -80,34 +83,16 @@
     <ClCompile Include="RoadSegmentationUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConvexHull.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HoughTransform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mylib\common\BBox.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\mylib\common\GraphUtil.cpp">
-      <Filter>mylib\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\mylib\common\Polygon2D.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mylib\common\Renderable.cpp">
-      <Filter>mylib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mylib\common\RoadEdge.cpp">
-      <Filter>mylib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mylib\common\RoadGraph.cpp">
-      <Filter>mylib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mylib\common\RoadGraphRenderer.cpp">
-      <Filter>mylib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mylib\common\RoadVertex.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mylib\common\Util.cpp">
@@ -141,6 +126,33 @@
       <Filter>mylib\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mylib\common\Polyline2D.cpp">
+      <Filter>mylib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\GraphUtil.cpp">
+      <Filter>mylib\road</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\RoadArea.cpp">
+      <Filter>mylib\road</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\RoadEdge.cpp">
+      <Filter>mylib\road</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\RoadGraph.cpp">
+      <Filter>mylib\road</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\RoadGraphRenderer.cpp">
+      <Filter>mylib\road</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\RoadVertex.cpp">
+      <Filter>mylib\road</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\feature\KDEFeatureExtractor.cpp">
+      <Filter>mylib\road\feature</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\road\feature\GenericFeatureExtractor.cpp">
+      <Filter>mylib\road\feature</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\common\ConvexHull.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -177,9 +189,6 @@
     <ClInclude Include="RoadSegmentationUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConvexHull.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HoughTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -189,25 +198,10 @@
     <ClInclude Include="..\..\mylib\common\common.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mylib\common\GraphUtil.h">
-      <Filter>mylib\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\mylib\common\Polygon2D.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mylib\common\Renderable.h">
-      <Filter>mylib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mylib\common\RoadEdge.h">
-      <Filter>mylib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mylib\common\RoadGraph.h">
-      <Filter>mylib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mylib\common\RoadGraphRenderer.h">
-      <Filter>mylib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mylib\common\RoadVertex.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mylib\common\Util.h">
@@ -241,6 +235,33 @@
       <Filter>mylib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mylib\common\Polyline2D.h">
+      <Filter>mylib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\GraphUtil.h">
+      <Filter>mylib\road</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\RoadArea.h">
+      <Filter>mylib\road</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\RoadEdge.h">
+      <Filter>mylib\road</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\RoadGraph.h">
+      <Filter>mylib\road</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\RoadGraphRenderer.h">
+      <Filter>mylib\road</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\RoadVertex.h">
+      <Filter>mylib\road</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\feature\KDEFeatureExtractor.h">
+      <Filter>mylib\road\feature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\road\feature\GenericFeatureExtractor.h">
+      <Filter>mylib\road\feature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\common\ConvexHull.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
   </ItemGroup>

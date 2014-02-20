@@ -1,6 +1,6 @@
 ﻿#include "GLWidget.h"
 #include "MainWindow.h"
-#include <common/GraphUtil.h>
+#include <road/GraphUtil.h>
 #include <road/feature/RoadFeature.h>
 #include <road/feature/GridFeature.h>
 #include <road/feature/RadialFeature.h>

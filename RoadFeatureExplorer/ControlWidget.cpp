@@ -1,4 +1,6 @@
-#include <common/GraphUtil.h>
+#include <road/GraphUtil.h>
+#include <road/feature/KDEFeatureExtractor.h>
+#include <road/feature/GenericFeatureExtractor.h>
 #include "ControlWidget.h"
 #include "MainWindow.h"
 #include "GLWidget.h"
@@ -116,7 +118,7 @@ void ControlWidget::detectRadial() {
 void ControlWidget::extractKDEFeature() {
 	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
 
-	RoadSegmentationUtil::extractKDEFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
+	KDEFeatureExtractor::extractFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
 
 	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("kde_feature.xml");
@@ -125,7 +127,7 @@ void ControlWidget::extractKDEFeature() {
 void ControlWidget::extractGenericFeature() {
 	int roadType = (ui.checkBoxRoadTypeAvenue->isChecked() ? 2 : 0) + (ui.checkBoxRoadTypeLocalStreet->isChecked() ? 1 : 0);
 
-	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
+	GenericFeatureExtractor::extractFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
 
 	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("generic_feature.xml");
@@ -160,7 +162,7 @@ void ControlWidget::detectGridRadial() {
 	GraphUtil::copyRoads(mainWin->glWidget->origRoads, mainWin->glWidget->roads);
 	RoadSegmentationUtil::detectRadial(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->roadFeature, radialMaxIteration, scale1, scale2, centerErrorTol2, angleThreshold2, scale3, centerErrorTol3, angleThreshold3, 150.0f, radialVotingThreshold, seedDistance, minSeedDirection, radialExtendingAngleThreshold);
 	RoadSegmentationUtil::detectGrid(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, roadType, mainWin->glWidget->roadFeature, gridMaxIteration, numBins, minTotalLength, minMaxBinRatio, gridAngleThreshold, gridVotingThreshold, gridExtendingDistanceThreshold, gridMinOBBLength);
-	RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
+	//RoadSegmentationUtil::extractGenericFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
 
 	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("feature.xml");
