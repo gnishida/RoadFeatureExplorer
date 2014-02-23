@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include <common/PolygonAreaBuilder.h>
+#include <common/PolygonBuilder.h>
 #include <road/RoadGraph.h>
 #include <road/RoadGraphRenderer.h>
 #include <road/feature/RoadFeature.h>
@@ -26,7 +26,7 @@ public:
 	RoadGraphRenderer* renderer;
 	QPoint lastPos;
 	Polygon2D selectedArea;
-	PolygonAreaBuilder selectedAreaBuilder;
+	PolygonBuilder selectedAreaBuilder;
 
 	RoadFeature roadFeature;
 	/*

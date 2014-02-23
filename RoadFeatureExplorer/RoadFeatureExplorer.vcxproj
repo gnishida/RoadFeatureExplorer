@@ -130,7 +130,7 @@
     <ClCompile Include="..\..\mylib\common\BBox.cpp" />
     <ClCompile Include="..\..\mylib\common\ConvexHull.cpp" />
     <ClCompile Include="..\..\mylib\common\Polygon2D.cpp" />
-    <ClCompile Include="..\..\mylib\common\PolygonAreaBuilder.cpp" />
+    <ClCompile Include="..\..\mylib\common\PolygonBuilder.cpp" />
     <ClCompile Include="..\..\mylib\common\Polyline2D.cpp" />
     <ClCompile Include="..\..\mylib\common\Renderable.cpp" />
     <ClCompile Include="..\..\mylib\common\Util.cpp" />
@@ -230,7 +230,7 @@
     <ClInclude Include="..\..\mylib\common\common.h" />
     <ClInclude Include="..\..\mylib\common\ConvexHull.h" />
     <ClInclude Include="..\..\mylib\common\Polygon2D.h" />
-    <ClInclude Include="..\..\mylib\common\PolygonAreaBuilder.h" />
+    <ClInclude Include="..\..\mylib\common\PolygonBuilder.h" />
     <ClInclude Include="..\..\mylib\common\Polyline2D.h" />
     <ClInclude Include="..\..\mylib\common\Renderable.h" />
     <ClInclude Include="..\..\mylib\common\Util.h" />

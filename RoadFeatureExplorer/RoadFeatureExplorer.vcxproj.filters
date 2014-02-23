@@ -122,9 +122,6 @@
     <ClCompile Include="..\..\mylib\road\feature\KDEFeature.cpp">
       <Filter>mylib\road\feature</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\mylib\common\PolygonAreaBuilder.cpp">
-      <Filter>mylib\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\mylib\common\Polyline2D.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
@@ -153,6 +150,9 @@
       <Filter>mylib\road\feature</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mylib\common\ConvexHull.cpp">
+      <Filter>mylib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mylib\common\PolygonBuilder.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -231,9 +231,6 @@
     <ClInclude Include="..\..\mylib\road\feature\KDEFeature.h">
       <Filter>mylib\road\feature</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mylib\common\PolygonAreaBuilder.h">
-      <Filter>mylib\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\mylib\common\Polyline2D.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
@@ -262,6 +259,9 @@
       <Filter>mylib\road\feature</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mylib\common\ConvexHull.h">
+      <Filter>mylib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\common\PolygonBuilder.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
   </ItemGroup>
