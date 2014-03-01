@@ -1,3 +1,4 @@
+#include <QMessageBox>
 #include <road/GraphUtil.h>
 #include <road/feature/KDEFeatureExtractor.h>
 #include <road/feature/GenericFeatureExtractor.h>
@@ -39,6 +40,7 @@ ControlWidget::ControlWidget(MainWindow* mainWin) : QDockWidget("Control Widget"
 
 	// register the event handlers
 	connect(ui.checkBoxRoadTypeHighway, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
+	connect(ui.checkBoxRoadTypeBoulevard, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
 	connect(ui.checkBoxRoadTypeAvenue, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
 	connect(ui.checkBoxRoadTypeLocalStreet, SIGNAL(stateChanged(int)), this, SLOT(showRoad(int)));
 	connect(ui.pushButtonDetectGrid, SIGNAL(clicked()), this, SLOT(detectGrid()));
@@ -122,6 +124,10 @@ void ControlWidget::extractKDEFeature() {
 
 	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("kde_feature.xml");
+
+	QMessageBox msgBox(this);
+	msgBox.setText(tr("Feature file was successfully saved."));
+	msgBox.exec();
 }
 
 void ControlWidget::extractGenericFeature() {
