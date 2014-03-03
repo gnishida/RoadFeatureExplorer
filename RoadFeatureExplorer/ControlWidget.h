@@ -27,6 +27,5 @@ public slots:
 	void detectRadial();
 	void extractKDEFeature();
 	void extractGenericFeature();
-	void detectGridRadial();
 };
 
