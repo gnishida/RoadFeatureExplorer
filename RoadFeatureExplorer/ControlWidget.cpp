@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <common/global.h>
 #include <road/GraphUtil.h>
 #include <road/feature/KDEFeatureExtractor.h>
 #include <road/feature/GenericFeatureExtractor.h>
@@ -125,10 +126,11 @@ void ControlWidget::detectRadial() {
 }
 
 void ControlWidget::extractKDEFeature() {
-	bool perturbation = ui.checkBoxPerturbation->isChecked();
-	bool rotation = ui.checkBoxRotation->isChecked();
+	G::global()["exactCut"] = ui.checkBoxExactCut->isChecked();
+	G::global()["perturbation"] = ui.checkBoxPerturbation->isChecked();
+	G::global()["rotation"] = ui.checkBoxRotation->isChecked();
 
-	KDEFeatureExtractor::extractFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, perturbation, rotation, mainWin->glWidget->roadFeature);
+	KDEFeatureExtractor::extractFeature(mainWin->glWidget->roads, mainWin->glWidget->selectedArea, mainWin->glWidget->roadFeature);
 
 	mainWin->glWidget->roadFeature.normalize();
 	mainWin->glWidget->roadFeature.save("kde_feature.xml");

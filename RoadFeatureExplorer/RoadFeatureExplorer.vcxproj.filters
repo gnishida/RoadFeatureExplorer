@@ -155,6 +155,9 @@
     <ClCompile Include="..\..\mylib\common\PolygonBuilder.cpp">
       <Filter>mylib\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mylib\common\global.cpp">
+      <Filter>mylib\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -262,6 +265,9 @@
       <Filter>mylib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mylib\common\PolygonBuilder.h">
+      <Filter>mylib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mylib\common\global.h">
       <Filter>mylib\common</Filter>
     </ClInclude>
   </ItemGroup>
