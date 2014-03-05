@@ -143,6 +143,7 @@
     <ClCompile Include="..\..\mylib\road\feature\KDEFeature.cpp" />
     <ClCompile Include="..\..\mylib\road\feature\KDEFeatureExtractor.cpp" />
     <ClCompile Include="..\..\mylib\road\feature\KDEFeatureItem.cpp" />
+    <ClCompile Include="..\..\mylib\road\feature\KDEFeatureItemEdge.cpp" />
     <ClCompile Include="..\..\mylib\road\feature\RadialFeature.cpp" />
     <ClCompile Include="..\..\mylib\road\feature\RoadFeature.cpp" />
     <ClCompile Include="..\..\mylib\road\GraphUtil.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="..\..\mylib\road\feature\KDEFeature.h" />
     <ClInclude Include="..\..\mylib\road\feature\KDEFeatureExtractor.h" />
     <ClInclude Include="..\..\mylib\road\feature\KDEFeatureItem.h" />
+    <ClInclude Include="..\..\mylib\road\feature\KDEFeatureItemEdge.h" />
     <ClInclude Include="..\..\mylib\road\feature\RadialFeature.h" />
     <ClInclude Include="..\..\mylib\road\feature\RoadFeature.h" />
     <ClInclude Include="..\..\mylib\road\GraphUtil.h" />
