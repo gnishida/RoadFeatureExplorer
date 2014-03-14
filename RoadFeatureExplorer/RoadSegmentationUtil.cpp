@@ -82,15 +82,15 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;		
 
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			QVector2D dir = roads.graph[*ei]->polyline[i + 1] - roads.graph[*ei]->polyline[i];
 			float theta = atan2f(dir.y(), dir.x());
 			if (theta < 0) theta += M_PI;
 			if (theta > M_PI * 0.5f) theta -= M_PI * 0.5f;
@@ -130,7 +130,7 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 		
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
@@ -138,8 +138,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;	
 
 		float length = 0.0f;
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			gf.addEdge(roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i], M_PI * 0.5f / (float)numBins);
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			gf.addEdge(roads.graph[*ei]->polyline[i + 1] - roads.graph[*ei]->polyline[i], M_PI * 0.5f / (float)numBins);
 		}
 	}
 	gf.computeFeature();
@@ -153,7 +153,7 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 		
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
@@ -161,8 +161,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			QVector2D dir = roads.graph[*ei]->polyline[i + 1] - roads.graph[*ei]->polyline[i];
 
 			// エッジの方向が、グリッド方向に近い場合、投票する
 			if (gf.isClose(dir, angleThreshold)) {
@@ -185,8 +185,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 	// 候補のエッジの総延長を計算する
 	float len = 0.0f;
 	for (QMap<RoadEdgeDesc, float>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		for (int i = 0; i < roads.graph[it.key()]->polyLine.size() - 1; i++) {
-			QVector2D dir = roads.graph[it.key()]->polyLine[i + 1] - roads.graph[it.key()]->polyLine[i];
+		for (int i = 0; i < roads.graph[it.key()]->polyline.size() - 1; i++) {
+			QVector2D dir = roads.graph[it.key()]->polyline[i + 1] - roads.graph[it.key()]->polyline[i];
 			len += dir.length();
 		}
 	}
@@ -198,8 +198,8 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 	// 候補のエッジ群を囲むconvex hullを求める
 	ConvexHull ch;
 	for (QMap<RoadEdgeDesc, float>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		for (int i = 0; i < roads.graph[it.key()]->polyLine.size(); i++) {
-			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
+		for (int i = 0; i < roads.graph[it.key()]->polyline.size(); i++) {
+			ch.addPoint(roads.graph[it.key()]->polyline[i]);
 		}
 	}
 	Polygon2D hull;
@@ -223,9 +223,9 @@ bool RoadSegmentationUtil::detectOneGrid(RoadGraph& roads, Polygon2D& area, int 
 	// 最後に、このグループに属するエッジを、RoadGraphオブジェクトに反映させる
 	for (QMap<RoadEdgeDesc, float>::iterator it = edges.begin(); it != edges.end(); ++it) {
 		RoadEdgeDesc e = it.key();
-		roads.graph[e]->shapeType = RoadEdge::SHAPE_GRID;
-		roads.graph[e]->group = gf.group_id;
-		roads.graph[e]->gridness = it.value();
+		roads.graph[e]->properties["shapeType"] = RoadEdge::SHAPE_GRID;
+		roads.graph[e]->properties["group"] = gf.group_id;
+		roads.graph[e]->properties["gridness"] = it.value();
 		roads.graph[e]->color = QColor(255 * (1.0f - it.value()), 255 * (1.0f - it.value()), 255);
 	}
 	
@@ -332,7 +332,7 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, Polygon2D& area, in
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 		
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// エリアの外のエッジは、スキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
@@ -340,8 +340,8 @@ void RoadSegmentationUtil::extendGridGroup(RoadGraph& roads, Polygon2D& area, in
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D dir = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			QVector2D dir = roads.graph[*ei]->polyline[i + 1] - roads.graph[*ei]->polyline[i];
 
 			// エッジの方向が、グリッド方向に近い場合、投票する
 			if (gf.isClose(dir, angleThreshold)) {
@@ -408,9 +408,9 @@ void RoadSegmentationUtil::detectRadial(RoadGraph& roads, Polygon2D& area, int r
 		// 最後に、候補エッジを、実際にグループに登録する
 		for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
 			RoadEdgeDesc e = it.key();
-			roads.graph[e]->shapeType = RoadEdge::SHAPE_RADIAL;
-			roads.graph[e]->group = rfs2[i]->group_id;
-			roads.graph[e]->gridness = 0;
+			roads.graph[e]->properties["shapeType"] = RoadEdge::SHAPE_RADIAL;
+			roads.graph[e]->properties["group"] = rfs2[i]->group_id;
+			roads.graph[e]->properties["gridness"] = 0;
 			roads.graph[e]->color = QColor(0, 255, 0);
 		}
 
@@ -458,15 +458,15 @@ void RoadSegmentationUtil::detectRadialCenterInScaled(RoadGraph& roads, Polygon2
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			ht.line(roads.graph[*ei]->polyline[i], roads.graph[*ei]->polyline[i + 1], sigma);
 			if (i > 0) {
 				//ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
 			}
@@ -493,16 +493,16 @@ std::vector<RadialFeaturePtr> RoadSegmentationUtil::detectRadialCentersInScaled(
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			ht.line(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
-			//ht.circle(roads.graph[*ei]->polyLine[i], roads.graph[*ei]->polyLine[i + 1], sigma);
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			ht.line(roads.graph[*ei]->polyline[i], roads.graph[*ei]->polyline[i + 1], sigma);
+			//ht.circle(roads.graph[*ei]->polyline[i], roads.graph[*ei]->polyline[i + 1], sigma);
 		}
 	}
 
@@ -553,16 +553,16 @@ void RoadSegmentationUtil::refineRadialCenterInScaled(RoadGraph& roads, Polygon2
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// 範囲の外のエッジはスキップする
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
 		RoadVertexDesc tgt = boost::target(*ei, roads.graph);
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D v1 = roads.graph[*ei]->polyLine[i];
-			QVector2D v2 = roads.graph[*ei]->polyLine[i + 1];
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			QVector2D v1 = roads.graph[*ei]->polyline[i];
+			QVector2D v2 = roads.graph[*ei]->polyline[i + 1];
 
 			// だいたいの中心点から離れすぎたエッジは、スキップする
 			if ((v1 - rf.center()).lengthSquared() > distanceThreshold2 && (v2 - rf.center()).lengthSquared() > distanceThreshold2) continue;
@@ -601,9 +601,9 @@ bool RoadSegmentationUtil::detectCircle(RoadGraph& roads, Polygon2D& area, int r
 	for (boost::tie(ei, eend) = edges(roads.graph); ei != eend; ++ei) {
 		if (!roads.graph[*ei]->valid) continue;
 
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; ++i) {
-			QVector2D p1 = roads.graph[*ei]->polyLine[i] - rf.center() + QVector2D(250, 250);
-			QVector2D p2 = roads.graph[*ei]->polyLine[i + 1] - rf.center() + QVector2D(250, 250);
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; ++i) {
+			QVector2D p1 = roads.graph[*ei]->polyline[i] - rf.center() + QVector2D(250, 250);
+			QVector2D p2 = roads.graph[*ei]->polyline[i + 1] - rf.center() + QVector2D(250, 250);
 
 			if (p1.x() < 0 || p1.x() >= 500 || p2.x() < 0 || p2.x() >= 500) continue;
 
@@ -647,7 +647,7 @@ bool RoadSegmentationUtil::findOneRadial(RoadGraph& roads, Polygon2D& area, int 
 		if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 
 		// 既にshapeTypeが確定しているエッジは、スキップする
-		if (roads.graph[*ei]->shapeType > 0) continue;
+		if (roads.graph[*ei]->properties["shapeType"].toInt() > 0) continue;
 
 		// 範囲外のエッジはスキップ
 		RoadVertexDesc src = boost::source(*ei, roads.graph);
@@ -655,9 +655,9 @@ bool RoadSegmentationUtil::findOneRadial(RoadGraph& roads, Polygon2D& area, int 
 		if (!area.contains(roads.graph[src]->pt) && !area.contains(roads.graph[tgt]->pt)) continue;
 
 		float length = 0.0f;
-		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-			QVector2D v1 = roads.graph[*ei]->polyLine[i];
-			QVector2D v2 = roads.graph[*ei]->polyLine[i + 1];
+		for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+			QVector2D v1 = roads.graph[*ei]->polyline[i];
+			QVector2D v2 = roads.graph[*ei]->polyline[i + 1];
 			QVector2D dir = v2 - v1;
 
 			if (Util::diffAngle(v1 - rf.center(), dir) <= angleThreshold ||
@@ -741,9 +741,9 @@ void RoadSegmentationUtil::extendRadialGroup(RoadGraph& roads, Polygon2D& area, 
 			if (!GraphUtil::isRoadTypeMatched(roads.graph[*ei]->type, roadType)) continue;
 
 			float length = 0.0f;
-			for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
-				QVector2D dir1 = roads.graph[*ei]->polyLine[i + 1] - roads.graph[*ei]->polyLine[i];
-				QVector2D dir2 = roads.graph[*ei]->polyLine[i] - rf.center();
+			for (int i = 0; i < roads.graph[*ei]->polyline.size() - 1; i++) {
+				QVector2D dir1 = roads.graph[*ei]->polyline[i + 1] - roads.graph[*ei]->polyline[i];
+				QVector2D dir2 = roads.graph[*ei]->polyline[i] - rf.center();
 
 				if (Util::diffAngle(dir1, dir2) < angleThreshold || Util::diffAngle(dir1, -dir2) < angleThreshold) {
 					length += dir1.length();
@@ -806,8 +806,8 @@ void RoadSegmentationUtil::buildRadialArea(RoadGraph& roads, QMap<RoadEdgeDesc, 
 	for (QMap<RoadEdgeDesc, bool>::iterator it = edges.begin(); it != edges.end(); ++it) {
 		length += roads.graph[it.key()]->getLength();
 
-		for (int i = 0; i < roads.graph[it.key()]->polyLine.size(); i++) {
-			ch.addPoint(roads.graph[it.key()]->polyLine[i]);
+		for (int i = 0; i < roads.graph[it.key()]->polyline.size(); i++) {
+			ch.addPoint(roads.graph[it.key()]->polyline[i]);
 		}
 	}
 	Polygon2D hull;
