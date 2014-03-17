@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ControlWidget.ui'
 **
-** Created: Tue Mar 4 15:00:31 2014
+** Created: Sun Mar 16 18:03:30 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -90,7 +90,7 @@ public:
         checkBoxRotation->setText(QApplication::translate("ControlWidget", "Rotation", 0, QApplication::UnicodeUTF8));
         checkBoxExactCut->setText(QApplication::translate("ControlWidget", "Exact Cut", 0, QApplication::UnicodeUTF8));
         checkBoxRoadTypeHighway->setText(QApplication::translate("ControlWidget", "Highways", 0, QApplication::UnicodeUTF8));
-        checkBoxRoadTypeBoulevard->setText(QApplication::translate("ControlWidget", "Boulvard", 0, QApplication::UnicodeUTF8));
+        checkBoxRoadTypeBoulevard->setText(QApplication::translate("ControlWidget", "Boulevard", 0, QApplication::UnicodeUTF8));
         Q_UNUSED(ControlWidget);
     } // retranslateUi
 
